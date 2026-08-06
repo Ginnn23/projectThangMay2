@@ -7,7 +7,7 @@ import { soDienThoaiCongTy, soDienThoaiLienKet } from "../data/contactInfo";
 import { boLocDuAn, chuanHoaPhanLoaiDuAn, layNhanPhanLoaiDuAn } from "../data/projectCategories";
 import { anhDuAnMacDinh, chuanHoaDuAn, duAnMau } from "../data/projectData";
 
-const SO_DU_AN_MOI_TRANG = 9;
+const SO_DU_AN_MOI_TRANG = 6;
 
 const duAnMauDaChuanHoa = duAnMau.map((duAn) => ({
   ...chuanHoaDuAn(duAn),
