@@ -75,9 +75,10 @@ Quay lại service `backend`, trong **Variables** thêm:
 
 ```env
 Cors__AllowedOrigins__0=https://${{frontend.RAILWAY_PUBLIC_DOMAIN}}
+Cors__AllowedOrigins__1=https://thangmayhahong.xyz
 ```
 
-Nếu dùng custom domain, thay giá trị bằng domain thật, ví dụ `https://hahongelevator.vn`. Không thêm dấu `/` ở cuối.
+Giữ origin Railway ở chỉ số `0` và thêm custom domain ở chỉ số `1`. Không thêm dấu `/` ở cuối domain.
 
 Sau khi lưu biến, redeploy cả backend và frontend. Biến `VITE_...` được đóng vào frontend lúc build nên frontend bắt buộc phải build lại khi URL API thay đổi.
 
