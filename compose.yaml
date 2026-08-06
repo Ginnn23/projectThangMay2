@@ -1,0 +1,61 @@
+name: ha-hong-elevator
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-HaHongElevatorDb}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres123}
+    ports:
+      - "${POSTGRES_PORT:-5433}:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: ./backend/HaHongElevator.Api
+    restart: unless-stopped
+    environment:
+      PORT: 8080
+      ASPNETCORE_ENVIRONMENT: Production
+      ConnectionStrings__DefaultConnection: Host=postgres;Port=5432;Database=${POSTGRES_DB:-HaHongElevatorDb};Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD:-postgres123}
+      Jwt__Key: ${JWT_KEY:-local-development-jwt-key-at-least-32-bytes-long}
+      Jwt__Issuer: HaHongElevator.Api
+      Jwt__Audience: HaHongElevator.Client
+      Jwt__ExpiresMinutes: 120
+      Cors__AllowedOrigins__0: http://localhost:${FRONTEND_PORT:-5173}
+      AdminSeed__Username: ${ADMIN_USERNAME:-admin}
+      AdminSeed__Password: ${ADMIN_PASSWORD:-Admin@123456}
+      AdminSeed__FullName: ${ADMIN_FULL_NAME:-Quản trị viên}
+      Uploads__Path: /data/uploads
+    ports:
+      - "${BACKEND_PORT:-5090}:8080"
+    volumes:
+      - uploads-data:/data/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_BASE_URL: http://localhost:${BACKEND_PORT:-5090}/api
+    restart: unless-stopped
+    environment:
+      PORT: 8080
+    ports:
+      - "${FRONTEND_PORT:-5173}:8080"
+    depends_on:
+      - backend
+
+volumes:
+  postgres-data:
+  uploads-data:
