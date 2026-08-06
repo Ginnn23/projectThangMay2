@@ -7,7 +7,7 @@ import { soDienThoaiCongTy, soDienThoaiLienKet } from "../data/contactInfo";
 import { boLocDuAn, chuanHoaPhanLoaiDuAn, layNhanPhanLoaiDuAn } from "../data/projectCategories";
 import { anhDuAnMacDinh, chuanHoaDuAn, duAnMau } from "../data/projectData";
 
-const SO_DU_AN_MOI_TRANG = 8;
+const SO_DU_AN_MOI_TRANG = 9;
 
 const duAnMauDaChuanHoa = duAnMau.map((duAn) => ({
   ...chuanHoaDuAn(duAn),
@@ -111,6 +111,14 @@ function DuAn() {
   const trangDangDung = Math.min(trangHienTai, tongSoTrang);
   const viTriBatDau = (trangDangDung - 1) * SO_DU_AN_MOI_TRANG;
   const duAnTrongTrang = danhSachDaLoc.slice(viTriBatDau, viTriBatDau + SO_DU_AN_MOI_TRANG);
+  const viTriKetThuc = Math.min(viTriBatDau + SO_DU_AN_MOI_TRANG, danhSachDaLoc.length);
+
+  const chuyenTrang = (trangMoi) => {
+    setTrangHienTai(Math.min(tongSoTrang, Math.max(1, trangMoi)));
+    window.requestAnimationFrame(() => {
+      document.getElementById("danh-sach-du-an")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  };
 
   return (
     <main>
@@ -140,8 +148,13 @@ function DuAn() {
           </div>
         </div>
       </section>
-      <section className="project-gallery-section">
+      <section className="project-gallery-section" id="danh-sach-du-an">
         <div className="site-container">
+          <div className="project-result-summary" aria-live="polite">
+            {danhSachDaLoc.length > 0
+              ? `Hiển thị ${viTriBatDau + 1}–${viTriKetThuc} trong ${danhSachDaLoc.length} dự án`
+              : "Chưa có dự án phù hợp"}
+          </div>
           <div className="row g-4 project-gallery-grid">
             {duAnTrongTrang.map((duAn) => (
               <div className="col-md-6 col-xl-4" key={duAn.id}>
@@ -151,15 +164,15 @@ function DuAn() {
           </div>
           {tongSoTrang > 1 && (
             <div className="site-pagination" aria-label="Phân trang dự án">
-              <button type="button" disabled={trangDangDung === 1} onClick={() => setTrangHienTai((trang) => Math.max(1, trang - 1))}>
+              <button type="button" aria-label="Trang trước" disabled={trangDangDung === 1} onClick={() => chuyenTrang(trangDangDung - 1)}>
                 Trước
               </button>
               {Array.from({ length: tongSoTrang }, (_, index) => index + 1).map((trang) => (
-                <button className={trangDangDung === trang ? "active" : ""} type="button" key={trang} onClick={() => setTrangHienTai(trang)}>
+                <button className={trangDangDung === trang ? "active" : ""} aria-current={trangDangDung === trang ? "page" : undefined} aria-label={`Trang ${trang}`} type="button" key={trang} onClick={() => chuyenTrang(trang)}>
                   {trang}
                 </button>
               ))}
-              <button type="button" disabled={trangDangDung === tongSoTrang} onClick={() => setTrangHienTai((trang) => Math.min(tongSoTrang, trang + 1))}>
+              <button type="button" aria-label="Trang sau" disabled={trangDangDung === tongSoTrang} onClick={() => chuyenTrang(trangDangDung + 1)}>
                 Sau
               </button>
             </div>

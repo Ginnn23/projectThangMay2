@@ -2241,6 +2241,14 @@ a {
   transition: opacity 0.25s ease, transform 0.25s ease;
 }
 
+.project-result-summary {
+  margin-bottom: 20px;
+  color: #637083;
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-align: right;
+}
+
 .site-pagination {
   display: flex;
   flex-wrap: wrap;
@@ -2272,6 +2280,22 @@ a {
 .site-pagination button:disabled {
   cursor: not-allowed;
   opacity: 0.45;
+}
+
+@media (max-width: 575.98px) {
+  .project-result-summary {
+    text-align: center;
+  }
+
+  .site-pagination {
+    gap: 7px;
+  }
+
+  .site-pagination button {
+    min-width: 38px;
+    min-height: 38px;
+    padding: 0 11px;
+  }
 }
 
 .admin-pagination {

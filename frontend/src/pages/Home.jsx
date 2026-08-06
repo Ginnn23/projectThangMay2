@@ -1,9 +1,15 @@
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+
 import elevatorDoorsImage from "../assets/images/elevator-doors.jpg";
 import hotelLobbyImage from "../assets/images/elevator-hotel-lobby.jpg";
 import lobbyImage from "../assets/images/elevator-lobby.jpg";
 import Hero from "../components/home/Hero";
 import TrustStrip from "../components/home/TrustStrip";
+import { apiClient } from "../api/client";
 import { soDienThoaiCongTy, soDienThoaiLienKet } from "../data/contactInfo";
+import { layNhanPhanLoaiDuAn } from "../data/projectCategories";
+import { chuanHoaDuAn } from "../data/projectData";
 
 const services = [
   {
@@ -36,7 +42,7 @@ const advantages = [
   ["bi-headset", "Đồng hành dài hạn", "Hỗ trợ sau bàn giao, bảo trì và nâng cấp khi công trình phát triển."],
 ];
 
-const projects = [
+const fallbackProjects = [
   {
     title: "Thang máy gia đình",
     category: "NHÀ PHỐ",
@@ -68,6 +74,38 @@ function SectionTitle({ eyebrow, title, description }) {
 }
 
 function Home() {
+  const [featuredProjects, setFeaturedProjects] = useState(fallbackProjects);
+
+  useEffect(() => {
+    let isActive = true;
+
+    const loadFeaturedProjects = async () => {
+      try {
+        const { data } = await apiClient.get("/projects/featured");
+        if (isActive && Array.isArray(data) && data.length > 0) {
+          setFeaturedProjects(data.slice(0, 3).map((project, index) => {
+            const normalizedProject = chuanHoaDuAn(project, index);
+            return {
+              id: normalizedProject.id,
+              slug: normalizedProject.slug,
+              title: normalizedProject.name,
+              category: layNhanPhanLoaiDuAn(normalizedProject.category),
+              location: normalizedProject.location,
+              image: normalizedProject.imageUrl,
+            };
+          }));
+        }
+      } catch {
+        // Keep the bundled examples if the API is temporarily unavailable.
+      }
+    };
+
+    loadFeaturedProjects();
+    return () => {
+      isActive = false;
+    };
+  }, []);
+
   return (
     <main>
       <Hero />
@@ -168,8 +206,8 @@ function Home() {
           </div>
 
           <div className="row g-4">
-            {projects.map((project, index) => (
-              <div className="col-lg-4" key={project.title} data-aos="zoom-in" data-aos-delay={index * 100}>
+            {featuredProjects.map((project, index) => (
+              <div className="col-lg-4" key={project.id || project.title} data-aos="zoom-in" data-aos-delay={index * 100}>
                 <article className="project-card">
                   <div className="project-image" style={{ backgroundImage: `linear-gradient(rgba(5, 14, 28, .1), rgba(5, 14, 28, .76)), url(${project.image})` }}>
                     <span>{project.category}</span>
@@ -177,7 +215,7 @@ function Home() {
                   <div className="project-content">
                     <h3>{project.title}</h3>
                     <p><i className="bi bi-geo-alt me-2"></i>{project.location}</p>
-                    <a href="/du-an">Xem dự án<i className="bi bi-arrow-up-right ms-2"></i></a>
+                    <Link to={project.slug ? `/du-an/${project.slug}` : "/du-an"}>Xem dự án<i className="bi bi-arrow-up-right ms-2"></i></Link>
                   </div>
                 </article>
               </div>
