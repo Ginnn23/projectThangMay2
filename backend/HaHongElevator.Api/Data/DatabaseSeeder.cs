@@ -20,6 +20,27 @@ public static class DatabaseSeeder
 
     private static async Task SeedAdminAsync(IServiceProvider serviceProvider, ApplicationDbContext dbContext)
     {
+        var configuration = serviceProvider.GetRequiredService<IConfiguration>();
+        var username = GetRequiredAdminValue(serviceProvider, "AdminSeed:Username", "admin");
+        var password = GetRequiredAdminValue(serviceProvider, "AdminSeed:Password");
+        var fullName = GetRequiredAdminValue(serviceProvider, "AdminSeed:FullName", "Quản trị viên");
+        var resetExistingPassword = configuration.GetValue<bool>("AdminSeed:ResetExistingPassword");
+        var existingAdmin = await dbContext.AdminUsers.FirstOrDefaultAsync(x => x.Username == username);
+
+        if (existingAdmin != null)
+        {
+            if (resetExistingPassword)
+            {
+                existingAdmin.PasswordHash = BCrypt.Net.BCrypt.HashPassword(password);
+                existingAdmin.FullName = fullName;
+                existingAdmin.Role = "Admin";
+                existingAdmin.IsActive = true;
+                await dbContext.SaveChangesAsync();
+            }
+
+            return;
+        }
+
         if (await dbContext.AdminUsers.AnyAsync())
         {
             return;
@@ -27,9 +48,9 @@ public static class DatabaseSeeder
 
         var adminUser = new AdminUser
         {
-            Username = GetRequiredAdminValue(serviceProvider, "AdminSeed:Username", "admin"),
-            PasswordHash = BCrypt.Net.BCrypt.HashPassword(GetRequiredAdminValue(serviceProvider, "AdminSeed:Password")),
-            FullName = GetRequiredAdminValue(serviceProvider, "AdminSeed:FullName", "Quản trị viên"),
+            Username = username,
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword(password),
+            FullName = fullName,
             Role = "Admin",
             IsActive = true,
             CreatedAt = DateTime.UtcNow
