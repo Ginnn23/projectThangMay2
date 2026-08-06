@@ -27,10 +27,12 @@ public class UploadsController : ControllerBase
 
     private const long MaxFileSize = 5 * 1024 * 1024;
     private readonly IWebHostEnvironment _environment;
+    private readonly IConfiguration _configuration;
 
-    public UploadsController(IWebHostEnvironment environment)
+    public UploadsController(IWebHostEnvironment environment, IConfiguration configuration)
     {
         _environment = environment;
+        _configuration = configuration;
     }
 
     [HttpPost("image")]
@@ -66,7 +68,11 @@ public class UploadsController : ControllerBase
             return BadRequest(new { message = "Invalid image content type." });
         }
 
-        var uploadsPath = Path.Combine(_environment.WebRootPath ?? Path.Combine(_environment.ContentRootPath, "wwwroot"), "uploads");
+        var uploadsPath = _configuration["Uploads:Path"];
+        if (string.IsNullOrWhiteSpace(uploadsPath))
+        {
+            uploadsPath = Path.Combine(_environment.WebRootPath ?? Path.Combine(_environment.ContentRootPath, "wwwroot"), "uploads");
+        }
         Directory.CreateDirectory(uploadsPath);
 
         var fileName = $"{Guid.NewGuid():N}{extension.ToLowerInvariant()}";

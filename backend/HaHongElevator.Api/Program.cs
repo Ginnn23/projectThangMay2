@@ -6,11 +6,20 @@ using HaHongElevator.Api.Middleware;
 using HaHongElevator.Api.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Railway assigns the public port at runtime. Binding to all interfaces is
+// required because the container is reached through Railway's proxy.
+var railwayPort = Environment.GetEnvironmentVariable("PORT");
+if (!string.IsNullOrWhiteSpace(railwayPort))
+{
+    builder.WebHost.UseUrls($"http://0.0.0.0:{railwayPort}");
+}
 
 const string FrontendCorsPolicy = "HaHongElevatorFrontend";
 
@@ -188,6 +197,17 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+
+var uploadsPath = builder.Configuration["Uploads:Path"];
+if (!string.IsNullOrWhiteSpace(uploadsPath))
+{
+    Directory.CreateDirectory(uploadsPath);
+    app.UseStaticFiles(new StaticFileOptions
+    {
+        FileProvider = new PhysicalFileProvider(uploadsPath),
+        RequestPath = "/uploads"
+    });
+}
 app.UseCors(FrontendCorsPolicy);
 app.UseRateLimiter();
 app.UseOutputCache();
@@ -210,6 +230,7 @@ app.MapGet("/health", async (ApplicationDbContext dbContext, CancellationToken c
         : Results.StatusCode(StatusCodes.Status503ServiceUnavailable);
 });
 
+await ApplyDatabaseMigrationsAsync(app.Services);
 await DatabaseSeeder.SeedAdminUserAsync(app.Services);
 
 app.Run();
@@ -217,4 +238,26 @@ app.Run();
 static string GetClientIp(HttpContext context)
 {
     return context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+}
+
+static async Task ApplyDatabaseMigrationsAsync(IServiceProvider services)
+{
+    using var scope = services.CreateScope();
+    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    var logger = scope.ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("DatabaseMigration");
+
+    const int maxAttempts = 10;
+    for (var attempt = 1; attempt <= maxAttempts; attempt++)
+    {
+        try
+        {
+            await dbContext.Database.MigrateAsync();
+            return;
+        }
+        catch (Exception exception) when (attempt < maxAttempts)
+        {
+            logger.LogWarning(exception, "Database is not ready (attempt {Attempt}/{MaxAttempts}). Retrying...", attempt, maxAttempts);
+            await Task.Delay(TimeSpan.FromSeconds(3));
+        }
+    }
 }
