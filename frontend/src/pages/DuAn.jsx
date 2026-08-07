@@ -111,7 +111,6 @@ function DuAn() {
   const trangDangDung = Math.min(trangHienTai, tongSoTrang);
   const viTriBatDau = (trangDangDung - 1) * SO_DU_AN_MOI_TRANG;
   const duAnTrongTrang = danhSachDaLoc.slice(viTriBatDau, viTriBatDau + SO_DU_AN_MOI_TRANG);
-  const viTriKetThuc = Math.min(viTriBatDau + SO_DU_AN_MOI_TRANG, danhSachDaLoc.length);
 
   const chuyenTrang = (trangMoi) => {
     setTrangHienTai(Math.min(tongSoTrang, Math.max(1, trangMoi)));
@@ -150,11 +149,11 @@ function DuAn() {
       </section>
       <section className="project-gallery-section" id="danh-sach-du-an">
         <div className="site-container">
-          <div className="project-result-summary" aria-live="polite">
-            {danhSachDaLoc.length > 0
-              ? `Hiển thị ${viTriBatDau + 1}–${viTriKetThuc} trong ${danhSachDaLoc.length} dự án`
-              : "Chưa có dự án phù hợp"}
-          </div>
+          {danhSachDaLoc.length === 0 && (
+            <div className="project-result-summary" aria-live="polite">
+              Chưa có dự án phù hợp
+            </div>
+          )}
           <div className="row g-4 project-gallery-grid">
             {duAnTrongTrang.map((duAn) => (
               <div className="col-md-6 col-xl-4" key={duAn.id}>
