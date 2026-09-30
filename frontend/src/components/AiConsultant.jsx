@@ -55,8 +55,10 @@ function AiConsultant() {
   ]);
   const [inputValue, setInputValue] = useState("");
   const [loading, setLoading] = useState(false);
+  const [cooldown, setCooldown] = useState(0);
   const [hasNewPrompt, setHasNewPrompt] = useState(true);
   const messagesEndRef = useRef(null);
+  const lastSentRef = useRef({ text: "", time: 0 });
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -68,6 +70,15 @@ function AiConsultant() {
       setHasNewPrompt(false);
     }
   }, [isOpen, messages, loading]);
+
+  // Bộ đếm thời gian cooldown chống spam
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const timer = setInterval(() => {
+      setCooldown((prev) => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [cooldown]);
 
   useEffect(() => {
     let active = true;
@@ -103,9 +114,17 @@ function AiConsultant() {
 
   const handleSend = async (messageToSend) => {
     const text = (messageToSend || inputValue).trim();
-    if (!text || loading) return;
+    if (!text || loading || cooldown > 0) return;
+
+    // Chặn gửi tin nhắn giống hệt nhau liên tiếp trong vòng 4 giây (chống spam phím)
+    const now = Date.now();
+    if (text === lastSentRef.current.text && now - lastSentRef.current.time < 4000) {
+      return;
+    }
+    lastSentRef.current = { text, time: now };
 
     setInputValue("");
+    setCooldown(2); // Kích hoạt 2 giây giãn cách giữa các tin nhắn
     const userMsg = { id: `user-${Date.now()}`, role: "user", text };
     setMessages((prev) => [...prev, userMsg]);
     setLoading(true);
@@ -149,7 +168,9 @@ function AiConsultant() {
   const handleKeyDown = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      handleSend();
+      if (!loading && cooldown === 0) {
+        handleSend();
+      }
     }
   };
 
@@ -272,18 +293,24 @@ function AiConsultant() {
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="Nhập câu hỏi hoặc SĐT để nhận báo giá..."
+                placeholder={cooldown > 0 ? `Vui lòng đợi ${cooldown}s...` : "Nhập câu hỏi hoặc SĐT để nhận báo giá..."}
                 aria-label="Nội dung chat"
-                disabled={loading}
+                maxLength={400}
+                disabled={loading || cooldown > 0}
               />
               <button
                 type="button"
                 className="ai-send-btn"
                 onClick={() => handleSend()}
-                disabled={loading || !inputValue.trim()}
+                disabled={loading || cooldown > 0 || !inputValue.trim()}
                 aria-label="Gửi tin nhắn"
+                title={cooldown > 0 ? `Vui lòng đợi ${cooldown}s` : "Gửi"}
               >
-                <i className="bi bi-send-fill"></i>
+                {cooldown > 0 ? (
+                  <span style={{ fontSize: "12px", fontWeight: "bold" }}>{cooldown}s</span>
+                ) : (
+                  <i className="bi bi-send-fill"></i>
+                )}
               </button>
             </div>
             <div className="ai-chat-quick-note">

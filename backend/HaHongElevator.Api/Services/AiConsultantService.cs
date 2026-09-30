@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -15,8 +16,22 @@ public class AiConsultantService
     private readonly IConfiguration _configuration;
     private readonly ILogger<AiConsultantService> _logger;
 
+    private static readonly ConcurrentDictionary<string, List<DateTime>> RequestRateMap = new();
+
     private static readonly Regex PhoneRegex = new(
         @"(?:(?:\+?84)|0)(?:3[2-9]|5[2689]|7[06-9]|8[1-9]|9[0-46-9])(?:\d[\s.-]?){7}\d",
+        RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+    private static readonly Regex ProvocativeRegex = new(
+        @"\b(danh nhau|đánh nhau|solo|đấm|dam nhau|chém|chem|giết|giet|chửi|chui|đm|dkm|vcl|vkl|vl|clm|đéo|deo|mẹ mày|me may|óc chó|oc cho|ngu|điên|dien|khùng|khung|lừa đảo|lua dao|tán em|yêu em|người yêu|gạ|khiêu dâm|sex|bậy|bậy bạ)\b",
+        RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+    private static readonly Regex PureGreetingRegex = new(
+        @"^(chào|chao|hi|hello|alo|alo ad|ad ơi|ad oi|ê|e|bạn ơi|ban oi|ơi|oi|helo|hế lô)[!?. ]*$",
+        RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+    private static readonly Regex GibberishRegex = new(
+        @"^(.)\1{3,}$|^(asdf|qwerty|zxcv|test|123456|hahaha|hehehe)+$",
         RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
     public AiConsultantService(HttpClient httpClient, IConfiguration configuration, ILogger<AiConsultantService> logger)
@@ -109,7 +124,59 @@ public class AiConsultantService
         return payload;
     }
 
-    public async Task<ConsultResponseDto> ConsultAsync(ConsultRequestDto request, ApplicationDbContext dbContext, CancellationToken cancellationToken = default)
+    private static bool IsRateLimited(string? clientKey)
+    {
+        if (string.IsNullOrWhiteSpace(clientKey)) return false;
+        var now = DateTime.UtcNow;
+        var window = now.AddSeconds(-60);
+
+        var timestamps = RequestRateMap.AddOrUpdate(
+            clientKey,
+            _ => [now],
+            (_, list) =>
+            {
+                lock (list)
+                {
+                    list.RemoveAll(t => t < window);
+                    list.Add(now);
+                    return list;
+                }
+            });
+
+        lock (timestamps)
+        {
+            var recent10s = timestamps.Count(t => t > now.AddSeconds(-10));
+            return recent10s > 4 || timestamps.Count > 18;
+        }
+    }
+
+    private static string? FindInstantKnowledgeMatch(string rawMessage, AiTrainingSettingsDto training, string? detectedPhone)
+    {
+        if (training.KnowledgeBase == null || training.KnowledgeBase.Count == 0) return null;
+
+        var lower = rawMessage.Trim().ToLowerInvariant();
+
+        foreach (var item in training.KnowledgeBase)
+        {
+            var qLower = item.Question.Trim().ToLowerInvariant();
+            if (lower == qLower || (lower.Length >= 8 && qLower.Contains(lower)) || (qLower.Length >= 8 && lower.Contains(qLower)))
+            {
+                var ans = item.Answer;
+                if (!string.IsNullOrWhiteSpace(detectedPhone))
+                {
+                    ans = $"Dạ em đã ghi nhận số điện thoại **{detectedPhone}** của anh/chị!\n\n" + ans;
+                }
+                return ans;
+            }
+        }
+
+        return null;
+    }
+
+    public Task<ConsultResponseDto> ConsultAsync(ConsultRequestDto request, ApplicationDbContext dbContext, CancellationToken cancellationToken = default)
+        => ConsultAsync(request, null, dbContext, cancellationToken);
+
+    public async Task<ConsultResponseDto> ConsultAsync(ConsultRequestDto request, string? clientKey, ApplicationDbContext dbContext, CancellationToken cancellationToken = default)
     {
         var rawMessage = request.Message?.Trim() ?? string.Empty;
         var detectedPhone = ExtractPhoneNumber(rawMessage) ?? ExtractPhoneNumber(request.CustomerPhone ?? string.Empty);
@@ -122,6 +189,68 @@ public class AiConsultantService
 
         var training = await GetTrainingSettingsAsync(dbContext, cancellationToken);
 
+        // 1. Chống spam tin nhắn liên tục (Rate limiting)
+        if (!string.IsNullOrWhiteSpace(clientKey) && IsRateLimited(clientKey))
+        {
+            return new ConsultResponseDto
+            {
+                Reply = "Dạ, em thấy tin nhắn đang được gửi liên tục hơi nhanh một chút. Anh/chị vui lòng chờ 3-5 giây để em có thể tiếp nhận và hỗ trợ kỹ thuật chu đáo nhất nhé ạ! ⏱️",
+                ExtractedPhoneNumber = detectedPhone,
+                LeadSaved = leadSaved,
+                SuggestedQuestions = GenerateSuggestions(rawMessage, training)
+            };
+        }
+
+        // 2. Chặn các câu khiêu khích, đùa cợt, thô tục hoặc gây hấn (Phản hồi tức thì < 1ms)
+        if (ProvocativeRegex.IsMatch(rawMessage))
+        {
+            return new ConsultResponseDto
+            {
+                Reply = "Dạ, em là trợ lý ảo kỹ thuật của Thang Máy Hà Hồng 🏢. Em chỉ hỗ trợ tư vấn các vấn đề kỹ thuật thang máy, kích thước hố thang, báo giá và dịch vụ bảo trì công trình.\n\nNếu anh/chị cần khảo sát hiện trạng hoặc nhận báo giá thang máy, em rất sẵn lòng giải đáp ạ! 😊",
+                ExtractedPhoneNumber = detectedPhone,
+                LeadSaved = leadSaved,
+                SuggestedQuestions = GenerateSuggestions(rawMessage, training)
+            };
+        }
+
+        // 3. Chào hỏi đơn thuần (Phản hồi tức thì < 1ms)
+        if (PureGreetingRegex.IsMatch(rawMessage))
+        {
+            return new ConsultResponseDto
+            {
+                Reply = "Dạ, em chào anh/chị! Em là trợ lý kỹ thuật của Thang Máy Hà Hồng 🏢.\n\nAnh/chị đang cần tư vấn kích thước hố thang, tải trọng hay báo giá dòng thang nào cho công trình nhà mình ạ?",
+                ExtractedPhoneNumber = detectedPhone,
+                LeadSaved = leadSaved,
+                SuggestedQuestions = GenerateSuggestions(rawMessage, training)
+            };
+        }
+
+        // 4. Ký tự vô nghĩa / gõ phím bừa bãi (Phản hồi tức thì < 1ms)
+        if (GibberishRegex.IsMatch(rawMessage) || (rawMessage.Length < 3 && !char.IsDigit(rawMessage[0])))
+        {
+            return new ConsultResponseDto
+            {
+                Reply = "Dạ, em chưa nhận diện rõ câu hỏi của anh/chị. Anh/chị có thể nhập câu hỏi cụ thể hơn (ví dụ: báo giá thang 4 tầng, kích thước hố thang...) hoặc để lại Số điện thoại để kỹ sư Hà Hồng liên hệ tư vấn nhé!",
+                ExtractedPhoneNumber = detectedPhone,
+                LeadSaved = leadSaved,
+                SuggestedQuestions = GenerateSuggestions(rawMessage, training)
+            };
+        }
+
+        // 5. Khớp chính xác với kho bài học đã dạy (Phản hồi tức thì < 1ms khi bấm gợi ý)
+        var instantAnswer = FindInstantKnowledgeMatch(rawMessage, training, detectedPhone);
+        if (instantAnswer != null)
+        {
+            return new ConsultResponseDto
+            {
+                Reply = instantAnswer,
+                ExtractedPhoneNumber = detectedPhone,
+                LeadSaved = leadSaved,
+                SuggestedQuestions = GenerateSuggestions(rawMessage, training)
+            };
+        }
+
+        // 6. Trường hợp cần AI suy luận tổng hợp: Gọi Gemini với mô hình nhanh nhất
         string reply;
         var apiKey = !string.IsNullOrWhiteSpace(training.CustomApiKey)
             ? training.CustomApiKey
@@ -135,7 +264,7 @@ public class AiConsultantService
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "Gemini API failed or key expired, using taught knowledge base fallback.");
+                _logger.LogWarning(ex, "Gemini API call timed out or failed, falling back to local trained knowledge.");
                 reply = MatchTrainedKnowledgeFallback(rawMessage, detectedPhone, leadSaved, training);
             }
         }
@@ -274,13 +403,14 @@ public class AiConsultantService
         sbPrompt.AppendLine("QUY TẮC:");
         sbPrompt.AppendLine("1. Hãy đối chiếu câu hỏi của khách hàng với các bài học đã dạy ở trên để đưa ra câu trả lời chính xác, sát thực tế nhất.");
         sbPrompt.AppendLine("2. Giữ phong thái lịch thiệp, xưng hô 'Dạ, em chào anh/chị' và mời khách để lại Số điện thoại nếu cần khảo sát thực tế hoặc nhận báo giá qua Zalo.");
-        sbPrompt.AppendLine("3. Trả lời súc tích, ngắt đoạn rõ ràng, dùng gạch đầu dòng để dễ đọc trên điện thoại.");
+        sbPrompt.AppendLine("3. Trả lời súc tích, ngắt đoạn rõ ràng, dùng gạch đầu dòng để dễ đọc trên điện thoại (độ dài ngắn gọn từ 60 - 120 từ).");
+        sbPrompt.AppendLine("4. Tuyệt đối không tham gia tranh cãi, bạo lực hay khiêu khích. Nếu người dùng hỏi câu đùa cợt hoặc ngoài lề, từ chối vui vẻ trong 1 câu ngắn và hướng về thang máy.");
 
         var contents = new List<object>();
 
         if (history != null && history.Count > 0)
         {
-            foreach (var h in history.TakeLast(6))
+            foreach (var h in history.TakeLast(4))
             {
                 contents.Add(new
                 {
@@ -305,23 +435,26 @@ public class AiConsultantService
             contents,
             generationConfig = new
             {
-                temperature = 0.4,
-                maxOutputTokens = 900,
+                temperature = 0.2,
+                maxOutputTokens = 350,
             }
         };
 
-        string[] modelsToTry = ["gemini-flash-lite-latest", "gemini-3.1-flash-lite", "gemini-3-flash-preview", "gemini-3.8-flash", "gemini-3.5-flash"];
+        string[] modelsToTry = ["gemini-flash-lite-latest", "gemini-3.1-flash-lite"];
         Exception? lastException = null;
 
         foreach (var model in modelsToTry)
         {
             try
             {
+                using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+                using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutCts.Token);
+
                 var url = $"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={apiKey.Trim()}";
-                var response = await _httpClient.PostAsJsonAsync(url, payload, cancellationToken);
+                var response = await _httpClient.PostAsJsonAsync(url, payload, linkedCts.Token);
                 if (response.IsSuccessStatusCode)
                 {
-                    var json = await response.Content.ReadFromJsonAsync<JsonElement>(cancellationToken: cancellationToken);
+                    var json = await response.Content.ReadFromJsonAsync<JsonElement>(cancellationToken: linkedCts.Token);
                     var candidate = json.GetProperty("candidates")[0];
                     var text = candidate.GetProperty("content").GetProperty("parts")[0].GetProperty("text").GetString();
                     return text?.Trim() ?? "Dạ, em chào anh/chị! Em đã ghi nhận câu hỏi, anh/chị có thể gọi ngay Hotline 0909 9333 58 để kỹ sư giải đáp trực tiếp ạ!";
@@ -332,7 +465,7 @@ public class AiConsultantService
             catch (Exception ex)
             {
                 lastException = ex;
-                _logger.LogWarning(ex, "Failed to call Gemini model {Model}", model);
+                _logger.LogWarning(ex, "Failed or timed out calling Gemini model {Model}", model);
             }
         }
 
