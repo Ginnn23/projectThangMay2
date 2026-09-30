@@ -122,21 +122,51 @@ export default function DuToanThangMay() {
     return new Intl.NumberFormat("vi-VN").format(val) + " VNĐ";
   };
 
+  const handlePhoneChange = (e) => {
+    // Chỉ cho phép nhập số, lọc bỏ chữ cái và ký tự đặc biệt
+    const digitsOnly = e.target.value.replace(/\D/g, "");
+    if (digitsOnly.length <= 10) {
+      setPhoneNumber(digitsOnly);
+    }
+  };
+
   const handleFormSubmit = async (e) => {
     e.preventDefault();
     setErrorMsg("");
 
-    if (!customerName.trim() || !phoneNumber.trim()) {
-      setErrorMsg("Vui lòng nhập Họ tên và Số điện thoại để lưu dự toán.");
+    const trimmedName = customerName.trim();
+    if (!trimmedName || trimmedName.length < 2) {
+      setErrorMsg("Vui lòng nhập họ và tên của bạn (tối thiểu 2 ký tự).");
+      return;
+    }
+
+    const cleanPhone = phoneNumber.replace(/\D/g, "");
+    if (!cleanPhone || cleanPhone.length !== 10) {
+      setErrorMsg("Số điện thoại phải gồm đúng 10 chữ số (VD: 0912345678).");
+      return;
+    }
+    if (!cleanPhone.startsWith("0")) {
+      setErrorMsg("Số điện thoại phải bắt đầu bằng chữ số 0 (VD: 0912345678).");
+      return;
+    }
+
+    const trimmedEmail = email.trim().toLowerCase();
+    if (!trimmedEmail) {
+      setErrorMsg("Vui lòng nhập địa chỉ Gmail (VD: hotro.hahong@gmail.com).");
+      return;
+    }
+    const gmailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/i;
+    if (!gmailRegex.test(trimmedEmail)) {
+      setErrorMsg("Email bắt buộc phải có đuôi @gmail.com (VD: yourname@gmail.com).");
       return;
     }
 
     setSubmitting(true);
     try {
       const payload = {
-        customerName: customerName.trim(),
-        phoneNumber: phoneNumber.trim(),
-        email: email.trim() || null,
+        customerName: trimmedName,
+        phoneNumber: cleanPhone,
+        email: trimmedEmail,
         address: address.trim() || null,
         buildingType,
         stops: Number(stops),
@@ -148,12 +178,27 @@ export default function DuToanThangMay() {
       };
 
       const res = await apiClient.post("/estimates", payload);
-      setSavedEstimateId(res.data?.id || Date.now());
+      setSavedEstimateId(res.data?.id || null);
       setSubmitSuccess(true);
+      setErrorMsg("");
     } catch (err) {
-      // Even if backend has connection issue, show successful client feedback
-      setSavedEstimateId(Date.now());
-      setSubmitSuccess(true);
+      console.error("Lỗi gửi dự toán:", err);
+      let errorDetail = "Gửi dự toán không thành công. Vui lòng kiểm tra lại thông tin.";
+      const errData = err.response?.data;
+      if (typeof errData === "string") {
+        errorDetail = errData;
+      } else if (errData?.message) {
+        errorDetail = errData.message;
+      } else if (errData?.errors) {
+        const firstKey = Object.keys(errData.errors)[0];
+        if (firstKey && Array.isArray(errData.errors[firstKey]) && errData.errors[firstKey].length > 0) {
+          errorDetail = errData.errors[firstKey][0];
+        }
+      } else if (err.message) {
+        errorDetail = err.message;
+      }
+      setErrorMsg(errorDetail);
+      setSubmitSuccess(false);
     } finally {
       setSubmitting(false);
     }
@@ -434,7 +479,7 @@ export default function DuToanThangMay() {
                           <i className="bi bi-check-circle-fill fs-3 d-block mb-1 text-success"></i>
                           <strong>Gửi thông tin thành công!</strong>
                           <p className="mb-2" style={{ fontSize: "13px" }}>
-                            Kỹ sư Thang Máy Hà Hồng sẽ liên hệ qua SĐT <strong>{phoneNumber}</strong> trong vòng 15 phút.
+                            Kỹ sư Thang Máy Hà Hồng sẽ liên hệ qua SĐT <strong>{phoneNumber}</strong> và gửi bảng dự toán qua Gmail <strong>{email}</strong> trong vòng 15 phút.
                           </p>
                           <button
                             type="button"
@@ -449,6 +494,9 @@ export default function DuToanThangMay() {
                         <form onSubmit={handleFormSubmit}>
                           {errorMsg && <div className="alert alert-danger py-2 mb-2" style={{ fontSize: "12px" }}>{errorMsg}</div>}
                           <div className="mb-2">
+                            <label className="form-label mb-1" style={{ fontSize: "12px", fontWeight: "600" }}>
+                              Họ và tên của bạn <span className="text-danger">*</span>
+                            </label>
                             <input
                               type="text"
                               className="form-control form-control-sm"
@@ -456,25 +504,52 @@ export default function DuToanThangMay() {
                               value={customerName}
                               onChange={(e) => setCustomerName(e.target.value)}
                               required
+                              maxLength={100}
                             />
                           </div>
                           <div className="mb-2">
+                            <label className="form-label mb-1" style={{ fontSize: "12px", fontWeight: "600" }}>
+                              Số điện thoại (đúng 10 chữ số) <span className="text-danger">*</span>
+                            </label>
                             <input
                               type="tel"
                               className="form-control form-control-sm"
-                              placeholder="Số điện thoại nhận báo giá *"
+                              placeholder="Số điện thoại (10 chữ số, chỉ nhập số) *"
                               value={phoneNumber}
-                              onChange={(e) => setPhoneNumber(e.target.value)}
+                              onChange={handlePhoneChange}
+                              maxLength={10}
+                              inputMode="numeric"
+                              pattern="[0-9]*"
                               required
                             />
+                            <small className="text-muted" style={{ fontSize: "11px" }}>Chỉ nhập 10 chữ số, bắt đầu bằng số 0 (VD: 0912345678)</small>
                           </div>
                           <div className="mb-2">
+                            <label className="form-label mb-1" style={{ fontSize: "12px", fontWeight: "600" }}>
+                              Địa chỉ Gmail <span className="text-danger">*</span>
+                            </label>
+                            <input
+                              type="email"
+                              className="form-control form-control-sm"
+                              placeholder="Địa chỉ Gmail (VD: example@gmail.com) *"
+                              value={email}
+                              onChange={(e) => setEmail(e.target.value)}
+                              maxLength={150}
+                              required
+                            />
+                            <small className="text-muted" style={{ fontSize: "11px" }}>Bắt buộc phải có đuôi @gmail.com để nhận file báo giá</small>
+                          </div>
+                          <div className="mb-2">
+                            <label className="form-label mb-1" style={{ fontSize: "12px", fontWeight: "600" }}>
+                              Địa chỉ công trình
+                            </label>
                             <input
                               type="text"
                               className="form-control form-control-sm"
                               placeholder="Địa chỉ công trình (Quận/Huyện, Tỉnh thành)"
                               value={address}
                               onChange={(e) => setAddress(e.target.value)}
+                              maxLength={250}
                             />
                           </div>
 
@@ -544,14 +619,14 @@ export default function DuToanThangMay() {
               <tbody>
                 <tr>
                   <td style={{ width: "18%", color: "#666" }}>Kính gửi:</td>
-                  <td><strong>{customerName || "Quý khách hàng"}</strong></td>
+                  <td style={{ width: "32%" }}><strong>{customerName || "Quý khách hàng"}</strong></td>
                   <td style={{ width: "18%", color: "#666" }}>Số điện thoại:</td>
-                  <td><strong>{phoneNumber || "---"}</strong></td>
+                  <td style={{ width: "32%" }}><strong>{phoneNumber || "---"}</strong></td>
                 </tr>
                 <tr>
-                  <td style={{ color: "#666" }}>Công trình:</td>
-                  <td>{buildingType === "nha-pho-cai-tao" ? "Nhà phố cải tạo" : (buildingType === "biet-thu" ? "Biệt thự cao cấp" : "Nhà phố xây mới")}</td>
-                  <td style={{ color: "#666" }}>Địa chỉ:</td>
+                  <td style={{ color: "#666" }}>Địa chỉ Gmail:</td>
+                  <td><strong>{email || "---"}</strong></td>
+                  <td style={{ color: "#666" }}>Địa chỉ công trình:</td>
                   <td>{address || "TP. Hồ Chí Minh"}</td>
                 </tr>
               </tbody>

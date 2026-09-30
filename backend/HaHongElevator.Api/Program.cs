@@ -131,7 +131,7 @@ builder.Services.AddRateLimiter(options =>
     options.AddPolicy<string>("contact-submit", httpContext =>
         RateLimitPartition.GetFixedWindowLimiter(GetClientIp(httpContext), _ => new FixedWindowRateLimiterOptions
         {
-            PermitLimit = 3,
+            PermitLimit = 15,
             Window = TimeSpan.FromMinutes(1),
             QueueLimit = 0
         }));

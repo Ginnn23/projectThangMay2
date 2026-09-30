@@ -333,7 +333,7 @@ function AdminToolbar({ activeTab, onChangeTab, user, onLogout }) {
   );
 }
 
-function DuToanAdmin({ onShowToast }) {
+function DuToanAdmin({ onShowToast, onUpdateCount }) {
   const [estimates, setEstimates] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -345,8 +345,15 @@ function DuToanAdmin({ onShowToast }) {
     setLoading(true);
     setError("");
     try {
-      const { data } = await apiClient.get("/admin/estimates");
-      setEstimates(Array.isArray(data) ? data : []);
+      let res;
+      try {
+        res = await apiClient.get("/estimates/admin");
+      } catch {
+        res = await apiClient.get("/admin/estimates");
+      }
+      const data = Array.isArray(res?.data) ? res.data : [];
+      setEstimates(data);
+      onUpdateCount?.(data.length);
     } catch (err) {
       setError(err?.response?.data?.message || "Không thể tải danh sách dự toán.");
     } finally {
@@ -360,7 +367,11 @@ function DuToanAdmin({ onShowToast }) {
 
   const handleStatusChange = async (id, newStatus) => {
     try {
-      await apiClient.patch(`/admin/estimates/${id}/status`, { status: newStatus });
+      try {
+        await apiClient.patch(`/estimates/${id}/status`, { status: newStatus });
+      } catch {
+        await apiClient.patch(`/admin/estimates/${id}/status`, { status: newStatus });
+      }
       setEstimates((prev) => prev.map((item) => (item.id === id ? { ...item, status: newStatus } : item)));
       onShowToast?.("Đã cập nhật trạng thái dự toán.");
     } catch {
@@ -371,8 +382,16 @@ function DuToanAdmin({ onShowToast }) {
   const handleDelete = async (id) => {
     if (!window.confirm("Bạn có chắc chắn muốn xóa bản ghi dự toán này?")) return;
     try {
-      await apiClient.delete(`/admin/estimates/${id}`);
-      setEstimates((prev) => prev.filter((item) => item.id !== id));
+      try {
+        await apiClient.delete(`/estimates/${id}`);
+      } catch {
+        await apiClient.delete(`/admin/estimates/${id}`);
+      }
+      setEstimates((prev) => {
+        const next = prev.filter((item) => item.id !== id);
+        onUpdateCount?.(next.length);
+        return next;
+      });
       onShowToast?.("Đã xóa bản ghi dự toán.");
     } catch {
       onShowToast?.("Không thể xóa bản ghi.", "error");
@@ -456,6 +475,7 @@ function DuToanAdmin({ onShowToast }) {
                   <td>
                     <strong>{item.customerName}</strong>
                     <div className="text-primary fw-bold">{item.phoneNumber}</div>
+                    {item.email && <div className="text-secondary small"><i className="bi bi-envelope me-1"></i>{item.email}</div>}
                     {item.address && <small className="text-muted d-block">{item.address}</small>}
                   </td>
                   <td>
@@ -1205,6 +1225,7 @@ function Admin() {
   const [editingProjectId, setEditingProjectId] = useState(null);
   const [adminToast, setAdminToast] = useState(null);
   const [xacNhanAdmin, setXacNhanAdmin] = useState(null);
+  const [estimatesCount, setEstimatesCount] = useState(0);
   const toastTimerRef = useRef(null);
 
   const thongKe = useMemo(() => ({
@@ -1310,11 +1331,12 @@ function Admin() {
 
     const taiTongQuanAdmin = async () => {
       try {
-        const [contactsResponse, servicesResponse, projectsResponse, maintenanceResponse] = await Promise.all([
+        const [contactsResponse, servicesResponse, projectsResponse, maintenanceResponse, estimatesRes] = await Promise.all([
           apiClient.get("/contacts"),
           layDichVuChoAdmin(),
           layDuAnChoAdmin(),
           apiClient.get("/maintenance-customers"),
+          apiClient.get("/estimates/admin").catch(() => apiClient.get("/admin/estimates")).catch(() => ({ data: [] })),
         ]);
 
         if (!dangHoatDong) return;
@@ -1323,6 +1345,9 @@ function Admin() {
         setServices(servicesResponse.data);
         setProjects(projectsResponse);
         setMaintenanceCustomers(maintenanceResponse.data);
+        if (Array.isArray(estimatesRes?.data)) {
+          setEstimatesCount(estimatesRes.data.length);
+        }
         setServiceWarning(servicesResponse.dangDungApiCu ? canhBaoBackendDichVuCu : "");
       } catch (err) {
         if (dangHoatDong) {
@@ -1720,6 +1745,7 @@ function Admin() {
 
         <div className="admin-summary-grid">
           <article><span>Liên hệ</span><strong>{thongKe.contacts}</strong></article>
+          <article><span>Dự toán báo giá</span><strong>{estimatesCount}</strong></article>
           <article><span>Khách bảo trì</span><strong>{thongKe.maintenance}</strong></article>
           <article><span>Dịch vụ đang hiện</span><strong>{thongKe.services}</strong></article>
           <article><span>Dự án</span><strong>{thongKe.projects}</strong></article>
@@ -1801,7 +1827,7 @@ function Admin() {
         )}
 
         {activeTab === "estimates" && (
-          <DuToanAdmin onShowToast={hienThongBao} />
+          <DuToanAdmin onShowToast={hienThongBao} onUpdateCount={setEstimatesCount} />
         )}
       </div>
     </main>

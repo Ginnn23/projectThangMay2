@@ -63,13 +63,15 @@ public class CreateEstimateRequest
     public string CustomerName { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "Vui lòng nhập số điện thoại")]
-    [MaxLength(30)]
-    [RegularExpression(@"^(0|\+84)[3|5|7|8|9][0-9]{8}$", ErrorMessage = "Số điện thoại không hợp lệ")]
+    [MaxLength(15)]
+    [RegularExpression(@"^0[0-9]{9}$", ErrorMessage = "Số điện thoại phải gồm đúng 10 chữ số (bắt đầu bằng số 0)")]
     public string PhoneNumber { get; set; } = string.Empty;
 
+    [Required(ErrorMessage = "Vui lòng nhập địa chỉ Gmail")]
     [MaxLength(254)]
-    [EmailAddress(ErrorMessage = "Email không hợp lệ")]
-    public string? Email { get; set; }
+    [EmailAddress(ErrorMessage = "Email không đúng định dạng")]
+    [RegularExpression(@"^(?i)[a-zA-Z0-9._%+-]+@gmail\.com$", ErrorMessage = "Địa chỉ email phải có đuôi @gmail.com (VD: example@gmail.com)")]
+    public string Email { get; set; } = string.Empty;
 
     [MaxLength(300)]
     public string? Address { get; set; }
