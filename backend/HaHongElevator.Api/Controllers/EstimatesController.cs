@@ -105,17 +105,21 @@ public class EstimatesController : ControllerBase
         _dbContext.ElevatorEstimates.Add(estimate);
         await _dbContext.SaveChangesAsync(cancellationToken);
 
-        // Tự động gửi email bảng báo giá kèm tài liệu kỹ thuật về Gmail của khách hàng
+        // Tự động gửi email trong nền (background Task) để trả lời khách hàng tức thì không bị nghẽn
         if (!string.IsNullOrWhiteSpace(estimate.Email))
         {
-            try
+            _ = Task.Run(async () =>
             {
-                await _emailService.SendEstimateQuotationAsync(estimate, cancellationToken);
-            }
-            catch
-            {
-                // logged inside email service
-            }
+                try
+                {
+                    using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(6));
+                    await _emailService.SendEstimateQuotationAsync(estimate, cts.Token);
+                }
+                catch
+                {
+                    // logged inside email service
+                }
+            });
         }
 
         return CreatedAtAction(nameof(GetEstimateById), new { id = estimate.Id }, MapToResponse(estimate));
