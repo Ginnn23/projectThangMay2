@@ -256,13 +256,35 @@ public class EstimatesController : ControllerBase
             return BadRequest(new { message = "Khách hàng này chưa cung cấp địa chỉ Gmail." });
         }
 
-        var sent = await _emailService.SendEstimateQuotationAsync(estimate, cancellationToken);
-        if (!sent)
+        var result = await _emailService.SendEstimateQuotationAsync(estimate, cancellationToken);
+        if (!result.Success)
         {
-            return StatusCode(500, new { message = "Gửi email chưa thành công. Vui lòng kiểm tra mật khẩu ứng dụng Gmail (App Password) trong cấu hình SMTP." });
+            return StatusCode(500, new { message = $"Chưa thể gửi email: {result.ErrorMessage}" });
         }
 
-        return Ok(new { message = $"Đã gửi thành công bảng dự toán tới {estimate.Email}" });
+        return Ok(new { message = $"Đã gửi thành công bảng báo giá kèm file PDF tới {estimate.Email}" });
+    }
+
+    /// <summary>
+    /// Download quotation as official PDF.
+    /// </summary>
+    [HttpGet("{id:int}/pdf")]
+    [HttpGet("admin/{id:int}/pdf")]
+    [HttpGet("/api/admin/estimates/{id:int}/pdf")]
+    [HttpGet("/api/estimates/{id:int}/pdf")]
+    public async Task<IActionResult> DownloadEstimatePdf(int id, CancellationToken cancellationToken)
+    {
+        var estimate = await _dbContext.ElevatorEstimates
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+
+        if (estimate == null)
+        {
+            return NotFound(new { message = "Không tìm thấy bản dự toán." });
+        }
+
+        var pdfBytes = _emailService.GenerateQuotationPdf(estimate);
+        return File(pdfBytes, "application/pdf", $"Bang_Bao_Gia_Thang_May_Ha_Hong_HH-{estimate.Id:D5}.pdf");
     }
 
     private static EstimateResponse MapToResponse(ElevatorEstimate x) => new()

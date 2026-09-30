@@ -5,6 +5,9 @@ using System.Text;
 using System.Text.Json;
 using HaHongElevator.Api.DTOs.Estimates;
 using HaHongElevator.Api.Models;
+using QuestPDF.Fluent;
+using QuestPDF.Helpers;
+using QuestPDF.Infrastructure;
 
 namespace HaHongElevator.Api.Services;
 
@@ -13,18 +16,23 @@ public class EmailService : IEmailService
     private readonly IConfiguration _config;
     private readonly ILogger<EmailService> _logger;
 
+    static EmailService()
+    {
+        QuestPDF.Settings.License = LicenseType.Community;
+    }
+
     public EmailService(IConfiguration config, ILogger<EmailService> logger)
     {
         _config = config;
         _logger = logger;
     }
 
-    public async Task<bool> SendEstimateQuotationAsync(ElevatorEstimate estimate, CancellationToken cancellationToken = default)
+    public async Task<EmailSendResult> SendEstimateQuotationAsync(ElevatorEstimate estimate, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(estimate.Email))
         {
             _logger.LogInformation("Estimate #{Id} has no recipient email specified. Skipping email.", estimate.Id);
-            return false;
+            return new EmailSendResult(false, "Khách hàng không cung cấp địa chỉ email.");
         }
 
         var host = _config["Smtp:Host"] ?? "smtp.gmail.com";
@@ -38,21 +46,19 @@ public class EmailService : IEmailService
 
         if (string.IsNullOrWhiteSpace(password))
         {
-            _logger.LogWarning(
-                "SMTP Password is not set. To send real emails via Gmail, configure 'Smtp:Password' or 'SMTP_PASSWORD' environment variable with a Gmail App Password. Báo giá cho khách {Name} ({Email}) đã được chuẩn bị thành công.",
-                estimate.CustomerName,
-                estimate.Email);
-            return false;
+            var msg = "Chưa cấu hình mật khẩu ứng dụng Gmail (Smtp:Password).";
+            _logger.LogWarning("{Message} Báo giá #{Id} ({Email}) chưa được gửi.", msg, estimate.Id, estimate.Email);
+            return new EmailSendResult(false, msg);
         }
 
         try
         {
-            using var client = new SmtpClient(host, port)
-            {
-                EnableSsl = enableSsl,
-                Credentials = new NetworkCredential(userName, password),
-                Timeout = 15000
-            };
+            using var client = new SmtpClient(host, port);
+            client.EnableSsl = enableSsl;
+            client.UseDefaultCredentials = false;
+            client.Credentials = new NetworkCredential(userName, password);
+            client.DeliveryMethod = SmtpDeliveryMethod.Network;
+            client.Timeout = 25000;
 
             var mail = new MailMessage
             {
@@ -66,22 +72,236 @@ public class EmailService : IEmailService
 
             mail.To.Add(new MailAddress(estimate.Email.Trim(), estimate.CustomerName, Encoding.UTF8));
 
-            // Attach printable quotation document
-            var attachmentHtml = BuildPrintableHtmlDocument(estimate);
-            var attachmentBytes = Encoding.UTF8.GetBytes(attachmentHtml);
-            var attachmentStream = new MemoryStream(attachmentBytes);
-            var attachment = new Attachment(attachmentStream, $"Bang_Bao_Gia_Thang_May_Ha_Hong_HH-{estimate.Id:D5}.html", "text/html");
+            // Attach official PDF document
+            var pdfBytes = GenerateQuotationPdf(estimate);
+            using var pdfStream = new MemoryStream(pdfBytes);
+            var attachment = new Attachment(pdfStream, $"Bang_Bao_Gia_Thang_May_Ha_Hong_HH-{estimate.Id:D5}.pdf", "application/pdf");
             mail.Attachments.Add(attachment);
 
             await client.SendMailAsync(mail, cancellationToken);
-            _logger.LogInformation("Successfully sent quotation email to {Email} for Estimate #{Id}", estimate.Email, estimate.Id);
-            return true;
+            _logger.LogInformation("Successfully sent quotation email with PDF attachment to {Email} for Estimate #{Id}", estimate.Email, estimate.Id);
+            return new EmailSendResult(true);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to send estimate quotation email to {Email} for Estimate #{Id}", estimate.Email, estimate.Id);
-            return false;
+            return new EmailSendResult(false, ex.Message);
         }
+    }
+
+    public byte[] GenerateQuotationPdf(ElevatorEstimate x)
+    {
+        var priceMin = FormatVnd(x.EstimatedPriceMin);
+        var priceMax = FormatVnd(x.EstimatedPriceMax);
+
+        var elevatorName = x.ElevatorType switch
+        {
+            "homelift-kinh" => "Thang máy kính Homelift Panorama quan sát cao cấp",
+            "inox-guong-vang" => "Cabin Inox Gương Vàng Ăn Mòn Hoa Văn Luxury",
+            _ => "Thang máy Inox 304 Tiêu chuẩn hiện đại"
+        };
+
+        var buildingName = x.BuildingType switch
+        {
+            "nha-pho-cai-tao" => "Nhà phố cải tạo (Tối ưu hố hẹp & Pit nông)",
+            "biet-thu" => "Biệt thự cao cấp / Villa",
+            "van-phong" => "Văn phòng / Tòa nhà kinh doanh",
+            _ => "Nhà phố xây mới (Hố chuẩn)"
+        };
+
+        var breakdownItems = new List<CostBreakdownItem>();
+        if (!string.IsNullOrWhiteSpace(x.BreakdownJson))
+        {
+            try
+            {
+                breakdownItems = JsonSerializer.Deserialize<List<CostBreakdownItem>>(x.BreakdownJson) ?? [];
+            }
+            catch
+            {
+                // ignore
+            }
+        }
+
+        var doc = Document.Create(container =>
+        {
+            container.Page(page =>
+            {
+                page.Size(PageSizes.A4);
+                page.Margin(25);
+                page.PageColor(Colors.White);
+                page.DefaultTextStyle(t => t.FontSize(9.5f).FontColor("#1e293b"));
+
+                // Header
+                page.Header().Column(headerCol =>
+                {
+                    headerCol.Item().Row(row =>
+                    {
+                        row.RelativeItem(7).Column(c =>
+                        {
+                            c.Item().Text("CÔNG TY TNHH THANG MÁY HÀ HỒNG").Bold().FontSize(13).FontColor("#0056b3");
+                            c.Item().Text("Chuyên Gia Thang Máy Gia Đình & Dịch Vụ Kỹ Thuật Uy Tín TPHCM").FontSize(8.5f).FontColor("#64748b");
+                            c.Item().Text("Hotline 24/7: 0909 9333 58 | Email: hahongre@gmail.com").FontSize(8.5f).FontColor("#475569");
+                            c.Item().Text("Địa chỉ: 18/1/6 Tổ 3, KP 6, P. Tân Thới Nhất, Quận 12, TP.HCM").FontSize(8f).FontColor("#64748b");
+                        });
+
+                        row.RelativeItem(5).AlignRight().Column(c =>
+                        {
+                            c.Item().Text($"MÃ BÁO GIÁ: HH-{x.Id:D5}").Bold().FontSize(12).FontColor("#dc2626");
+                            c.Item().Text($"Ngày lập: {DateTime.Now:dd/MM/yyyy}").FontSize(8.5f).FontColor("#64748b");
+                            c.Item().Text("Website: thangmayhahong.xyz").FontSize(8.5f).FontColor("#0056b3");
+                        });
+                    });
+
+                    headerCol.Item().PaddingVertical(8).LineHorizontal(1.5f).LineColor("#0056b3");
+                });
+
+                // Content
+                page.Content().Column(col =>
+                {
+                    col.Item().PaddingBottom(8).AlignCenter().Text("BẢNG DỰ TOÁN BÁO GIÁ THIẾT KẾ & LẮP ĐẶT THANG MÁY")
+                        .Bold().FontSize(13).FontColor("#091e3a");
+
+                    // Customer Info Box
+                    col.Item().Border(1).BorderColor("#cbd5e1").Background("#f8fafc").Padding(10).Column(box =>
+                    {
+                        box.Item().Row(r =>
+                        {
+                            r.RelativeItem(6).Text(t =>
+                            {
+                                t.Span("Kính gửi Quý khách: ").FontColor("#64748b");
+                                t.Span(x.CustomerName).Bold().FontColor("#0056b3");
+                            });
+                            r.RelativeItem(6).Text(t =>
+                            {
+                                t.Span("Số điện thoại: ").FontColor("#64748b");
+                                t.Span(x.PhoneNumber).Bold();
+                            });
+                        });
+                        box.Item().PaddingTop(4).Row(r =>
+                        {
+                            r.RelativeItem(6).Text(t =>
+                            {
+                                t.Span("Địa chỉ Gmail: ").FontColor("#64748b");
+                                t.Span(x.Email ?? "(Chưa cung cấp)");
+                            });
+                            r.RelativeItem(6).Text(t =>
+                            {
+                                t.Span("Địa chỉ công trình: ").FontColor("#64748b");
+                                t.Span(string.IsNullOrWhiteSpace(x.Address) ? "TP. Hồ Chí Minh" : x.Address);
+                            });
+                        });
+                        box.Item().PaddingTop(4).Text(t =>
+                        {
+                            t.Span("Loại hình công trình: ").FontColor("#64748b");
+                            t.Span(buildingName).Bold();
+                        });
+                    });
+
+                    // Technical Specifications
+                    col.Item().PaddingTop(10).PaddingBottom(4).Text("I. THÔNG SỐ KỸ THUẬT ĐỀ XUẤT").Bold().FontSize(10.5f).FontColor("#0056b3");
+                    col.Item().Table(table =>
+                    {
+                        table.ColumnsDefinition(cols =>
+                        {
+                            cols.RelativeColumn(5);
+                            cols.RelativeColumn(7);
+                        });
+
+                        void AddRow(string label, string val, bool alt = false)
+                        {
+                            table.Cell().Background(alt ? "#f1f5f9" : "#ffffff").Border(0.5f).BorderColor("#cbd5e1").Padding(4.5f).Text(label).Bold();
+                            table.Cell().Background(alt ? "#f1f5f9" : "#ffffff").Border(0.5f).BorderColor("#cbd5e1").Padding(4.5f).Text(val);
+                        }
+
+                        AddRow("Tải trọng định mức", $"{x.CapacityKg} kg ({x.CapacityKg / 70} người)", true);
+                        AddRow("Số tầng phục vụ", $"{x.Stops} Tầng ({x.Stops} điểm dừng)", false);
+                        AddRow("Dòng thang máy", elevatorName, true);
+                        AddRow("Động cơ / Công suất", $"{x.MotorBrand} ({x.MotorPowerKw} kW)", false);
+                        AddRow("Kích thước giếng thang (Rộng x Sâu)", $"{x.ShaftWidth} x {x.ShaftDepth} mm", true);
+                        AddRow("Kích thước cabin (Rộng x Sâu x Cao)", $"{x.CabinWidth} x {x.CabinDepth} x 2200 mm", false);
+                        AddRow("Chiều sâu hố Pit / Chiều cao OH", $"Pit: {x.PitDepth} mm | OH: {x.OverheadHeight} mm", true);
+                        AddRow("Yêu cầu nguồn điện", x.PowerSupply, false);
+                    });
+
+                    // Itemized Breakdown if available
+                    if (breakdownItems.Count > 0)
+                    {
+                        col.Item().PaddingTop(10).PaddingBottom(4).Text("II. BÓC TÁCH CHI PHÍ THI CÔNG CHI TIẾT").Bold().FontSize(10.5f).FontColor("#0056b3");
+                        col.Item().Table(table =>
+                        {
+                            table.ColumnsDefinition(cols =>
+                            {
+                                cols.RelativeColumn(3.5f);
+                                cols.RelativeColumn(5.5f);
+                                cols.RelativeColumn(3f);
+                            });
+
+                            table.Cell().Background("#0056b3").Padding(5).Text("Hạng mục").Bold().FontColor("#ffffff");
+                            table.Cell().Background("#0056b3").Padding(5).Text("Quy cách kỹ thuật").Bold().FontColor("#ffffff");
+                            table.Cell().Background("#0056b3").Padding(5).AlignRight().Text("Đơn giá dự kiến").Bold().FontColor("#ffffff");
+
+                            var isAlt = false;
+                            foreach (var item in breakdownItems)
+                            {
+                                var bg = isAlt ? "#f1f5f9" : "#ffffff";
+                                table.Cell().Background(bg).Border(0.5f).BorderColor("#cbd5e1").Padding(4.5f).Text(item.Category).Bold();
+                                table.Cell().Background(bg).Border(0.5f).BorderColor("#cbd5e1").Padding(4.5f).Text(item.Title);
+                                table.Cell().Background(bg).Border(0.5f).BorderColor("#cbd5e1").Padding(4.5f).AlignRight().Text($"{FormatVnd(item.MinPrice)} - {FormatVnd(item.MaxPrice)}").Bold().FontColor("#0056b3");
+                                isAlt = !isAlt;
+                            }
+                        });
+                    }
+
+                    // Price Banner
+                    col.Item().PaddingTop(10).Background("#eff6ff").Border(1).BorderColor("#bfdbfe").Padding(8).AlignCenter().Column(priceCol =>
+                    {
+                        priceCol.Item().Text($"TỔNG CHI PHÍ DỰ TOÁN TRỌN GÓI ({x.Stops} TẦNG):").Bold().FontSize(10f).FontColor("#1e40af");
+                        priceCol.Item().Text($"{priceMin} - {priceMax}").Bold().FontSize(15).FontColor("#dc2626");
+                        priceCol.Item().Text("(Bao gồm toàn bộ thiết bị nhập khẩu chính hãng, kiểm định an toàn và nhân công lắp đặt hoàn thiện)").FontSize(8f).FontColor("#1e3a8a");
+                    });
+
+                    // Commitments Box
+                    col.Item().PaddingTop(10).Border(1).BorderColor("#bbf7d0").Background("#f0fdf4").Padding(8).Column(c =>
+                    {
+                        c.Item().Text("CAM KẾT CHẤT LƯỢNG TỪ THANG MÁY HÀ HỒNG:").Bold().FontSize(8.5f).FontColor("#166534");
+                        c.Item().Text("• Bảo hành toàn diện 24 tháng chính hãng đối với thiết bị động cơ và tủ điều khiển.").FontSize(8f).FontColor("#15803d");
+                        c.Item().Text("• Tặng gói bảo trì định kỳ miễn phí 12 tháng đầu tiên sau khi bàn giao nghiệm thu.").FontSize(8f).FontColor("#15803d");
+                        c.Item().Text("• Đội ngũ kỹ sư trực kỹ thuật 24/7, có mặt hỗ trợ tại TPHCM trong vòng 30 phút.").FontSize(8f).FontColor("#15803d");
+                    });
+
+                    // Signature
+                    col.Item().PaddingTop(15).Row(r =>
+                    {
+                        r.RelativeItem().AlignCenter().Column(c =>
+                        {
+                            c.Item().Text("ĐẠI DIỆN KHÁCH HÀNG").Bold().FontSize(9f);
+                            c.Item().Text("(Ký, ghi rõ họ tên)").Italic().FontSize(7.5f).FontColor("#64748b");
+                        });
+                        r.RelativeItem().AlignCenter().Column(c =>
+                        {
+                            c.Item().Text("ĐẠI DIỆN THANG MÁY HÀ HỒNG").Bold().FontSize(9f).FontColor("#0056b3");
+                            c.Item().Text("(Ký tên và đóng dấu)").Italic().FontSize(7.5f).FontColor("#64748b");
+                        });
+                    });
+                });
+
+                // Footer
+                page.Footer().Row(row =>
+                {
+                    row.RelativeItem().Text("Thang Máy Hà Hồng — Hotline: 0909 9333 58 — thangmayhahong.xyz").FontSize(7.5f).FontColor("#94a3b8");
+                    row.RelativeItem().AlignRight().Text(x =>
+                    {
+                        x.DefaultTextStyle(t => t.FontSize(7.5f).FontColor("#94a3b8"));
+                        x.Span("Trang ");
+                        x.CurrentPageNumber();
+                        x.Span(" / ");
+                        x.TotalPages();
+                    });
+                });
+            });
+        });
+
+        return doc.GeneratePdf();
     }
 
     private static string FormatVnd(decimal val)
@@ -91,7 +311,6 @@ public class EmailService : IEmailService
 
     private static string BuildQuotationEmailHtml(ElevatorEstimate x)
     {
-        var viCulture = new CultureInfo("vi-VN");
         var priceMin = FormatVnd(x.EstimatedPriceMin);
         var priceMax = FormatVnd(x.EstimatedPriceMax);
 
@@ -162,6 +381,9 @@ public class EmailService : IEmailService
             <p style=""font-size: 14px; color: #475569;"">
                 Thang Máy Hà Hồng chân thành cảm ơn Quý khách đã tin tưởng sử dụng công cụ dự toán kỹ thuật trực tuyến. Dưới đây là bảng thông số thiết kế và dự toán chi phí trọn gói dành riêng cho công trình của Quý khách.
             </p>
+            <p style=""font-size: 13px; color: #166534; background: #f0fdf4; border: 1px solid #bbf7d0; padding: 10px 14px; border-radius: 6px;"">
+                📎 <strong>Tài liệu đính kèm:</strong> Chúng tôi đã đính kèm <strong>File PDF Báo Giá Chính Thức (Bang_Bao_Gia_Thang_May_Ha_Hong_HH-{x.Id:D5}.pdf)</strong> vào email này để Quý khách tiện lưu trữ và in ấn.
+            </p>
 
             <!-- Customer & Project Info Box -->
             <div style=""background: #f8fafc; border-left: 4px solid #0056b3; border-radius: 6px; padding: 15px; margin: 20px 0;"">
@@ -197,7 +419,7 @@ public class EmailService : IEmailService
             <table style=""width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 25px;"">
                 <tr style=""background: #f1f5f9;"">
                     <td style=""padding: 8px 10px; font-weight: 600; width: 45%; border: 1px solid #e2e8f0;"">Tải trọng định mức</td>
-                    <td style=""padding: 8px 10px; font-weight: 700; color: #0056b3; border: 1px solid #e2e8f0;"">{x.CapacityKg} kg</td>
+                    <td style=""padding: 8px 10px; font-weight: 700; color: #0056b3; border: 1px solid #e2e8f0;"">{x.CapacityKg} kg ({x.CapacityKg / 70} người)</td>
                 </tr>
                 <tr>
                     <td style=""padding: 8px 10px; font-weight: 600; border: 1px solid #e2e8f0;"">Số tầng phục vụ</td>
@@ -271,92 +493,6 @@ public class EmailService : IEmailService
             <div>CÔNG TY TNHH THANG MÁY HÀ HỒNG - GPKD / MST: 0316353846</div>
             <div style=""margin-top: 4px;"">Địa chỉ: 18/1/6 Tổ 3, KP 6, P. Tân Thới Nhất, Quận 12, TP. Hồ Chí Minh</div>
             <div style=""margin-top: 4px;"">Hotline: 0909 9333 58 | Website: https://thangmayhahong.xyz</div>
-        </div>
-    </div>
-</body>
-</html>";
-    }
-
-    private static string BuildPrintableHtmlDocument(ElevatorEstimate x)
-    {
-        var priceMin = FormatVnd(x.EstimatedPriceMin);
-        var priceMax = FormatVnd(x.EstimatedPriceMax);
-
-        return $@"<!DOCTYPE html>
-<html lang=""vi"">
-<head>
-    <meta charset=""UTF-8"">
-    <title>Bảng Dự Toán Báo Giá Thang Máy Hà Hồng - HH-{x.Id:D5}</title>
-    <style>
-        body {{ font-family: Arial, sans-serif; color: #111; margin: 0; padding: 30px; line-height: 1.5; }}
-        .header {{ display: flex; justify-content: space-between; border-bottom: 2px solid #0056b3; padding-bottom: 15px; margin-bottom: 20px; }}
-        .company-title {{ font-size: 18px; color: #0056b3; font-weight: bold; margin: 0; text-transform: uppercase; }}
-        .box {{ background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 6px; padding: 12px 16px; margin-bottom: 20px; }}
-        table {{ width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 13px; }}
-        th, td {{ border: 1px solid #d1d5db; padding: 8px 10px; }}
-        th {{ background: #0056b3; color: #fff; text-align: left; }}
-        .price-total {{ font-size: 18px; font-weight: bold; color: #dc2626; }}
-        @media print {{ body {{ padding: 0; }} }}
-    </style>
-</head>
-<body>
-    <div class=""header"">
-        <div>
-            <div class=""company-title"">CÔNG TY TNHH THANG MÁY HÀ HỒNG</div>
-            <small>Hotline: 0909 9333 58 | Email: hahongre@gmail.com | thangmayhahong.xyz</small>
-        </div>
-        <div style=""text-align: right;"">
-            <strong style=""color: #dc2626; font-size: 16px;"">BẢNG DỰ TOÁN BÁO GIÁ</strong><br>
-            <small>Mã: HH-{x.Id:D5}</small><br>
-            <small>Ngày: {DateTime.UtcNow:dd/MM/yyyy}</small>
-        </div>
-    </div>
-
-    <div class=""box"">
-        <table>
-            <tr>
-                <td style=""width: 20%; border: none;""><strong>Kính gửi:</strong></td>
-                <td style=""width: 30%; border: none;"">{x.CustomerName}</td>
-                <td style=""width: 20%; border: none;""><strong>Số điện thoại:</strong></td>
-                <td style=""width: 30%; border: none;"">{x.PhoneNumber}</td>
-            </tr>
-            <tr>
-                <td style=""border: none;""><strong>Địa chỉ Gmail:</strong></td>
-                <td style=""border: none;"">{x.Email}</td>
-                <td style=""border: none;""><strong>Địa chỉ công trình:</strong></td>
-                <td style=""border: none;"">{x.Address ?? "TP. Hồ Chí Minh"}</td>
-            </tr>
-        </table>
-    </div>
-
-    <h3>I. THÔNG SỐ KỸ THUẬT TIÊU CHUẨN</h3>
-    <table>
-        <tr><th>Hạng mục</th><th>Quy cách kỹ thuật</th></tr>
-        <tr><td>Số tầng phục vụ</td><td><strong>{x.Stops} Tầng</strong></td></tr>
-        <tr><td>Tải trọng định mức</td><td><strong>{x.CapacityKg} kg</strong></td></tr>
-        <tr><td>Dòng thang máy</td><td>{x.ElevatorType}</td></tr>
-        <tr><td>Động cơ máy kéo</td><td>{x.MotorBrand} ({x.MotorPowerKw} kW)</td></tr>
-        <tr><td>Kích thước giếng thang (Rộng x Sâu)</td><td><strong>{x.ShaftWidth} x {x.ShaftDepth} mm</strong></td></tr>
-        <tr><td>Kích thước cabin (Rộng x Sâu x Cao)</td><td>{x.CabinWidth} x {x.CabinDepth} x 2200 mm</td></tr>
-        <tr><td>Độ sâu hố Pit / Chiều cao OH</td><td>Pit: {x.PitDepth} mm | OH: {x.OverheadHeight} mm</td></tr>
-        <tr><td>Nguồn điện yêu cầu</td><td>{x.PowerSupply}</td></tr>
-    </table>
-
-    <h3>II. DỰ TOÁN TỔNG CHI PHÍ TRỌN GÓI</h3>
-    <div class=""box"" style=""text-align: center;"">
-        <div>KHOẢNG GIÁ DỰ TOÁN:</div>
-        <div class=""price-total"">{priceMin} - {priceMax}</div>
-        <small>(Bao gồm thiết bị chính hãng, lắp đặt kiểm định và bảo hành 24 tháng)</small>
-    </div>
-
-    <div style=""display: flex; justify-content: space-between; margin-top: 40px; text-align: center;"">
-        <div style=""width: 45%;"">
-            <strong>ĐẠI DIỆN KHÁCH HÀNG</strong><br><br><br><br>
-            <em>(Ký, ghi rõ họ tên)</em>
-        </div>
-        <div style=""width: 45%;"">
-            <strong>ĐẠI DIỆN THANG MÁY HÀ HỒNG</strong><br><br><br><br>
-            <em>(Ký tên và đóng dấu)</em>
         </div>
     </div>
 </body>
