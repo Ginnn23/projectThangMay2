@@ -545,16 +545,6 @@ function DuToanAdmin({ onShowToast, onUpdateCount }) {
                       >
                         <i className="bi bi-eye"></i>
                       </button>
-                      <a
-                        href={`${apiClient.defaults.baseURL || "/api"}/estimates/${item.id}/pdf`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="btn btn-outline-secondary btn-sm"
-                        title="Tải file PDF báo giá"
-                        download
-                      >
-                        <i className="bi bi-file-earmark-pdf"></i>
-                      </a>
                       <button
                         type="button"
                         className="btn btn-outline-success btn-sm"
@@ -632,15 +622,6 @@ function DuToanAdmin({ onShowToast, onUpdateCount }) {
               </div>
               <div className="modal-footer">
                 <button type="button" className="btn btn-secondary" onClick={() => setSelectedEstimate(null)}>Đóng</button>
-                <a
-                  href={`${apiClient.defaults.baseURL || "/api"}/estimates/${selectedEstimate.id}/pdf`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="btn btn-outline-primary"
-                  download
-                >
-                  <i className="bi bi-file-earmark-pdf me-1"></i> Tải file PDF
-                </a>
                 <button
                   type="button"
                   className="btn btn-success"

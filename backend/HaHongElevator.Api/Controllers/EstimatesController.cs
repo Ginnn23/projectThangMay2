@@ -108,17 +108,14 @@ public class EstimatesController : ControllerBase
         // Tự động gửi email bảng báo giá kèm tài liệu kỹ thuật về Gmail của khách hàng
         if (!string.IsNullOrWhiteSpace(estimate.Email))
         {
-            _ = Task.Run(async () =>
+            try
             {
-                try
-                {
-                    await _emailService.SendEstimateQuotationAsync(estimate, default);
-                }
-                catch
-                {
-                    // logged inside email service
-                }
-            });
+                await _emailService.SendEstimateQuotationAsync(estimate, cancellationToken);
+            }
+            catch
+            {
+                // logged inside email service
+            }
         }
 
         return CreatedAtAction(nameof(GetEstimateById), new { id = estimate.Id }, MapToResponse(estimate));
@@ -283,8 +280,15 @@ public class EstimatesController : ControllerBase
             return NotFound(new { message = "Không tìm thấy bản dự toán." });
         }
 
-        var pdfBytes = _emailService.GenerateQuotationPdf(estimate);
-        return File(pdfBytes, "application/pdf", $"Bang_Bao_Gia_Thang_May_Ha_Hong_HH-{estimate.Id:D5}.pdf");
+        try
+        {
+            var pdfBytes = _emailService.GenerateQuotationPdf(estimate);
+            return File(pdfBytes, "application/pdf", $"Bang_Bao_Gia_Thang_May_Ha_Hong_HH-{estimate.Id:D5}.pdf");
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = $"Không thể xuất file PDF lúc này: {ex.Message}" });
+        }
     }
 
     private static EstimateResponse MapToResponse(ElevatorEstimate x) => new()

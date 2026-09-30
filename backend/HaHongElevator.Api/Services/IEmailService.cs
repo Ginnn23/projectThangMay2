@@ -9,3 +9,4 @@ public interface IEmailService
     Task<EmailSendResult> SendEstimateQuotationAsync(ElevatorEstimate estimate, CancellationToken cancellationToken = default);
     byte[] GenerateQuotationPdf(ElevatorEstimate estimate);
 }
+
