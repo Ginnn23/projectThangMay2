@@ -1,6 +1,7 @@
 using HaHongElevator.Api.Data;
 using HaHongElevator.Api.DTOs.Auth;
 using HaHongElevator.Api.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -49,5 +50,37 @@ public class AuthController : ControllerBase
                 Role = user.Role
             }
         });
+    }
+
+    [Authorize(Roles = "Admin")]
+    [HttpPost("change-password")]
+    public async Task<IActionResult> ChangePassword(ChangePasswordRequestDto request)
+    {
+        var username = User.Identity?.Name;
+        if (string.IsNullOrWhiteSpace(username))
+        {
+            return Unauthorized(new { message = "Vui lòng đăng nhập lại." });
+        }
+
+        var user = await _dbContext.AdminUsers.FirstOrDefaultAsync(x => x.Username == username && x.IsActive);
+        if (user == null)
+        {
+            return NotFound(new { message = "Không tìm thấy tài khoản quản trị." });
+        }
+
+        if (!BCrypt.Net.BCrypt.Verify(request.CurrentPassword, user.PasswordHash))
+        {
+            return BadRequest(new { message = "Mật khẩu hiện tại không chính xác." });
+        }
+
+        if (request.CurrentPassword == request.NewPassword)
+        {
+            return BadRequest(new { message = "Mật khẩu mới không được trùng với mật khẩu hiện tại." });
+        }
+
+        user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.NewPassword);
+        await _dbContext.SaveChangesAsync();
+
+        return Ok(new { message = "Đổi mật khẩu thành công. Hãy ghi nhớ mật khẩu mới của bạn." });
     }
 }

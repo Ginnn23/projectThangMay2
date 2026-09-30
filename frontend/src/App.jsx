@@ -1,17 +1,28 @@
-import { useEffect } from "react";
+import { Suspense, lazy, useEffect } from "react";
 import AOS from "aos";
 import { Route, Routes, useLocation } from "react-router-dom";
 
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import FloatingContact from "./components/FloatingContact";
-import Admin from "./pages/Admin";
-import ChiTietDuAn from "./pages/ChiTietDuAn";
-import DichVu from "./pages/DichVu";
-import DuAn from "./pages/DuAn";
-import GioiThieu from "./pages/GioiThieu";
 import Home from "./pages/Home";
-import LienHe from "./pages/LienHe";
+
+const Admin = lazy(() => import("./pages/Admin"));
+const ChiTietDuAn = lazy(() => import("./pages/ChiTietDuAn"));
+const DichVu = lazy(() => import("./pages/DichVu"));
+const DuAn = lazy(() => import("./pages/DuAn"));
+const GioiThieu = lazy(() => import("./pages/GioiThieu"));
+const LienHe = lazy(() => import("./pages/LienHe"));
+
+function PageLoader() {
+  return (
+    <div style={{ minHeight: "50vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <div className="spinner-border text-primary" role="status">
+        <span className="visually-hidden">Đang tải...</span>
+      </div>
+    </div>
+  );
+}
 
 function ScrollToTop() {
   const { hash, pathname } = useLocation();
@@ -47,15 +58,17 @@ function App() {
     <>
       <ScrollToTop />
       {!laTrangAdmin && <Header />}
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/gioi-thieu" element={<GioiThieu />} />
-        <Route path="/dich-vu" element={<DichVu />} />
-        <Route path="/du-an" element={<DuAn />} />
-        <Route path="/du-an/:slug" element={<ChiTietDuAn />} />
-        <Route path="/lien-he" element={<LienHe />} />
-        <Route path="/admin" element={<Admin />} />
-      </Routes>
+      <Suspense fallback={<PageLoader />}>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/gioi-thieu" element={<GioiThieu />} />
+          <Route path="/dich-vu" element={<DichVu />} />
+          <Route path="/du-an" element={<DuAn />} />
+          <Route path="/du-an/:slug" element={<ChiTietDuAn />} />
+          <Route path="/lien-he" element={<LienHe />} />
+          <Route path="/admin" element={<Admin />} />
+        </Routes>
+      </Suspense>
       {!laTrangAdmin && <FloatingContact />}
       {!laTrangAdmin && <Footer />}
     </>
