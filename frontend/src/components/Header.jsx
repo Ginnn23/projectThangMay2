@@ -9,6 +9,7 @@ const menuItems = [
   { label: "Giới thiệu", to: "/gioi-thieu" },
   { label: "Dịch vụ", to: "/dich-vu" },
   { label: "Dự án", to: "/du-an" },
+  { label: "Dự toán báo giá", to: "/du-toan" },
   { label: "Liên hệ", to: "/lien-he" },
 ];
 

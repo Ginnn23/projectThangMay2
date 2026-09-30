@@ -8,6 +8,14 @@
     <priority>1.0</priority>
   </url>
 
+  <!-- Dự toán & Báo giá trực quan (Mới) -->
+  <url>
+    <loc>https://thangmayhahong.xyz/du-toan</loc>
+    <lastmod>2026-09-30</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.95</priority>
+  </url>
+
   <!-- Dịch vụ thang máy -->
   <url>
     <loc>https://thangmayhahong.xyz/dich-vu</loc>

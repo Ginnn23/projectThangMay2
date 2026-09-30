@@ -8,3 +8,4 @@ Disallow: /api/
 
 # Sitemap location
 Sitemap: https://thangmayhahong.xyz/sitemap.xml
+

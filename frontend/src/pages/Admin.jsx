@@ -303,6 +303,7 @@ function AdminLogin({ onLogin }) {
 function AdminToolbar({ activeTab, onChangeTab, user, onLogout }) {
   const tabs = [
     { key: "contacts", label: "Liên hệ", icon: "bi-inbox" },
+    { key: "estimates", label: "Dự toán báo giá", icon: "bi-calculator" },
     { key: "maintenance", label: "Bảo trì", icon: "bi-calendar-check" },
     { key: "home", label: "Trang chủ", icon: "bi-house-gear" },
     { key: "services", label: "Dịch vụ", icon: "bi-tools" },
@@ -329,6 +330,251 @@ function AdminToolbar({ activeTab, onChangeTab, user, onLogout }) {
         Đăng xuất
       </button>
     </div>
+  );
+}
+
+function DuToanAdmin({ onShowToast }) {
+  const [estimates, setEstimates] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [selectedEstimate, setSelectedEstimate] = useState(null);
+
+  const fetchEstimates = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const { data } = await apiClient.get("/admin/estimates");
+      setEstimates(Array.isArray(data) ? data : []);
+    } catch (err) {
+      setError(err?.response?.data?.message || "Không thể tải danh sách dự toán.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchEstimates();
+  }, []);
+
+  const handleStatusChange = async (id, newStatus) => {
+    try {
+      await apiClient.patch(`/admin/estimates/${id}/status`, { status: newStatus });
+      setEstimates((prev) => prev.map((item) => (item.id === id ? { ...item, status: newStatus } : item)));
+      onShowToast?.("Đã cập nhật trạng thái dự toán.");
+    } catch {
+      onShowToast?.("Không thể cập nhật trạng thái.", "error");
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm("Bạn có chắc chắn muốn xóa bản ghi dự toán này?")) return;
+    try {
+      await apiClient.delete(`/admin/estimates/${id}`);
+      setEstimates((prev) => prev.filter((item) => item.id !== id));
+      onShowToast?.("Đã xóa bản ghi dự toán.");
+    } catch {
+      onShowToast?.("Không thể xóa bản ghi.", "error");
+    }
+  };
+
+  const filtered = useMemo(() => {
+    return estimates.filter((item) => {
+      const matchStatus = statusFilter === "all" || item.status === statusFilter;
+      const term = search.trim().toLowerCase();
+      const matchSearch = !term ||
+        (item.customerName || "").toLowerCase().includes(term) ||
+        (item.phoneNumber || "").includes(term) ||
+        (item.email || "").toLowerCase().includes(term) ||
+        (item.address || "").toLowerCase().includes(term);
+      return matchStatus && matchSearch;
+    });
+  }, [estimates, search, statusFilter]);
+
+  const formatVnd = (val) => val ? new Intl.NumberFormat("vi-VN").format(val) + " đ" : "0 đ";
+
+  return (
+    <section className="admin-section">
+      <div className="admin-section-heading">
+        <div>
+          <span className="admin-section-kicker">Khách hàng tính giá trực tuyến</span>
+          <h2>Dự toán báo giá thang máy</h2>
+          <p>Danh sách khách hàng đã cấu hình và yêu cầu báo giá từ công cụ trực tuyến.</p>
+        </div>
+        <button type="button" className="btn btn-outline-primary btn-sm" onClick={fetchEstimates} disabled={loading}>
+          <i className="bi bi-arrow-repeat me-1"></i> {loading ? "Đang tải..." : "Làm mới"}
+        </button>
+      </div>
+
+      {error && <div className="alert alert-danger">{error}</div>}
+
+      <div className="d-flex gap-3 mb-3 flex-wrap">
+        <div className="admin-search-box flex-grow-1" style={{ margin: 0 }}>
+          <i className="bi bi-search"></i>
+          <input
+            type="search"
+            placeholder="Tìm theo tên khách hàng, số điện thoại, địa chỉ..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+        <select
+          className="form-select form-select-sm"
+          style={{ width: "auto" }}
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+        >
+          <option value="all">Tất cả trạng thái</option>
+          <option value="New">Mới gửi (Chưa liên hệ)</option>
+          <option value="Contacted">Đã liên hệ tư vấn</option>
+          <option value="SurveyScheduled">Đã hẹn khảo sát</option>
+          <option value="DealClosed">Đã chốt hợp đồng</option>
+          <option value="Cancelled">Đã hủy</option>
+        </select>
+      </div>
+
+      <div className="admin-table-wrap">
+        <table className="admin-table">
+          <thead>
+            <tr>
+              <th>Khách hàng</th>
+              <th>Cấu hình thang máy</th>
+              <th>Giếng thang / Pit</th>
+              <th>Dự toán giá</th>
+              <th>Ngày gửi</th>
+              <th>Trạng thái</th>
+              <th>Thao tác</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filtered.length === 0 ? (
+              <tr><td colSpan="7" className="text-center py-4 text-muted">Chưa có bản ghi dự toán nào.</td></tr>
+            ) : (
+              filtered.map((item) => (
+                <tr key={item.id}>
+                  <td>
+                    <strong>{item.customerName}</strong>
+                    <div className="text-primary fw-bold">{item.phoneNumber}</div>
+                    {item.address && <small className="text-muted d-block">{item.address}</small>}
+                  </td>
+                  <td>
+                    <span className="badge bg-primary-subtle text-primary me-1">{item.capacityKg}kg</span>
+                    <span className="badge bg-secondary-subtle text-secondary me-1">{item.stops} Tầng</span>
+                    <div><small className="fw-semibold">{item.elevatorType}</small></div>
+                    <small className="text-muted">Động cơ: {item.motorBrand}</small>
+                  </td>
+                  <td>
+                    <div><small>Hố: {item.shaftWidth} x {item.shaftDepth} mm</small></div>
+                    <small className="text-muted">Pit: {item.pitDepth} mm | OH: {item.overheadHeight} mm</small>
+                  </td>
+                  <td>
+                    <strong className="text-danger">{formatVnd(item.estimatedPriceMin)}</strong>
+                    <div style={{ fontSize: "12px" }}>đến {formatVnd(item.estimatedPriceMax)}</div>
+                  </td>
+                  <td>
+                    <small>{new Intl.DateTimeFormat("vi-VN", { dateStyle: "short", timeStyle: "short" }).format(new Date(item.createdAt))}</small>
+                  </td>
+                  <td>
+                    <select
+                      className="form-select form-select-sm"
+                      value={item.status}
+                      onChange={(e) => handleStatusChange(item.id, e.target.value)}
+                    >
+                      <option value="New">Mới gửi</option>
+                      <option value="Contacted">Đã liên hệ</option>
+                      <option value="SurveyScheduled">Hẹn khảo sát</option>
+                      <option value="DealClosed">Đã chốt HĐ</option>
+                      <option value="Cancelled">Đã hủy</option>
+                    </select>
+                  </td>
+                  <td>
+                    <div className="d-flex gap-1">
+                      <button
+                        type="button"
+                        className="btn btn-outline-primary btn-sm"
+                        title="Xem chi tiết"
+                        onClick={() => setSelectedEstimate(item)}
+                      >
+                        <i className="bi bi-eye"></i>
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-outline-danger btn-sm"
+                        title="Xóa"
+                        onClick={() => handleDelete(item.id)}
+                      >
+                        <i className="bi bi-trash"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Modal Detail */}
+      {selectedEstimate && (
+        <div className="modal show d-block" style={{ backgroundColor: "rgba(0,0,0,0.6)" }}>
+          <div className="modal-dialog modal-lg">
+            <div className="modal-content">
+              <div className="modal-header bg-primary text-white">
+                <h5 className="modal-title">Chi tiết bản dự toán: {selectedEstimate.customerName}</h5>
+                <button type="button" className="btn-close btn-close-white" onClick={() => setSelectedEstimate(null)}></button>
+              </div>
+              <div className="modal-body">
+                <div className="row g-3">
+                  <div className="col-md-6">
+                    <p><strong>Khách hàng:</strong> {selectedEstimate.customerName}</p>
+                    <p><strong>Số điện thoại:</strong> <a href={`tel:${selectedEstimate.phoneNumber}`}>{selectedEstimate.phoneNumber}</a></p>
+                    <p><strong>Email:</strong> {selectedEstimate.email || "Chưa cung cấp"}</p>
+                    <p><strong>Địa chỉ:</strong> {selectedEstimate.address || "Chưa cung cấp"}</p>
+                  </div>
+                  <div className="col-md-6">
+                    <p><strong>Loại công trình:</strong> {selectedEstimate.buildingType}</p>
+                    <p><strong>Cấu hình:</strong> {selectedEstimate.capacityKg}kg - {selectedEstimate.stops} Tầng</p>
+                    <p><strong>Dòng thang:</strong> {selectedEstimate.elevatorType}</p>
+                    <p><strong>Động cơ:</strong> {selectedEstimate.motorBrand} ({selectedEstimate.motorPowerKw}kW, {selectedEstimate.powerSupply})</p>
+                  </div>
+                </div>
+                <hr />
+                <div className="row g-3">
+                  <div className="col-md-6">
+                    <h6>Thông số giếng thang:</h6>
+                    <ul>
+                      <li>Kích thước hố (W x D): {selectedEstimate.shaftWidth} x {selectedEstimate.shaftDepth} mm</li>
+                      <li>Kích thước cabin (W x D): {selectedEstimate.cabinWidth} x {selectedEstimate.cabinDepth} mm</li>
+                      <li>Hố PIT: {selectedEstimate.pitDepth} mm</li>
+                      <li>Chiều cao OH: {selectedEstimate.overheadHeight} mm</li>
+                    </ul>
+                  </div>
+                  <div className="col-md-6">
+                    <h6>Dự toán giá trọn gói:</h6>
+                    <div className="fs-5 fw-bold text-danger">
+                      {formatVnd(selectedEstimate.estimatedPriceMin)} - {formatVnd(selectedEstimate.estimatedPriceMax)}
+                    </div>
+                    {selectedEstimate.adminNotes && (
+                      <div className="mt-2">
+                        <small className="text-muted d-block">Ghi chú của khách:</small>
+                        <em>{selectedEstimate.adminNotes}</em>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-secondary" onClick={() => setSelectedEstimate(null)}>Đóng</button>
+                <a href={`tel:${selectedEstimate.phoneNumber}`} className="btn btn-primary">
+                  <i className="bi bi-telephone-fill me-1"></i> Gọi ngay
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </section>
   );
 }
 
@@ -1552,6 +1798,10 @@ function Admin() {
 
         {activeTab === "ai" && (
           <AiTrainingAdmin onShowToast={hienThongBao} />
+        )}
+
+        {activeTab === "estimates" && (
+          <DuToanAdmin onShowToast={hienThongBao} />
         )}
       </div>
     </main>

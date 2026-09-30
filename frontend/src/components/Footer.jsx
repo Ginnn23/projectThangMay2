@@ -41,6 +41,7 @@ function Footer() {
             <Link to="/gioi-thieu">Giới thiệu</Link>
             <Link to="/dich-vu">Dịch vụ</Link>
             <Link to="/du-an">Dự án</Link>
+            <Link to="/du-toan">Dự toán báo giá</Link>
           </div>
 
           <div className="col-6 col-lg-3">

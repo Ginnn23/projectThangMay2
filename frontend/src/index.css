@@ -4850,3 +4850,68 @@ a {
     grid-template-columns: 1fr;
   }
 }
+
+/* ==========================================================
+   ESTIMATOR TOOL & PRINT STYLES
+   ========================================================== */
+.estimator-step-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #1e293b;
+  display: flex;
+  align-items: center;
+}
+
+.step-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: #1e40af;
+  color: #fff;
+  border-radius: 50%;
+  font-size: 14px;
+}
+
+.estimator-option-btn {
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+}
+
+.estimator-option-btn:hover {
+  border-color: #3b82f6;
+  background: #f8fafc;
+  transform: translateY(-1px);
+}
+
+.estimator-option-btn.active-option {
+  border-color: #1d4ed8 !important;
+  background: #eff6ff !important;
+  box-shadow: 0 0 0 2px rgba(29, 78, 216, 0.2);
+}
+
+.estimator-sticky-sidebar {
+  position: sticky;
+  top: 90px;
+}
+
+@media print {
+  body * {
+    visibility: hidden !important;
+  }
+  #print-quotation, #print-quotation * {
+    visibility: visible !important;
+  }
+  #print-quotation {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    display: block !important;
+    background: #fff !important;
+  }
+}
+
