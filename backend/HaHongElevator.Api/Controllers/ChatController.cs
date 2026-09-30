@@ -74,4 +74,17 @@ public class ChatController : ControllerBase
         var updated = await _aiConsultantService.SaveTrainingSettingsAsync(request, _dbContext, cancellationToken);
         return Ok(updated);
     }
+
+    [HttpPost("admin/test-gemini")]
+    [Authorize(Roles = "Admin")]
+    public async Task<ActionResult> TestGemini([FromBody] TestGeminiRequest request, CancellationToken cancellationToken)
+    {
+        var (success, message, modelName) = await _aiConsultantService.TestGeminiKeyAsync(request.ApiKey, cancellationToken);
+        return Ok(new { success, message, modelName });
+    }
+}
+
+public class TestGeminiRequest
+{
+    public string ApiKey { get; set; } = string.Empty;
 }

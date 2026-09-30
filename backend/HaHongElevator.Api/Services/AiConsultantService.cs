@@ -175,10 +175,52 @@ public class AiConsultantService
         }
     }
 
+    public async Task<(bool success, string message, string? modelName)> TestGeminiKeyAsync(string apiKey, CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(apiKey))
+        {
+            return (false, "Chưa nhập API Key. Vui lòng nhập khóa Google Gemini API Key.", null);
+        }
+
+        string[] modelsToTry = ["gemini-1.5-flash", "gemini-2.0-flash"];
+        string lastError = string.Empty;
+
+        foreach (var model in modelsToTry)
+        {
+            try
+            {
+                var url = $"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={apiKey.Trim()}";
+                var payload = new
+                {
+                    contents = new[]
+                    {
+                        new { role = "user", parts = new[] { new { text = "Chào bạn! Hãy trả lời trong 1 câu ngắn: Bạn là ai?" } } }
+                    }
+                };
+
+                var response = await _httpClient.PostAsJsonAsync(url, payload, cancellationToken);
+                if (response.IsSuccessStatusCode)
+                {
+                    var json = await response.Content.ReadFromJsonAsync<JsonElement>(cancellationToken: cancellationToken);
+                    var candidate = json.GetProperty("candidates")[0];
+                    var text = candidate.GetProperty("content").GetProperty("parts")[0].GetProperty("text").GetString();
+                    return (true, $"Kết nối thành công tới mô hình {model}! Phản hồi thử nghiệm: \"{text?.Trim()}\"", model);
+                }
+
+                var errBody = await response.Content.ReadAsStringAsync(cancellationToken);
+                lastError = $"Mô hình {model} báo lỗi ({response.StatusCode}): {errBody}";
+            }
+            catch (Exception ex)
+            {
+                lastError = ex.Message;
+            }
+        }
+
+        return (false, $"Không thể kết nối Gemini API. Chi tiết: {lastError}", null);
+    }
+
     private async Task<string> CallGeminiWithTrainedKnowledgeAsync(string userMessage, List<ChatMessageDto>? history, AiTrainingSettingsDto training, string apiKey, CancellationToken cancellationToken)
     {
-        var url = $"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={apiKey}";
-
         // Xây dựng System Instruction từ những gì người dùng đã dạy
         var sbPrompt = new System.Text.StringBuilder();
         sbPrompt.AppendLine(training.SystemPrompt);
@@ -241,14 +283,34 @@ public class AiConsultantService
             }
         };
 
-        var response = await _httpClient.PostAsJsonAsync(url, payload, cancellationToken);
-        response.EnsureSuccessStatusCode();
+        string[] modelsToTry = ["gemini-1.5-flash", "gemini-2.0-flash"];
+        Exception? lastException = null;
 
-        var json = await response.Content.ReadFromJsonAsync<JsonElement>(cancellationToken: cancellationToken);
-        var candidate = json.GetProperty("candidates")[0];
-        var text = candidate.GetProperty("content").GetProperty("parts")[0].GetProperty("text").GetString();
+        foreach (var model in modelsToTry)
+        {
+            try
+            {
+                var url = $"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={apiKey.Trim()}";
+                var response = await _httpClient.PostAsJsonAsync(url, payload, cancellationToken);
+                if (response.IsSuccessStatusCode)
+                {
+                    var json = await response.Content.ReadFromJsonAsync<JsonElement>(cancellationToken: cancellationToken);
+                    var candidate = json.GetProperty("candidates")[0];
+                    var text = candidate.GetProperty("content").GetProperty("parts")[0].GetProperty("text").GetString();
+                    return text?.Trim() ?? "Dạ, em chào anh/chị! Em đã ghi nhận câu hỏi, anh/chị có thể gọi ngay Hotline 0909 9333 58 để kỹ sư giải đáp trực tiếp ạ!";
+                }
 
-        return text?.Trim() ?? "Dạ, em chào anh/chị! Em đã ghi nhận câu hỏi, anh/chị có thể gọi ngay Hotline 0909 9333 58 để kỹ sư giải đáp trực tiếp ạ!";
+                _logger.LogWarning("Gemini model {Model} returned status code {StatusCode}", model, response.StatusCode);
+            }
+            catch (Exception ex)
+            {
+                lastException = ex;
+                _logger.LogWarning(ex, "Failed to call Gemini model {Model}", model);
+            }
+        }
+
+        if (lastException != null) throw lastException;
+        throw new InvalidOperationException("Could not get response from any Gemini model.");
     }
 
     private static string MatchTrainedKnowledgeFallback(string userMessage, string? detectedPhone, bool leadSaved, AiTrainingSettingsDto training)

@@ -22,6 +22,8 @@ export default function AiTrainingAdmin({ onShowToast }) {
   const [kbForm, setKbForm] = useState(defaultKbForm);
   const [editingKbId, setEditingKbId] = useState(null);
   const [showApiKey, setShowApiKey] = useState(false);
+  const [testingKey, setTestingKey] = useState(false);
+  const [keyTestResult, setKeyTestResult] = useState(null);
 
   // Test Chat Sandbox
   const [testInput, setTestInput] = useState("");
@@ -65,6 +67,35 @@ export default function AiTrainingAdmin({ onShowToast }) {
       onShowToast?.("Lỗi khi lưu bài học cho AI.", "error");
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleTestKey = async () => {
+    if (!settings.customApiKey?.trim()) {
+      setKeyTestResult({
+        success: false,
+        message: "Vui lòng nhập Gemini API Key trước khi kiểm tra.",
+      });
+      return;
+    }
+
+    setTestingKey(true);
+    setKeyTestResult(null);
+
+    try {
+      const { data } = await apiClient.post("/chat/admin/test-gemini", {
+        apiKey: settings.customApiKey.trim(),
+      });
+      setKeyTestResult(data);
+    } catch (err) {
+      setKeyTestResult({
+        success: false,
+        message:
+          err?.response?.data?.message ||
+          "Không thể gửi yêu cầu kiểm tra tới máy chủ.",
+      });
+    } finally {
+      setTestingKey(false);
     }
   };
 
@@ -367,25 +398,50 @@ export default function AiTrainingAdmin({ onShowToast }) {
               </div>
 
               <div className="admin-span-2">
-                <label className="form-label fw-bold">Google Gemini API Key (Tùy chọn):</label>
+                <label className="form-label fw-bold">Google Gemini API Key (Kết nối trí tuệ nhân tạo Google):</label>
                 <div className="d-flex gap-2">
                   <input
                     type={showApiKey ? "text" : "password"}
                     value={settings.customApiKey || ""}
                     onChange={(e) => setSettings({ ...settings, customApiKey: e.target.value })}
-                    placeholder="AIzaSy... (Nếu để trống, hệ thống sẽ dùng bộ nhớ từ khóa nội bộ)"
+                    placeholder="Dán mã AIzaSy... vào đây"
                   />
                   <button
                     type="button"
                     className="btn admin-secondary-button"
+                    title={showApiKey ? "Ẩn mã khóa" : "Hiện mã khóa"}
                     onClick={() => setShowApiKey(!showApiKey)}
                   >
                     <i className={`bi ${showApiKey ? "bi-eye-slash" : "bi-eye"}`}></i>
                   </button>
+                  <button
+                    type="button"
+                    className="btn btn-outline-primary text-nowrap"
+                    onClick={handleTestKey}
+                    disabled={testingKey || !settings.customApiKey?.trim()}
+                  >
+                    <i className={`bi ${testingKey ? "bi-arrow-repeat" : "bi-lightning-charge-fill"} me-1`}></i>
+                    {testingKey ? "Đang kiểm tra..." : "Kiểm tra kết nối"}
+                  </button>
                 </div>
-                <small className="text-muted">
-                  Khi nhập Gemini API Key, AI sẽ đọc toàn bộ các bài học bạn dạy để đối đáp biến hóa cực kỳ thông minh.
-                </small>
+
+                {keyTestResult && (
+                  <div className={`alert ${keyTestResult.success ? "alert-success" : "alert-danger"} mt-2 mb-1 py-2`}>
+                    <i className={`bi ${keyTestResult.success ? "bi-check-circle-fill" : "bi-exclamation-octagon-fill"} me-2`}></i>
+                    <strong>{keyTestResult.success ? "Kết nối Gemini AI thành công!" : "Lỗi kết nối Gemini API:"}</strong>
+                    <p className="mb-0 mt-1" style={{ fontSize: "13px" }}>{keyTestResult.message}</p>
+                  </div>
+                )}
+
+                <div className="alert alert-info mt-3 p-3">
+                  <h6 className="mb-2"><i className="bi bi-info-circle-fill me-2"></i>Hướng dẫn lấy Google Gemini API Key miễn phí (mất 30 giây):</h6>
+                  <ol className="mb-0 ps-3" style={{ fontSize: "13.5px", lineHeight: "1.6" }}>
+                    <li>Mở trang Google AI Studio: <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noreferrer" className="fw-bold">https://aistudio.google.com/app/apikey</a></li>
+                    <li>Đăng nhập bằng tài khoản Google / Gmail cá nhân của bạn.</li>
+                    <li>Bấm nút xanh <strong>"Create API key"</strong> rồi bấm <strong>Copy</strong>.</li>
+                    <li>Dán mã đó vào ô bên trên rồi bấm nút <strong>"Kiểm tra kết nối"</strong> và <strong>"Lưu thay đổi"</strong> là xong!</li>
+                  </ol>
+                </div>
               </div>
 
               <div className="admin-form-actions admin-span-2">
