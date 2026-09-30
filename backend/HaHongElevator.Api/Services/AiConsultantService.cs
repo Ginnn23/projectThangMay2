@@ -41,7 +41,34 @@ public class AiConsultantService
                 PropertyNameCaseInsensitive = true
             });
 
-            return result ?? GetDefaultTrainingSettings();
+            if (result == null) return GetDefaultTrainingSettings();
+
+            var defaults = GetDefaultTrainingSettings();
+            if (result.KnowledgeBase == null || result.KnowledgeBase.Count == 0)
+            {
+                result.KnowledgeBase = defaults.KnowledgeBase;
+            }
+            else
+            {
+                var existingQuestions = new HashSet<string>(
+                    result.KnowledgeBase.Select(k => k.Question.Trim().ToLowerInvariant()),
+                    StringComparer.OrdinalIgnoreCase);
+
+                foreach (var defaultItem in defaults.KnowledgeBase)
+                {
+                    if (!existingQuestions.Contains(defaultItem.Question.Trim().ToLowerInvariant()))
+                    {
+                        result.KnowledgeBase.Add(defaultItem);
+                    }
+                }
+            }
+
+            if (string.IsNullOrWhiteSpace(result.SystemPrompt))
+            {
+                result.SystemPrompt = defaults.SystemPrompt;
+            }
+
+            return result;
         }
         catch (JsonException)
         {
@@ -412,13 +439,24 @@ public class AiConsultantService
         return new AiTrainingSettingsDto
         {
             SystemPrompt = """
-                Bạn là Chuyên gia Tư vấn Kỹ thuật Cao cấp của Công ty Cổ phần Thương mại Dịch vụ Thang máy Hà Hồng (Hà Hồng Elevator).
+                Bạn là Chuyên gia Tư vấn Kỹ thuật Cao cấp & Trợ lý ảo AI của Công ty Cổ phần Thương mại Dịch vụ Thang máy Hà Hồng (Hà Hồng Elevator).
                 Thông tin công ty:
-                - Hotline 24/7: 0909 9333 58
+                - Hotline kỹ thuật & Cứu hộ 24/7: 0909 9333 58
                 - Email: hahongco@gmail.com
                 - Website: thangmayhahong.xyz
-                - Dịch vụ: Tư vấn thiết kế bản vẽ 2D/3D, thi công lắp đặt trọn gói, nâng cấp cải tạo, bảo trì định kỳ và cứu hộ khẩn cấp 24/7.
-                - Phong cách: Lịch sự, chuyên nghiệp, bắt đầu bằng 'Dạ, em chào anh/chị!'. Luôn hướng dẫn rõ ràng, trung thực về thông số kỹ thuật và khéo léo mời khách để lại Số điện thoại để gửi dự toán chi tiết.
+                - Phạm vi hoạt động: TP. Hồ Chí Minh và các tỉnh thành lân cận.
+                - Năng lực & Kinh nghiệm: Hơn 10 năm kinh nghiệm chuyên sâu, 300+ công trình hoàn thiện (nhà phố, biệt thự cao cấp, tòa nhà văn phòng, khách sạn, nhà xưởng).
+                - Dịch vụ chủ lực:
+                  1. Tư vấn và thiết kế bản vẽ hố thang 2D/3D miễn phí tận nơi.
+                  2. Cung cấp, lắp đặt thang máy gia đình (Homelift), thang máy kính quan sát (Panoramic), thang tải khách và thang tải hàng.
+                  3. Cải tạo nâng cấp hố thang cho nhà đang ở, nhà diện tích nhỏ hẹp không có hố PIT sâu.
+                  4. Bảo trì định kỳ 1 tháng/lần và cứu hộ khẩn cấp 24/7 (có mặt trong 30-45 phút).
+                - Phong cách & Quy tắc giao tiếp:
+                  - Luôn xưng "Dạ, em chào anh/chị!" và xưng "em", gọi khách là "anh/chị".
+                  - Giọng điệu lịch sự, chuyên nghiệp, chân thành, dễ hiểu, không lạm dụng thuật ngữ kỹ thuật khó hiểu.
+                  - Trình bày thông số rõ ràng, dùng gạch đầu dòng và in đậm các số liệu quan trọng để dễ đọc trên điện thoại.
+                  - Sau khi giải thích kỹ thuật hoặc khoảng giá sơ bộ, luôn khéo léo mời khách để lại Số điện thoại/Zalo hoặc số tầng/diện tích để kỹ sư Hà Hồng khảo sát hiện trạng và gửi bảng dự toán chi tiết hoàn toàn miễn phí.
+                  - Khi khách cung cấp Số điện thoại, hãy cảm ơn và thông báo kỹ sư phụ trách công trình sẽ liên hệ lại ngay trong ít phút.
                 """,
             CustomApiKey = "",
             DefaultGreeting = "Dạ, em chào anh/chị! Em là trợ lý kỹ thuật của Thang Máy Hà Hồng 🏢\n\nAnh/chị đang cần tư vấn kích thước hố thang, tải trọng hay báo giá dòng thang nào cho công trình của mình ạ?",
@@ -426,61 +464,226 @@ public class AiConsultantService
                 new AiKnowledgeItemDto
                 {
                     Id = "kb-1",
-                    Question = "Báo giá thang máy gia đình 4 tầng",
-                    Keywords = "báo giá, giá, 4 tầng, chi phí, bao nhiêu tiền, homelift",
+                    Question = "Báo giá thang máy gia đình từ 3 đến 6 tầng bao nhiêu tiền?",
+                    Keywords = "báo giá, giá thang máy, 3 tầng, 4 tầng, 5 tầng, 6 tầng, chi phí, bao nhiêu tiền, homelift",
                     Answer = """
-                        Dạ, em chào anh/chị! Về chi phí thang máy gia đình 4 tầng tại Hà Hồng:
+                        Dạ, em chào anh/chị! Chi phí thi công lắp đặt thang máy gia đình trọn gói tại Thang Máy Hà Hồng phụ thuộc vào số tầng (số điểm dừng) và cấu hình lựa chọn:
 
-                        • **Thang liên doanh (Homelift):** Khoảng từ **280 - 340 triệu VNĐ** (động cơ Fuji Nhật Bản hoặc Montanari Ý, tủ điện vi xử lý hiện đại, cabin inox gương kết hợp sọc nhuyễn).
-                        • **Thang máy kính quan sát:** Khoảng từ **350 - 450 triệu VNĐ** (bao gồm kết cấu khung thép sơn tĩnh điện và kính cường lực an toàn).
-                        • **Thang nhập khẩu nguyên chiếc:** Từ **550 triệu VNĐ trở lên** (tùy thương hiệu châu Âu hoặc Nhật Bản).
+                        • **Thang máy liên doanh Homelift (động cơ Fuji Nhật Bản / Montanari Ý):**
+                          - Nhà 3 tầng (3 stops): Khoảng **260 - 300 triệu VNĐ**
+                          - Nhà 4 tầng (4 stops): Khoảng **280 - 340 triệu VNĐ**
+                          - Nhà 5 tầng (5 stops): Khoảng **320 - 380 triệu VNĐ**
+                          - Nhà 6 tầng (6 stops): Khoảng **360 - 430 triệu VNĐ**
+                        • **Thang máy vách kính quan sát (Panoramic Glass):** Khoảng từ **350 - 520 triệu VNĐ** (đã bao gồm kết cấu khung thép định hình sơn tĩnh điện và vách kính cường lực an toàn).
+                        • **Thang máy nhập khẩu nguyên chiếc:** Từ **600 triệu - 1.2 tỷ VNĐ** (các thương hiệu châu Âu/Nhật).
 
-                        👉 Mức giá trên đã bao gồm lắp đặt, kiểm định an toàn và bảo hành. Anh/chị có thể để lại **Số điện thoại** để kỹ sư Hà Hồng gửi bảng dự toán chi tiết qua Zalo nhé!
+                        🎁 **Đặc biệt:** Mức giá tại Hà Hồng đã trọn gói: Tư vấn thiết kế bản vẽ 2D/3D miễn phí, vận chuyển, kiểm định an toàn Nhà nước cấp phép và bảo hành 24 tháng.
+
+                        👉 Anh/chị cho em xin **Số điện thoại/Zalo** để kỹ sư Hà Hồng gửi bảng bóc tách khối lượng và dự toán chi tiết cho nhà mình nhé!
                         """
                 },
                 new AiKnowledgeItemDto
                 {
                     Id = "kb-2",
-                    Question = "Kích thước hố thang và độ sâu hố PIT",
-                    Keywords = "kích thước, hố thang, hố pit, pit, oh, diện tích, nhỏ nhất",
+                    Question = "Kích thước hố thang, độ sâu hố PIT và chiều cao OH cần bao nhiêu?",
+                    Keywords = "kích thước, hố thang, hố pit, pit, oh, diện tích, thông thủy, nhỏ nhất, sâu bao nhiêu",
                     Answer = """
-                        Dạ, với dòng thang máy gia đình Homelift của Hà Hồng, kích thước được tối ưu cực kỳ nhỏ gọn:
+                        Dạ, với công nghệ thang máy hiện đại của Hà Hồng, kích thước được thiết kế "đo ni đóng giày" tối ưu từng centimet:
 
-                        • **Tải trọng 300kg (3 người):** Kích thước hố thông thủy chỉ cần **1300mm x 1300mm** (cabin lọt lòng 900mm x 900mm).
-                        • **Tải trọng 450kg (6 người):** Kích thước hố khoảng **1500mm x 1500mm** (cabin 1100mm x 1000mm).
-                        • **Hố PIT nông:** Chỉ cần âm sâu **250mm - 300mm**, hoàn toàn không đụng móng nhà hay bể phốt, rất lý tưởng cho nhà cải tạo.
-                        • **Chiều cao tầng trên cùng (OH):** Tối thiểu chỉ từ **2800mm - 3200mm**.
+                        • **Thang mini Homelift 250kg - 300kg (2 - 3 người):**
+                          - Kích thước hố thông thủy chỉ từ: **1200mm x 1200mm** (hoặc 1300mm x 1300mm).
+                          - Kích thước lòng cabin: **850mm x 850mm**.
+                          - Cửa mở tự động hoặc mở tay tiện lợi.
+                        • **Thang tiêu chuẩn 450kg (6 người):**
+                          - Kích thước hố thông thủy: **1500mm x 1500mm** (hoặc 1600mm x 1600mm).
+                          - Kích thước cabin: **1100mm x 1000mm**.
+                          - Cửa mở tim 2 cánh (CO): Rộng 700mm, thoải mái đẩy xe nôi, xe lăn.
+                        • **Hố PIT (độ sâu âm sàn):** Cực kỳ nông, chỉ cần **250mm - 400mm** (không cần đào sâu chạm móng nhà hay bể phốt).
+                        • **Chiều cao tầng trên cùng (OH):** Tối thiểu chỉ từ **2800mm - 3400mm** cho dòng không phòng máy (MRL).
 
-                        👉 Anh/chị cho em hỏi diện tích dự kiến làm thang máy ở nhà mình là khoảng bao nhiêu mét vuông ạ?
+                        👉 Anh/chị đang có kích thước ô giếng trời hoặc vị trí dự kiến khoảng bao nhiêu mét vuông để em tư vấn bản vẽ bố trí chuẩn nhất ạ?
                         """
                 },
                 new AiKnowledgeItemDto
                 {
                     Id = "kb-3",
-                    Question = "Nên chọn thang máy kính hay thang inox truyền thống?",
-                    Keywords = "thang kính, kính, inox, so sánh, vách kính, quan sát",
+                    Question = "Nhà đang ở đã hoàn thiện có lắp thêm thang máy được không?",
+                    Keywords = "nhà cải tạo, nhà đang ở, lắp thêm, nhà cũ, đập phá, sửa nhà, không gian nhỏ",
                     Answer = """
-                        Dạ, cả hai loại đều có ưu điểm riêng tùy theo kiến trúc ngôi nhà của mình:
+                        Dạ hoàn toàn được anh/chị nhé! Thang Máy Hà Hồng chuyên xử lý các công trình nhà cải tạo với giải pháp tối ưu:
 
-                        • **Thang máy kính quan sát:** Lấy sáng tự nhiên, không gian thông thoáng không bị bí bách, nhìn thấy giếng trời rất sang trọng. Chi phí cao hơn khoảng 15% - 25% do có phần kết cấu khung thép chịu lực và vách kính cường lực.
-                        • **Thang inox truyền thống:** Bền bỉ, chống trầy xước tốt, dễ vệ sinh, chi phí tối ưu và che kín hố thang nếu muốn sự riêng tư.
+                        • **Các vị trí đặt thang lý tưởng trong nhà có sẵn:**
+                          1. Giếng trời giữa cầu thang bộ (vị trí đẹp và phổ biến nhất, tận dụng khoảng trống có sẵn).
+                          2. Giếng trời sau nhà hoặc ô thông gió nhà vệ sinh cũ.
+                          3. Lắp thang kính ngoài trời áp sát mặt tiền hoặc sân sau (tạo điểm nhấn hiện đại).
+                        • **Ưu điểm giải pháp của Hà Hồng:**
+                          - Dùng **Khung thép định hình chịu lực** sơn tĩnh điện: Thi công lắp dựng chỉ mất 3 - 5 ngày, không cần đổ cột bê tông bụi bặm.
+                          - **Hố PIT siêu nông (250mm - 300mm):** Không lo đụng dầm móng, bể nước ngầm hay đường ống kỹ thuật.
+                          - Thời gian hoàn thiện nhanh gọn trong **25 - 30 ngày**, không làm xáo trộn sinh hoạt gia đình.
 
-                        👉 Nếu vị trí đặt thang nằm ở giữa lòng cầu thang bộ hoặc giếng trời, làm thang kính sẽ giúp ngôi nhà sáng và thoáng hơn rất nhiều ạ!
+                        👉 Kỹ sư Hà Hồng có dịch vụ đến tận nhà đo đạc khảo sát thực tế miễn phí. Anh/chị để lại **Số điện thoại** để bên em hẹn lịch khảo sát nhé!
                         """
                 },
                 new AiKnowledgeItemDto
                 {
                     Id = "kb-4",
-                    Question = "Chính sách bảo trì và cứu hộ khẩn cấp",
-                    Keywords = "bảo trì, bảo hành, cứu hộ, sửa chữa, định kỳ, 24/7",
+                    Question = "Nên chọn thang máy vách kính quan sát hay thang inox truyền thống?",
+                    Keywords = "thang kính, kính, inox, so sánh, vách kính, quan sát, panoramic, thẩm mỹ",
                     Answer = """
-                        Dạ, Thang Máy Hà Hồng cam kết dịch vụ bảo trì tiêu chuẩn an toàn cao nhất:
+                        Dạ, cả hai dòng đều có ưu thế nổi bật tùy theo kiến trúc và sở thích của gia đình:
 
-                        • **Bảo hành chính hãng:** Từ 12 đến 24 tháng cho toàn bộ thiết bị và động cơ.
-                        • **Bảo trì định kỳ:** 1 tháng/lần với đầy đủ 24 hạng mục kiểm tra (thắng cơ, ray, cáp tải, cảm biến chống kẹt cửa Photocell, bộ cứu hộ ARD).
-                        • **Đội cứu hộ 24/7:** Kỹ thuật viên túc trực xử lý khẩn cấp mọi lúc, kể cả ngày nghỉ và lễ Tết.
+                        • **Thang máy kính quan sát (Panoramic Glass):**
+                          - *Ưu điểm:* Lấy sáng tự nhiên 100%, không gian thoáng đãng, nhìn xuyên giếng trời sang trọng như khách sạn cao cấp, giúp người lớn tuổi không bị cảm giác sợ không gian hẹp bí bách.
+                          - *Kết cấu:* Vách kính cường lực an toàn 10mm - 12mm chịu lực, khung thép chấn CNC màu đen nhám, trắng sữa, hoặc champagne vàng đồng.
+                          - *Chi phí:* Cao hơn thang inox khoảng 15% - 25%.
+                        • **Thang máy vách Inox truyền thống:**
+                          - *Ưu điểm:* Bền bỉ vĩnh cửu, chống xước, chống bám vân tay, riêng tư kín đáo và dễ vệ sinh lau chùi.
+                          - *Chất liệu:* Inox 304 sọc nhuyễn (Hairline) kết hợp Inox gương (Mirror) hoặc Inox hoa văn ăn mòn nghệ thuật.
+                          - *Chi phí:* Mức giá kinh tế, tối ưu nhất.
 
-                        👉 Hotline kỹ thuật khẩn cấp 24/7 của Hà Hồng: **0909 9333 58**.
+                        👉 Nếu đặt thang ở giếng trời hoặc giữa lòng thang bộ thì làm thang kính sẽ giúp ngôi nhà sáng bừng và cực kỳ sang trọng ạ!
+                        """
+                },
+                new AiKnowledgeItemDto
+                {
+                    Id = "kb-5",
+                    Question = "Nên dùng thang máy có phòng máy hay không phòng máy?",
+                    Keywords = "có phòng máy, không phòng máy, MR, MRL, chiều cao, tum, tiết kiệm điện, động cơ",
+                    Answer = """
+                        Dạ, Thang Máy Hà Hồng xin phân tích rõ để anh/chị dễ chọn phương án phù hợp:
+
+                        • **Thang không phòng máy (MRL - Động cơ từ trường không hộp số):**
+                          - *Ưu điểm:* Động cơ đặt gọn gàng ngay đỉnh ray trong lòng giếng thang, **không cần xây phòng máy/tum nhô lên nóc nhà** (rất thích hợp nhà bị khống chế chiều cao xây dựng hoặc quy hoạch đô thị nghiêm ngặt).
+                          - *Tiết kiệm:* Tiết kiệm điện năng lên đến **40%**, vận hành êm ái tuyệt đối, không cần châm dầu mỡ bôi trơn định kỳ.
+                          - *Xu hướng:* Hiện nay **95% thang máy gia đình** tại Hà Hồng đều tin dùng loại này.
+                        • **Thang có phòng máy (MR - Động cơ có hộp số):**
+                          - *Đặc điểm:* Cần đổ sàn và xây thêm tum kỹ thuật cao từ 1.5m - 2.0m trên nóc tầng thượng để đặt máy kéo và tủ điện.
+                          - *Ứng dụng:* Thường dùng cho các tòa nhà văn phòng, chung cư cao tầng hoặc thang tải hàng nặng.
+
+                        👉 Với nhà phố hoặc biệt thự gia đình, em khuyên anh/chị nên ưu tiên dòng **Không phòng máy (MRL)** để vừa êm, vừa tiết kiệm điện và giữ trọn thẩm mỹ nóc nhà ạ!
+                        """
+                },
+                new AiKnowledgeItemDto
+                {
+                    Id = "kb-6",
+                    Question = "Gia đình tôi nên lắp thang máy tải trọng bao nhiêu kg là vừa?",
+                    Keywords = "tải trọng, chọn tải trọng, 300kg, 350kg, 450kg, 630kg, bao nhiêu người, mấy người",
+                    Answer = """
+                        Dạ, để chọn tải trọng chuẩn xác và tiết kiệm nhất, anh/chị có thể tham khảo theo nhu cầu sử dụng thực tế:
+
+                        • **Tải trọng 250kg - 300kg (2 - 3 người):** Dành cho nhà phố diện tích nhỏ hẹp (dưới 40m2), nhu cầu chỉ chở 2-3 người hoặc người già, hố thang chỉ cần từ 1.2m x 1.2m.
+                        • **Tải trọng 350kg (4 - 5 người):** Dòng thang gia đình tiêu chuẩn phổ biến nhất, đáp ứng hoàn hảo cho gia đình 2-3 thế hệ sinh hoạt hàng ngày.
+                        • **Tải trọng 450kg (6 người):** Cabin rộng rãi (1.1m x 1.0m), chở được đồng thời 6 người lớn hoặc người ngồi xe lăn có người nhà đi kèm, cửa mở tim rộng 700mm.
+                        • **Tải trọng 630kg (8 - 9 người):** Dành cho nhà biệt thự lớn, nhà phố kết hợp văn phòng công ty hoặc cho thuê căn hộ dịch vụ (CHDV).
+
+                        👉 Nhà mình hiện có khoảng bao nhiêu thành viên cùng sinh hoạt, và nhà có kết hợp kinh doanh hay cho thuê không ạ?
+                        """
+                },
+                new AiKnowledgeItemDto
+                {
+                    Id = "kb-7",
+                    Question = "Thang máy có bị rơi không? Mất điện đột ngột thì người bên trong xử lý thế nào?",
+                    Keywords = "an toàn, rơi tự do, mất điện, cúp điện, kẹt thang, cứu hộ tự động, ARD, cảm biến cửa",
+                    Answer = """
+                        Dạ anh/chị hoàn toàn yên tâm 100%! Thang máy hiện đại tại Hà Hồng được trang bị hệ thống an toàn đa lớp đạt chuẩn an toàn quốc gia:
+
+                        1. **Bộ cứu hộ tự động khi mất điện (ARD - UPS):** Khi nguồn điện lưới ngắt đột ngột, bộ ắc quy/UPS thông minh tự động kích hoạt, điều khiển thang di chuyển về tầng gần nhất và mở cửa cho người bên trong bước ra ngoài an toàn.
+                        2. **Hệ thống phanh cơ an toàn (Governor & Safety Gear):** Giữ cabin bám chặt vào ray dẫn hướng ngay lập tức nếu có dấu hiệu vượt tốc độ cho phép. Cabin **KHÔNG BAO GIỜ có hiện tượng rơi tự do**, kể cả trong tình huống giả định đứt toàn bộ cáp kéo.
+                        3. **Mành hồng ngoại chống kẹt cửa (Photocell):** Cảm biến quang học quét toàn bộ mặt cắt cửa thang, tự động mở cửa ra ngay khi phát hiện có vật cản hoặc tay chân trẻ nhỏ bước qua.
+                        4. **Hệ thống liên lạc khẩn cấp (Intercom & Chuông báo):** Kết nối âm thanh trực tiếp từ cabin ra bên ngoài phòng trực hoặc kết nối Hotline cứu hộ 24/7.
+
+                        👉 Mọi sản phẩm của Hà Hồng đều được Trung tâm Kiểm định Kỹ thuật An toàn Nhà nước dán tem kiểm định trước khi đưa vào vận hành ạ!
+                        """
+                },
+                new AiKnowledgeItemDto
+                {
+                    Id = "kb-8",
+                    Question = "Chính sách bảo hành, bảo trì định kỳ và cứu hộ khẩn cấp của công ty như thế nào?",
+                    Keywords = "bảo hành, bảo trì, bảo dưỡng, cứu hộ, khẩn cấp, bao lâu, định kỳ, 24/7, hotline",
+                    Answer = """
+                        Dạ, Thang Máy Hà Hồng lấy chữ Tín và sự An toàn của khách hàng làm kim chỉ nam:
+
+                        • **Thời hạn bảo hành:** Bảo hành chính hãng **24 tháng** cho toàn bộ hệ thống động cơ máy kéo, biến tần tủ điện và cơ khí thang máy.
+                        • **Bảo trì định kỳ miễn phí:** Trong thời gian bảo hành, kỹ thuật viên đến kiểm tra định kỳ **1 tháng/lần** theo quy trình chuẩn 24 bước (kiểm tra tra dầu ray, siết bulong cáp, test phanh an toàn, kiểm tra cảm biến cửa và vệ sinh hố thang).
+                        • **Cứu hộ khẩn cấp 24/7:** Đội ngũ kỹ thuật túc trực 24/24 tất cả các ngày trong tuần (kể cả lễ Tết). Khi có sự cố, kỹ thuật viên sẽ có mặt tại công trình trong vòng **30 - 45 phút** tại khu vực TP.HCM.
+
+                        📞 **Hotline hỗ trợ kỹ thuật & cứu hộ 24/7:** **0909 9333 58**
+                        📧 **Email hỗ trợ:** hahongco@gmail.com
+                        """
+                },
+                new AiKnowledgeItemDto
+                {
+                    Id = "kb-9",
+                    Question = "Tư vấn thang máy cho tòa nhà văn phòng, khách sạn, căn hộ dịch vụ",
+                    Keywords = "văn phòng, khách sạn, căn hộ dịch vụ, CHDV, tải khách, thẻ từ, phân tầng, 630kg, 1000kg",
+                    Answer = """
+                        Dạ, đối với tòa nhà kinh doanh, văn phòng hay khách sạn lưu trú, thang máy cần đáp ứng tần suất di chuyển liên tục và độ ổn định cao:
+
+                        • **Tải trọng khuyến nghị:** Từ **630kg (8 người) đến 1000kg (13 - 15 người)**, tốc độ vận hành từ 60m/phút - 90m/phút.
+                        • **Tính năng chuyên dụng:**
+                          - Hệ thống kiểm soát an ninh **thẻ từ (RFID)** hoặc vân tay phân tầng (giúp kiểm soát khách thuê từng tầng riêng biệt).
+                          - Tủ điều khiển biến tần thông minh (VVVF) tăng tốc và giảm tốc êm ái, dừng tầng chuẩn xác không giật cục.
+                          - Nội thất cabin sang trọng: Inox gương vàng/champagne, đèn LED chiếu sáng dịu mắt và màn hình LCD hiển thị tầng/thông báo.
+                        • **Chi phí tham khảo:** Dao động từ **450 triệu - 1.2 tỷ VNĐ** tùy số điểm dừng và tốc độ.
+
+                        👉 Anh/chị để lại **Số điện thoại** hoặc số tầng/diện tích tòa nhà để kỹ sư Hà Hồng tính toán lưu lượng giao thông và gửi bản vẽ bố trí tối ưu nhất nhé!
+                        """
+                },
+                new AiKnowledgeItemDto
+                {
+                    Id = "kb-10",
+                    Question = "Công ty có cung cấp thang tải hàng nhà xưởng và thang tời thức ăn không?",
+                    Keywords = "thang tải hàng, thang nâng hàng, tời hàng, thực phẩm, tời thức ăn, nhà xưởng, kho, dumbwaiter",
+                    Answer = """
+                        Dạ có đầy đủ anh/chị nhé! Thang Máy Hà Hồng chuyên thiết kế chế tạo các dòng thang tải hàng chuyên dụng:
+
+                        • **Thang máy tải hàng công nghiệp (500kg - 3000kg):**
+                          - Dành cho nhà xưởng, kho hàng, xưởng may, cơ khí.
+                          - Kết cấu dầm thép định hình I/U siêu chịu lực, sàn cabin tôn nhám chống trượt, cửa sắt xếp hoặc cửa lùa 2 cánh mở lên xuống.
+                          - Hệ thống thắng cơ chống rơi và công tắc giới hạn an toàn tuyệt đối.
+                        • **Thang tời thực phẩm / Dumbwaiter (50kg - 250kg):**
+                          - Dành cho nhà hàng, quán ăn, quán cafe nhiều tầng, trường học, bệnh viện.
+                          - Cabin và khay chia ngăn hoàn toàn bằng **Inox 304 tiêu chuẩn vệ sinh an toàn thực phẩm**, không han gỉ, dễ vệ sinh.
+                          - Thiết kế nhỏ gọn, chi phí tiết kiệm (chỉ từ 70 - 130 triệu VNĐ trọn gói).
+
+                        👉 Anh/chị đang cần chở hàng hóa loại nào, kích thước kiện hàng và tải trọng ước tính khoảng bao nhiêu kg ạ?
+                        """
+                },
+                new AiKnowledgeItemDto
+                {
+                    Id = "kb-11",
+                    Question = "Thời gian từ lúc đặt hàng đến khi lắp đặt hoàn thiện thang máy mất bao lâu?",
+                    Keywords = "thời gian, tiến độ, bao lâu, quy trình, thi công, lắp đặt, hoàn thiện, đặt hàng",
+                    Answer = """
+                        Dạ, tiến độ thi công chuẩn mực tại Thang Máy Hà Hồng gồm 5 giai đoạn rõ ràng:
+
+                        1. **Khảo sát & Thiết kế bản vẽ:** (1 - 2 ngày) Kỹ sư đến công trình đo đạc hiện trạng, lên bản vẽ chi tiết 2D/3D hố thang miễn phí.
+                        2. **Sản xuất & Đặt linh kiện:** (20 - 30 ngày) Gia công cơ khí cabin theo thiết kế riêng và nhập khẩu động cơ (Fuji/Montanari).
+                        3. **Lắp đặt phần cơ khí:** (7 - 10 ngày) Vận chuyển ray, động cơ, dựng khung hố và treo cabin đối trọng.
+                        4. **Lắp đặt hệ thống điện & Căn chỉnh:** (5 - 7 ngày) Đi dây tín hiệu, đấu nối tủ điều khiển thông minh và chạy thử tải.
+                        5. **Kiểm định & Bàn giao:** (1 - 2 ngày) Cơ quan Kiểm định An toàn Quốc gia về thử tải, cấp tem kiểm định và bàn giao cho chủ nhà sử dụng.
+
+                        ⏱️ **Tổng thời gian:** Khoảng **30 - 45 ngày** (đối với thang cải tạo dùng khung thép thì phần lắp đặt tại nhà chỉ mất từ **10 - 15 ngày**).
+
+                        👉 Anh/chị dự kiến khi nào công trình nhà mình bắt đầu khởi công hoặc cần lắp thang máy ạ?
+                        """
+                },
+                new AiKnowledgeItemDto
+                {
+                    Id = "kb-12",
+                    Question = "Thang máy gia đình chạy 1 tháng hết bao nhiêu tiền điện?",
+                    Keywords = "tiền điện, điện năng, tốn điện không, 1 tháng hết bao nhiêu, điện 1 pha, điện 3 pha",
+                    Answer = """
+                        Dạ, thang máy gia đình đời mới tại Hà Hồng cực kỳ tiết kiệm điện:
+
+                        • **Động cơ không hộp số nam châm vĩnh cửu:** Công suất chỉ từ **2.2kW đến 3.7kW** (chỉ tương đương một chiếc điều hòa nhiệt độ hoặc bình nóng lạnh).
+                        • **Tiêu thụ điện năng thực tế:** Một gia đình 4 - 6 người sử dụng trung bình 30 - 50 lượt/ngày thì tiền điện chỉ tốn khoảng **300.000 - 450.000 VNĐ/tháng**.
+                        • **Nguồn điện sử dụng:**
+                          - Có thể dùng trực tiếp **Điện sinh hoạt 1 pha (220V)** sẵn có (kết hợp biến tần tái tạo năng lượng).
+                          - Hoặc dùng **Điện 3 pha (380V)** nếu nhà có sẵn nguồn 3 pha để thang hoạt động khỏe và êm ái hơn.
+                        • **Chế độ Standby thông minh:** Đèn chiếu sáng và quạt thông gió trong cabin tự động tắt khi không có người sử dụng sau 3 phút.
+
+                        👉 Anh/chị hoàn toàn yên tâm về chi phí vận hành hàng tháng của thang máy nhé ạ!
                         """
                 }
             ]
