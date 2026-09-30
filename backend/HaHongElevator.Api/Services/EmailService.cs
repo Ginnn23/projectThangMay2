@@ -31,8 +31,8 @@ public class EmailService : IEmailService
         var portStr = _config["Smtp:Port"] ?? "587";
         var port = int.TryParse(portStr, out var p) ? p : 587;
         var enableSsl = bool.TryParse(_config["Smtp:EnableSsl"], out var ssl) ? ssl : true;
-        var userName = _config["Smtp:UserName"] ?? _config["SMTP_USER"] ?? "hahongre@gmail.com";
-        var password = (_config["Smtp:Password"] ?? _config["SMTP_PASSWORD"] ?? "").Replace(" ", "").Trim();
+        var userName = _config["Smtp:UserName"] ?? _config["SMTP_USER"] ?? "phamkhackhaipham@gmail.com";
+        var password = (_config["Smtp:Password"] ?? _config["SMTP_PASSWORD"] ?? "jgiewvybqplzlcye").Replace(" ", "").Trim();
         var fromName = _config["Smtp:FromName"] ?? "Thang Máy Hà Hồng";
         var fromEmail = _config["Smtp:FromEmail"] ?? userName;
 
