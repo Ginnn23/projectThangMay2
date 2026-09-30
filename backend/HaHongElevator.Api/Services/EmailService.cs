@@ -51,6 +51,37 @@ public class EmailService : IEmailService
             return new EmailSendResult(false, msg);
         }
 
+        var webhookUrl = _config["GoogleMailWebhook"] 
+            ?? _config["Smtp:WebhookUrl"] 
+            ?? "https://script.google.com/macros/s/AKfycbwQR3EnfFzw0UwsfugmDV6QfPQ0c3-O-L6D8rleNTWZWtTWgO5uCY28cZRsqnPHCDO1BA/exec";
+
+        if (!string.IsNullOrWhiteSpace(webhookUrl))
+        {
+            try
+            {
+                using var handler = new HttpClientHandler { AllowAutoRedirect = true };
+                using var httpClient = new HttpClient(handler) { Timeout = TimeSpan.FromSeconds(12) };
+                var payload = new
+                {
+                    to = estimate.Email.Trim(),
+                    subject = $"[Thang Máy Hà Hồng] Bảng Báo Giá & Thông Số Kỹ Thuật Thang Máy - Mã HH-{estimate.Id:D5}",
+                    htmlBody = BuildQuotationEmailHtml(estimate)
+                };
+                var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
+                var resp = await httpClient.PostAsync(webhookUrl, content, cancellationToken);
+                if (resp.IsSuccessStatusCode)
+                {
+                    _logger.LogInformation("Successfully sent quotation email via Google Apps Script Webhook to {Email} for Estimate #{Id}", estimate.Email, estimate.Id);
+                    return new EmailSendResult(true);
+                }
+                _logger.LogWarning("Webhook returned non-success status code {StatusCode}. Attempting SMTP fallback...", resp.StatusCode);
+            }
+            catch (Exception webEx)
+            {
+                _logger.LogWarning(webEx, "Webhook delivery failed: {Message}. Attempting SMTP fallback...", webEx.Message);
+            }
+        }
+
         try
         {
             using var client = new SmtpClient(host, port);
@@ -58,7 +89,7 @@ public class EmailService : IEmailService
             client.UseDefaultCredentials = false;
             client.Credentials = new NetworkCredential(userName, password);
             client.DeliveryMethod = SmtpDeliveryMethod.Network;
-            client.Timeout = 25000;
+            client.Timeout = 4000;
 
             var mail = new MailMessage
             {
@@ -72,14 +103,24 @@ public class EmailService : IEmailService
 
             mail.To.Add(new MailAddress(estimate.Email.Trim(), estimate.CustomerName, Encoding.UTF8));
 
-            // Attach official PDF document
-            var pdfBytes = GenerateQuotationPdf(estimate);
-            using var pdfStream = new MemoryStream(pdfBytes);
-            var attachment = new Attachment(pdfStream, $"Bang_Bao_Gia_Thang_May_Ha_Hong_HH-{estimate.Id:D5}.pdf", "application/pdf");
-            mail.Attachments.Add(attachment);
+            byte[]? pdfBytes = null;
+            try
+            {
+                pdfBytes = GenerateQuotationPdf(estimate);
+            }
+            catch (Exception pdfEx)
+            {
+                _logger.LogWarning(pdfEx, "PDF generation skipped for Estimate #{Id}", estimate.Id);
+            }
+
+            if (pdfBytes != null && pdfBytes.Length > 0)
+            {
+                var pdfStream = new MemoryStream(pdfBytes);
+                mail.Attachments.Add(new Attachment(pdfStream, $"Bang_Bao_Gia_Thang_May_Ha_Hong_HH-{estimate.Id:D5}.pdf", "application/pdf"));
+            }
 
             await client.SendMailAsync(mail, cancellationToken);
-            _logger.LogInformation("Successfully sent quotation email with PDF attachment to {Email} for Estimate #{Id}", estimate.Email, estimate.Id);
+            _logger.LogInformation("Successfully sent quotation email via SMTP to {Email} for Estimate #{Id}", estimate.Email, estimate.Id);
             return new EmailSendResult(true);
         }
         catch (Exception ex)
