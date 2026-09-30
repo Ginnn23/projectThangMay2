@@ -191,106 +191,6 @@ function AdminConfirmModal({ confirm, onClose }) {
   );
 }
 
-function AdminChangePasswordModal({ isOpen, onClose, onSuccess }) {
-  const [currentPassword, setCurrentPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmNewPassword, setConfirmNewPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-
-  if (!isOpen) return null;
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!currentPassword || !newPassword || !confirmNewPassword) {
-      setError("Vui lòng điền đầy đủ các trường.");
-      return;
-    }
-    if (newPassword.length < 6) {
-      setError("Mật khẩu mới phải có ít nhất 6 ký tự.");
-      return;
-    }
-    if (newPassword !== confirmNewPassword) {
-      setError("Mật khẩu xác nhận không khớp.");
-      return;
-    }
-
-    setLoading(true);
-    setError("");
-    try {
-      const response = await apiClient.post("/auth/change-password", {
-        currentPassword,
-        newPassword,
-        confirmNewPassword,
-      });
-      onSuccess(response.data?.message || "Đổi mật khẩu thành công!");
-      setCurrentPassword("");
-      setNewPassword("");
-      setConfirmNewPassword("");
-      onClose();
-    } catch (err) {
-      setError(layLoiApi(err));
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <div className="admin-modal-backdrop" role="presentation">
-      <div className="admin-confirm-modal" role="dialog" aria-modal="true" aria-labelledby="admin-pwd-title" style={{ maxWidth: "440px" }}>
-        <div className="admin-confirm-icon" style={{ background: "#e8f0fe", color: "#1a73e8" }}>
-          <i className="bi bi-shield-lock"></i>
-        </div>
-        <h2 id="admin-pwd-title">Đổi mật khẩu quản trị</h2>
-        {error && <div className="alert alert-danger" style={{ fontSize: "14px", padding: "8px 12px" }}>{error}</div>}
-        <form onSubmit={handleSubmit} style={{ textAlign: "left", display: "grid", gap: "12px", width: "100%", marginTop: "12px" }}>
-          <div>
-            <label style={{ fontSize: "13px", fontWeight: "600", display: "block", marginBottom: "4px" }}>Mật khẩu hiện tại</label>
-            <input
-              type="password"
-              className="form-control"
-              value={currentPassword}
-              onChange={(e) => setCurrentPassword(e.target.value)}
-              placeholder="Nhập mật khẩu hiện tại"
-              required
-            />
-          </div>
-          <div>
-            <label style={{ fontSize: "13px", fontWeight: "600", display: "block", marginBottom: "4px" }}>Mật khẩu mới</label>
-            <input
-              type="password"
-              className="form-control"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              placeholder="Tối thiểu 6 ký tự"
-              required
-            />
-          </div>
-          <div>
-            <label style={{ fontSize: "13px", fontWeight: "600", display: "block", marginBottom: "4px" }}>Xác nhận mật khẩu mới</label>
-            <input
-              type="password"
-              className="form-control"
-              value={confirmNewPassword}
-              onChange={(e) => setConfirmNewPassword(e.target.value)}
-              placeholder="Nhập lại mật khẩu mới"
-              required
-            />
-          </div>
-          <div className="admin-modal-actions" style={{ marginTop: "16px" }}>
-            <button className="admin-secondary-button" type="button" onClick={onClose} disabled={loading}>
-              Hủy
-            </button>
-            <button className="admin-primary-button" type="submit" disabled={loading}>
-              {loading ? "Đang lưu..." : "Cập nhật mật khẩu"}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  );
-}
-
 async function layDuAnChoAdmin() {
   try {
     const response = await apiClient.get("/projects/admin");
@@ -383,7 +283,7 @@ function AdminLogin({ onLogin }) {
       <section className="admin-login-panel">
         <span className="section-eyebrow">HÀ HỒNG ADMIN</span>
         <h1>Đăng nhập quản trị</h1>
-       
+        <p>Kết nối với API tại <strong>{API_BASE_URL}</strong></p>
         <form onSubmit={dangNhap}>
           {loi && <div className="alert alert-danger">{loi}</div>}
           <label htmlFor="adminUsername">Tài khoản</label>
@@ -399,7 +299,7 @@ function AdminLogin({ onLogin }) {
   );
 }
 
-function AdminToolbar({ activeTab, onChangeTab, user, onLogout, onOpenChangePassword }) {
+function AdminToolbar({ activeTab, onChangeTab, user, onLogout }) {
   const tabs = [
     { key: "contacts", label: "Liên hệ", icon: "bi-inbox" },
     { key: "maintenance", label: "Bảo trì", icon: "bi-calendar-check" },
@@ -422,16 +322,10 @@ function AdminToolbar({ activeTab, onChangeTab, user, onLogout, onOpenChangePass
           </button>
         ))}
       </nav>
-      <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-        <button className="admin-secondary-button" type="button" onClick={onOpenChangePassword} style={{ fontSize: "14px", padding: "8px 12px" }}>
-          <i className="bi bi-key me-1"></i>
-          Đổi mật khẩu
-        </button>
-        <button className="admin-logout-button" type="button" onClick={onLogout}>
-          <i className="bi bi-box-arrow-right"></i>
-          Đăng xuất
-        </button>
-      </div>
+      <button className="admin-logout-button" type="button" onClick={onLogout}>
+        <i className="bi bi-box-arrow-right"></i>
+        Đăng xuất
+      </button>
     </div>
   );
 }
@@ -1063,7 +957,6 @@ function Admin() {
   const [editingProjectId, setEditingProjectId] = useState(null);
   const [adminToast, setAdminToast] = useState(null);
   const [xacNhanAdmin, setXacNhanAdmin] = useState(null);
-  const [moDoiMatKhau, setMoDoiMatKhau] = useState(false);
   const toastTimerRef = useRef(null);
 
   const thongKe = useMemo(() => ({
@@ -1573,19 +1466,8 @@ function Admin() {
     <main className="admin-page">
       <AdminToast toast={adminToast} onClose={() => setAdminToast(null)} />
       <AdminConfirmModal confirm={xacNhanAdmin} onClose={() => setXacNhanAdmin(null)} />
-      <AdminChangePasswordModal
-        isOpen={moDoiMatKhau}
-        onClose={() => setMoDoiMatKhau(false)}
-        onSuccess={(msg) => hienThongBao(msg)}
-      />
       <div className="admin-shell">
-        <AdminToolbar
-          activeTab={activeTab}
-          onChangeTab={doiTab}
-          user={user}
-          onLogout={dangXuat}
-          onOpenChangePassword={() => setMoDoiMatKhau(true)}
-        />
+        <AdminToolbar activeTab={activeTab} onChangeTab={doiTab} user={user} onLogout={dangXuat} />
 
         <div className="admin-summary-grid">
           <article><span>Liên hệ</span><strong>{thongKe.contacts}</strong></article>
