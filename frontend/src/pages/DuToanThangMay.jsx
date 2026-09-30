@@ -3,6 +3,7 @@ import { apiClient } from "../api/client";
 import { soDienThoaiCongTy, soDienThoaiLienKet, emailCongTy } from "../data/contactInfo";
 import SeoHead from "../components/SeoHead";
 import logoHaHong from "../assets/images/logo-ha-hong.jpg";
+import heroImage from "../assets/images/hero-elevator.jpg";
 
 export default function DuToanThangMay() {
   // Config state
@@ -218,7 +219,14 @@ export default function DuToanThangMay() {
       />
 
       {/* Hero Banner */}
-      <section className="about-banner estimator-banner">
+      <section
+        className="about-banner estimator-banner"
+        style={{
+          backgroundImage: `linear-gradient(135deg, rgba(7, 22, 46, 0.94) 0%, rgba(12, 40, 80, 0.9) 100%), url(${heroImage})`,
+          backgroundPosition: "center",
+          backgroundSize: "cover",
+        }}
+      >
         <div className="site-container">
           <nav className="about-breadcrumb" aria-label="breadcrumb">
             <a href="/">Trang chủ</a>
@@ -477,18 +485,23 @@ export default function DuToanThangMay() {
                       {submitSuccess ? (
                         <div className="alert alert-success py-3 text-center mb-0">
                           <i className="bi bi-check-circle-fill fs-3 d-block mb-1 text-success"></i>
-                          <strong>Gửi thông tin thành công!</strong>
+                          <h6 className="fw-bold text-success mb-1">Gửi Yêu Cầu & Lưu Dự Toán Thành Công!</h6>
                           <p className="mb-2" style={{ fontSize: "13px" }}>
-                            Kỹ sư Thang Máy Hà Hồng sẽ liên hệ qua SĐT <strong>{phoneNumber}</strong> và gửi bảng dự toán qua Gmail <strong>{email}</strong> trong vòng 15 phút.
+                            Bảng dự toán kỹ thuật chi tiết đã được gửi tự động tới Gmail <strong>{email}</strong>.
+                            Kỹ sư Thang Máy Hà Hồng sẽ liên hệ qua SĐT <strong>{phoneNumber}</strong> trong vòng 15 phút.
                           </p>
                           <button
                             type="button"
-                            className="btn btn-outline-success btn-sm w-100"
+                            className="btn btn-outline-success btn-sm w-100 mb-2 fw-semibold"
                             onClick={handlePrint}
                           >
                             <i className="bi bi-printer me-2"></i>
-                            In / Tải file Báo Giá PDF ngay
+                            In / Tải ngay file Báo Giá PDF
                           </button>
+                          <small className="text-muted d-block" style={{ fontSize: "11px" }}>
+                            <i className="bi bi-envelope-check me-1 text-success"></i>
+                            Quý khách vui lòng kiểm tra hộp thư đến (hoặc hòm thư Spam) của Gmail <strong>{email}</strong>.
+                          </small>
                         </div>
                       ) : (
                         <form onSubmit={handleFormSubmit}>

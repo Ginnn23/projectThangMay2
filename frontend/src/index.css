@@ -4854,6 +4854,49 @@ a {
 /* ==========================================================
    ESTIMATOR TOOL & PRINT STYLES
    ========================================================== */
+.estimator-banner {
+  min-height: 280px !important;
+  padding: 55px 0 45px !important;
+  background: linear-gradient(135deg, rgba(8, 26, 54, 0.96) 0%, rgba(13, 44, 88, 0.92) 100%) !important;
+  background-size: cover !important;
+  background-position: center !important;
+  color: #ffffff !important;
+  border-bottom: 3px solid #0056b3;
+}
+
+.estimator-banner h1 {
+  color: #ffffff !important;
+  font-size: clamp(28px, 3.8vw, 42px) !important;
+  font-weight: 800;
+  margin-bottom: 12px;
+}
+
+.estimator-banner p {
+  color: rgba(255, 255, 255, 0.88) !important;
+  font-size: 16px;
+  max-width: 820px;
+  line-height: 1.6;
+}
+
+.estimator-banner .about-breadcrumb a,
+.estimator-banner .about-breadcrumb span {
+  color: rgba(255, 255, 255, 0.75) !important;
+  font-size: 14px;
+}
+
+.estimator-banner .about-breadcrumb span:last-child {
+  color: #f7b731 !important;
+  font-weight: 600;
+}
+
+.estimator-banner .section-eyebrow {
+  color: #f7b731 !important;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  display: inline-block;
+  margin-bottom: 8px;
+}
+
 .estimator-step-title {
   font-size: 1.15rem;
   font-weight: 700;

@@ -340,6 +340,7 @@ function DuToanAdmin({ onShowToast, onUpdateCount }) {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [selectedEstimate, setSelectedEstimate] = useState(null);
+  const [sendingEmailId, setSendingEmailId] = useState(null);
 
   const fetchEstimates = async () => {
     setLoading(true);
@@ -395,6 +396,27 @@ function DuToanAdmin({ onShowToast, onUpdateCount }) {
       onShowToast?.("Đã xóa bản ghi dự toán.");
     } catch {
       onShowToast?.("Không thể xóa bản ghi.", "error");
+    }
+  };
+
+  const handleResendEmail = async (id, targetEmail) => {
+    if (!targetEmail) {
+      onShowToast?.("Khách hàng này chưa có địa chỉ Gmail.", "error");
+      return;
+    }
+    setSendingEmailId(id);
+    try {
+      let res;
+      try {
+        res = await apiClient.post(`/estimates/${id}/resend-email`);
+      } catch {
+        res = await apiClient.post(`/admin/estimates/${id}/resend-email`);
+      }
+      onShowToast?.(res?.data?.message || `Đã gửi báo giá tới ${targetEmail}`);
+    } catch (err) {
+      onShowToast?.(err.response?.data?.message || "Không thể gửi email lúc này. Vui lòng kiểm tra cấu hình SMTP.", "error");
+    } finally {
+      setSendingEmailId(null);
     }
   };
 
@@ -475,7 +497,12 @@ function DuToanAdmin({ onShowToast, onUpdateCount }) {
                   <td>
                     <strong>{item.customerName}</strong>
                     <div className="text-primary fw-bold">{item.phoneNumber}</div>
-                    {item.email && <div className="text-secondary small"><i className="bi bi-envelope me-1"></i>{item.email}</div>}
+                    {item.email && (
+                      <div className="text-secondary small">
+                        <i className="bi bi-envelope me-1"></i>
+                        {item.email}
+                      </div>
+                    )}
                     {item.address && <small className="text-muted d-block">{item.address}</small>}
                   </td>
                   <td>
@@ -517,6 +544,15 @@ function DuToanAdmin({ onShowToast, onUpdateCount }) {
                         onClick={() => setSelectedEstimate(item)}
                       >
                         <i className="bi bi-eye"></i>
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-outline-success btn-sm"
+                        title="Gửi báo giá qua Gmail cho khách"
+                        onClick={() => handleResendEmail(item.id, item.email)}
+                        disabled={!item.email || sendingEmailId === item.id}
+                      >
+                        <i className={`bi ${sendingEmailId === item.id ? "bi-hourglass-split" : "bi-envelope-paper"}`}></i>
                       </button>
                       <button
                         type="button"
@@ -586,6 +622,15 @@ function DuToanAdmin({ onShowToast, onUpdateCount }) {
               </div>
               <div className="modal-footer">
                 <button type="button" className="btn btn-secondary" onClick={() => setSelectedEstimate(null)}>Đóng</button>
+                <button
+                  type="button"
+                  className="btn btn-success"
+                  onClick={() => handleResendEmail(selectedEstimate.id, selectedEstimate.email)}
+                  disabled={!selectedEstimate.email || sendingEmailId === selectedEstimate.id}
+                >
+                  <i className={`bi ${sendingEmailId === selectedEstimate.id ? "bi-hourglass-split" : "bi-envelope-paper"} me-1`}></i>
+                  {sendingEmailId === selectedEstimate.id ? "Đang gửi..." : "Gửi lại file báo giá qua Gmail"}
+                </button>
                 <a href={`tel:${selectedEstimate.phoneNumber}`} className="btn btn-primary">
                   <i className="bi bi-telephone-fill me-1"></i> Gọi ngay
                 </a>
@@ -1225,7 +1270,6 @@ function Admin() {
   const [editingProjectId, setEditingProjectId] = useState(null);
   const [adminToast, setAdminToast] = useState(null);
   const [xacNhanAdmin, setXacNhanAdmin] = useState(null);
-  const [estimatesCount, setEstimatesCount] = useState(0);
   const toastTimerRef = useRef(null);
 
   const thongKe = useMemo(() => ({
@@ -1331,12 +1375,11 @@ function Admin() {
 
     const taiTongQuanAdmin = async () => {
       try {
-        const [contactsResponse, servicesResponse, projectsResponse, maintenanceResponse, estimatesRes] = await Promise.all([
+        const [contactsResponse, servicesResponse, projectsResponse, maintenanceResponse] = await Promise.all([
           apiClient.get("/contacts"),
           layDichVuChoAdmin(),
           layDuAnChoAdmin(),
           apiClient.get("/maintenance-customers"),
-          apiClient.get("/estimates/admin").catch(() => apiClient.get("/admin/estimates")).catch(() => ({ data: [] })),
         ]);
 
         if (!dangHoatDong) return;
@@ -1345,9 +1388,6 @@ function Admin() {
         setServices(servicesResponse.data);
         setProjects(projectsResponse);
         setMaintenanceCustomers(maintenanceResponse.data);
-        if (Array.isArray(estimatesRes?.data)) {
-          setEstimatesCount(estimatesRes.data.length);
-        }
         setServiceWarning(servicesResponse.dangDungApiCu ? canhBaoBackendDichVuCu : "");
       } catch (err) {
         if (dangHoatDong) {
@@ -1745,7 +1785,6 @@ function Admin() {
 
         <div className="admin-summary-grid">
           <article><span>Liên hệ</span><strong>{thongKe.contacts}</strong></article>
-          <article><span>Dự toán báo giá</span><strong>{estimatesCount}</strong></article>
           <article><span>Khách bảo trì</span><strong>{thongKe.maintenance}</strong></article>
           <article><span>Dịch vụ đang hiện</span><strong>{thongKe.services}</strong></article>
           <article><span>Dự án</span><strong>{thongKe.projects}</strong></article>
@@ -1827,7 +1866,7 @@ function Admin() {
         )}
 
         {activeTab === "estimates" && (
-          <DuToanAdmin onShowToast={hienThongBao} onUpdateCount={setEstimatesCount} />
+          <DuToanAdmin onShowToast={hienThongBao} />
         )}
       </div>
     </main>

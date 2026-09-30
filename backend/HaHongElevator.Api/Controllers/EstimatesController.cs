@@ -25,11 +25,16 @@ public class EstimatesController : ControllerBase
 
     private readonly ApplicationDbContext _dbContext;
     private readonly ElevatorEstimatorService _estimatorService;
+    private readonly IEmailService _emailService;
 
-    public EstimatesController(ApplicationDbContext dbContext, ElevatorEstimatorService estimatorService)
+    public EstimatesController(
+        ApplicationDbContext dbContext,
+        ElevatorEstimatorService estimatorService,
+        IEmailService emailService)
     {
         _dbContext = dbContext;
         _estimatorService = estimatorService;
+        _emailService = emailService;
     }
 
     /// <summary>
@@ -99,6 +104,22 @@ public class EstimatesController : ControllerBase
 
         _dbContext.ElevatorEstimates.Add(estimate);
         await _dbContext.SaveChangesAsync(cancellationToken);
+
+        // Tự động gửi email bảng báo giá kèm tài liệu kỹ thuật về Gmail của khách hàng
+        if (!string.IsNullOrWhiteSpace(estimate.Email))
+        {
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    await _emailService.SendEstimateQuotationAsync(estimate, default);
+                }
+                catch
+                {
+                    // logged inside email service
+                }
+            });
+        }
 
         return CreatedAtAction(nameof(GetEstimateById), new { id = estimate.Id }, MapToResponse(estimate));
     }
@@ -212,6 +233,36 @@ public class EstimatesController : ControllerBase
         await _dbContext.SaveChangesAsync(cancellationToken);
 
         return NoContent();
+    }
+
+    /// <summary>
+    /// Admin: Resend quotation email to customer's Gmail
+    /// </summary>
+    [HttpPost("admin/{id:int}/resend-email")]
+    [HttpPost("{id:int}/resend-email")]
+    [HttpPost("/api/admin/estimates/{id:int}/resend-email")]
+    [HttpPost("/api/estimates/{id:int}/resend-email")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> ResendQuotationEmail(int id, CancellationToken cancellationToken)
+    {
+        var estimate = await _dbContext.ElevatorEstimates.FindAsync([id], cancellationToken);
+        if (estimate == null)
+        {
+            return NotFound(new { message = "Không tìm thấy bản dự toán." });
+        }
+
+        if (string.IsNullOrWhiteSpace(estimate.Email))
+        {
+            return BadRequest(new { message = "Khách hàng này chưa cung cấp địa chỉ Gmail." });
+        }
+
+        var sent = await _emailService.SendEstimateQuotationAsync(estimate, cancellationToken);
+        if (!sent)
+        {
+            return StatusCode(500, new { message = "Gửi email chưa thành công. Vui lòng kiểm tra mật khẩu ứng dụng Gmail (App Password) trong cấu hình SMTP." });
+        }
+
+        return Ok(new { message = $"Đã gửi thành công bảng dự toán tới {estimate.Email}" });
     }
 
     private static EstimateResponse MapToResponse(ElevatorEstimate x) => new()
