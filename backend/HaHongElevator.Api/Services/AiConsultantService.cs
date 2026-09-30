@@ -10,6 +10,7 @@ namespace HaHongElevator.Api.Services;
 
 public class AiConsultantService
 {
+    private const string SettingKey = "ai-training-config";
     private readonly HttpClient _httpClient;
     private readonly IConfiguration _configuration;
     private readonly ILogger<AiConsultantService> _logger;
@@ -18,37 +19,67 @@ public class AiConsultantService
         @"(?:(?:\+?84)|0)(?:3[2-9]|5[2689]|7[06-9]|8[1-9]|9[0-46-9])(?:\d[\s.-]?){7}\d",
         RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-    private const string SystemPrompt = """
-        Bạn là Chuyên gia Tư vấn Kỹ thuật Cao cấp của Công ty Cổ phần Thương mại Dịch vụ Thang máy Hà Hồng (Hà Hồng Elevator).
-        Thông tin công ty:
-        - Hotline 24/7: 0909 9333 58
-        - Email: hahongco@gmail.com
-        - Website: thangmayhahong.xyz
-        - Dịch vụ: Tư vấn, thiết kế bản vẽ, thi công lắp đặt trọn gói, bảo trì định kỳ và sửa chữa cứu hộ thang máy 24/7.
-        - Các dòng sản phẩm: Thang máy gia đình (Homelift), thang máy biệt thự, thang máy kính quan sát khung thép, thang máy tải khách văn phòng/khách sạn, thang máy tải hàng xưởng sản xuất, cửa sập và thang cuốn thương mại.
-
-        Quy tắc tư vấn:
-        1. Giọng điệu thân thiện, lễ phép, chuyên nghiệp, bắt đầu bằng "Dạ, em chào anh/chị!" hoặc "Dạ, chào anh/chị ạ!".
-        2. Tư vấn chính xác về kỹ thuật:
-           - Thang máy gia đình Homelift: Tải trọng phổ biến 250kg - 450kg (chở 3-6 người), hố PIT nông chỉ 250 - 300mm (không đụng móng nhà), chiều cao tầng trên cùng (OH) chỉ cần 2800 - 3200mm, dùng được điện 1 pha 220V hoặc 3 pha 380V.
-           - Kích thước hố thang tham khảo:
-             + 300kg (3-4 người): kích thước thông thủy hố khoảng 1300mm x 1300mm, cabin 900mm x 900mm.
-             + 450kg (6 người): kích thước thông thủy hố khoảng 1500mm x 1500mm, cabin 1100mm x 1000mm.
-             + 630kg (8-9 người): kích thước thông thủy hố khoảng 1700mm x 1700mm.
-           - Khoảng giá tham khảo:
-             + Thang máy gia đình liên doanh: từ 280 - 450 triệu VNĐ (tùy số tầng, tải trọng, nội thất).
-             + Thang máy nhập khẩu nguyên chiếc: từ 550 triệu - 1,2 tỷ VNĐ.
-             + Gói cải tạo cabin inox champagne / gương: 80 - 180 triệu VNĐ.
-           - An toàn: Luôn trang bị bộ cứu hộ tự động (ARD) đưa cabin về tầng gần nhất mở cửa khi mất điện, chống kẹt cửa Photocell, hệ thống thắng cơ chống rơi tự do.
-        3. Khéo léo mời khách để lại Số điện thoại hoặc địa chỉ công trình để kỹ sư Hà Hồng liên hệ gửi bản vẽ thiết kế 2D/3D và báo giá chi tiết qua Zalo.
-        4. Trả lời súc tích, rõ ràng, gạch đầu dòng các ý quan trọng để người đọc dễ theo dõi trên điện thoại.
-        """;
-
     public AiConsultantService(HttpClient httpClient, IConfiguration configuration, ILogger<AiConsultantService> logger)
     {
         _httpClient = httpClient;
         _configuration = configuration;
         _logger = logger;
+    }
+
+    public async Task<AiTrainingSettingsDto> GetTrainingSettingsAsync(ApplicationDbContext dbContext, CancellationToken cancellationToken = default)
+    {
+        var setting = await dbContext.SiteSettings.AsNoTracking().FirstOrDefaultAsync(x => x.Key == SettingKey, cancellationToken);
+        if (setting == null || string.IsNullOrWhiteSpace(setting.Value))
+        {
+            return GetDefaultTrainingSettings();
+        }
+
+        try
+        {
+            var result = JsonSerializer.Deserialize<AiTrainingSettingsDto>(setting.Value, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
+
+            return result ?? GetDefaultTrainingSettings();
+        }
+        catch (JsonException)
+        {
+            return GetDefaultTrainingSettings();
+        }
+    }
+
+    public async Task<AiTrainingSettingsDto> SaveTrainingSettingsAsync(AiTrainingSettingsDto request, ApplicationDbContext dbContext, CancellationToken cancellationToken = default)
+    {
+        var setting = await dbContext.SiteSettings.FirstOrDefaultAsync(x => x.Key == SettingKey, cancellationToken);
+        if (setting == null)
+        {
+            setting = new SiteSetting { Key = SettingKey };
+            dbContext.SiteSettings.Add(setting);
+        }
+
+        var payload = new AiTrainingSettingsDto
+        {
+            SystemPrompt = request.SystemPrompt?.Trim() ?? string.Empty,
+            CustomApiKey = request.CustomApiKey?.Trim() ?? string.Empty,
+            DefaultGreeting = request.DefaultGreeting?.Trim() ?? string.Empty,
+            KnowledgeBase = request.KnowledgeBase?
+                .Where(k => !string.IsNullOrWhiteSpace(k.Question) || !string.IsNullOrWhiteSpace(k.Answer))
+                .Select(k => new AiKnowledgeItemDto
+                {
+                    Id = string.IsNullOrWhiteSpace(k.Id) ? Guid.NewGuid().ToString("N") : k.Id.Trim(),
+                    Question = k.Question?.Trim() ?? string.Empty,
+                    Keywords = k.Keywords?.Trim() ?? string.Empty,
+                    Answer = k.Answer?.Trim() ?? string.Empty
+                })
+                .ToList() ?? []
+        };
+
+        setting.Value = JsonSerializer.Serialize(payload);
+        setting.UpdatedAt = DateTime.UtcNow;
+        await dbContext.SaveChangesAsync(cancellationToken);
+
+        return payload;
     }
 
     public async Task<ConsultResponseDto> ConsultAsync(ConsultRequestDto request, ApplicationDbContext dbContext, CancellationToken cancellationToken = default)
@@ -57,33 +88,36 @@ public class AiConsultantService
         var detectedPhone = ExtractPhoneNumber(rawMessage) ?? ExtractPhoneNumber(request.CustomerPhone ?? string.Empty);
         var leadSaved = false;
 
-        // Tự động lưu số điện thoại khách hàng nếu phát hiện
         if (!string.IsNullOrWhiteSpace(detectedPhone))
         {
             leadSaved = await TrySaveLeadAsync(detectedPhone, rawMessage, request.CustomerName, dbContext, cancellationToken);
         }
 
+        var training = await GetTrainingSettingsAsync(dbContext, cancellationToken);
+
         string reply;
-        var apiKey = _configuration["Gemini:ApiKey"] ?? Environment.GetEnvironmentVariable("GEMINI_API_KEY");
+        var apiKey = !string.IsNullOrWhiteSpace(training.CustomApiKey)
+            ? training.CustomApiKey
+            : _configuration["Gemini:ApiKey"] ?? Environment.GetEnvironmentVariable("GEMINI_API_KEY");
 
         if (!string.IsNullOrWhiteSpace(apiKey))
         {
             try
             {
-                reply = await CallGeminiAsync(rawMessage, request.History, apiKey, cancellationToken);
+                reply = await CallGeminiWithTrainedKnowledgeAsync(rawMessage, request.History, training, apiKey, cancellationToken);
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "Gemini API error, falling back to expert knowledge engine.");
-                reply = GenerateExpertFallbackResponse(rawMessage, detectedPhone, leadSaved);
+                _logger.LogWarning(ex, "Gemini API failed or key expired, using taught knowledge base fallback.");
+                reply = MatchTrainedKnowledgeFallback(rawMessage, detectedPhone, leadSaved, training);
             }
         }
         else
         {
-            reply = GenerateExpertFallbackResponse(rawMessage, detectedPhone, leadSaved);
+            reply = MatchTrainedKnowledgeFallback(rawMessage, detectedPhone, leadSaved, training);
         }
 
-        var suggestions = GenerateSuggestions(rawMessage);
+        var suggestions = GenerateSuggestions(rawMessage, training);
 
         return new ConsultResponseDto
         {
@@ -141,13 +175,40 @@ public class AiConsultantService
         }
     }
 
-    private async Task<string> CallGeminiAsync(string userMessage, List<ChatMessageDto>? history, string apiKey, CancellationToken cancellationToken)
+    private async Task<string> CallGeminiWithTrainedKnowledgeAsync(string userMessage, List<ChatMessageDto>? history, AiTrainingSettingsDto training, string apiKey, CancellationToken cancellationToken)
     {
         var url = $"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={apiKey}";
 
+        // Xây dựng System Instruction từ những gì người dùng đã dạy
+        var sbPrompt = new System.Text.StringBuilder();
+        sbPrompt.AppendLine(training.SystemPrompt);
+        sbPrompt.AppendLine();
+        sbPrompt.AppendLine("=== KHO TRI THỨC VÀ BÀI HỌC BẠN ĐÃ ĐƯỢC HUẤN LUYỆN (BẮT BUỘC ƯU TIÊN SỬ DỤNG): ===");
+
+        if (training.KnowledgeBase != null && training.KnowledgeBase.Count > 0)
+        {
+            int index = 1;
+            foreach (var item in training.KnowledgeBase)
+            {
+                sbPrompt.AppendLine($"[Bài học {index}]");
+                sbPrompt.AppendLine($"- Câu hỏi thường gặp: {item.Question}");
+                if (!string.IsNullOrWhiteSpace(item.Keywords))
+                {
+                    sbPrompt.AppendLine($"- Từ khóa liên quan: {item.Keywords}");
+                }
+                sbPrompt.AppendLine($"- Nội dung trả lời chuẩn của công ty: {item.Answer}");
+                sbPrompt.AppendLine();
+                index++;
+            }
+        }
+
+        sbPrompt.AppendLine("QUY TẮC:");
+        sbPrompt.AppendLine("1. Hãy đối chiếu câu hỏi của khách hàng với các bài học đã dạy ở trên để đưa ra câu trả lời chính xác, sát thực tế nhất.");
+        sbPrompt.AppendLine("2. Giữ phong thái lịch thiệp, xưng hô 'Dạ, em chào anh/chị' và mời khách để lại Số điện thoại nếu cần khảo sát thực tế hoặc nhận báo giá qua Zalo.");
+        sbPrompt.AppendLine("3. Trả lời súc tích, ngắt đoạn rõ ràng, dùng gạch đầu dòng để dễ đọc trên điện thoại.");
+
         var contents = new List<object>();
 
-        // Thêm system instruction thông qua prompt đầu tiên hoặc API structure
         if (history != null && history.Count > 0)
         {
             foreach (var h in history.TakeLast(6))
@@ -170,13 +231,13 @@ public class AiConsultantService
         {
             systemInstruction = new
             {
-                parts = new[] { new { text = SystemPrompt } }
+                parts = new[] { new { text = sbPrompt.ToString() } }
             },
             contents,
             generationConfig = new
             {
-                temperature = 0.5,
-                maxOutputTokens = 800,
+                temperature = 0.4,
+                maxOutputTokens = 900,
             }
         };
 
@@ -187,123 +248,180 @@ public class AiConsultantService
         var candidate = json.GetProperty("candidates")[0];
         var text = candidate.GetProperty("content").GetProperty("parts")[0].GetProperty("text").GetString();
 
-        return text?.Trim() ?? "Dạ, em chào anh/chị! Hiện em đang ghi nhận câu hỏi, anh/chị có thể gọi ngay Hotline 0909 9333 58 để kỹ sư giải đáp trực tiếp ạ!";
+        return text?.Trim() ?? "Dạ, em chào anh/chị! Em đã ghi nhận câu hỏi, anh/chị có thể gọi ngay Hotline 0909 9333 58 để kỹ sư giải đáp trực tiếp ạ!";
     }
 
-    private static string GenerateExpertFallbackResponse(string userMessage, string? detectedPhone, bool leadSaved)
+    private static string MatchTrainedKnowledgeFallback(string userMessage, string? detectedPhone, bool leadSaved, AiTrainingSettingsDto training)
     {
-        var lower = userMessage.ToLowerInvariant();
+        var lowerMsg = userMessage.ToLowerInvariant();
 
         if (leadSaved && !string.IsNullOrWhiteSpace(detectedPhone))
         {
             return $"Dạ, Thang Máy Hà Hồng đã ghi nhận số điện thoại **{detectedPhone}** của anh/chị thành công! 📞\n\nKỹ sư bên em sẽ liên hệ lại qua điện thoại/Zalo để gửi bản vẽ thiết kế 2D/3D sơ bộ và bảng dự toán chi tiết nhất cho công trình của mình trong ít phút tới ạ!\n\nNếu cần trao đổi gấp, anh/chị có thể gọi trực tiếp Hotline 24/7: **0909 9333 58**.";
         }
 
-        if (lower.Contains("giá") || lower.Contains("chi phí") || lower.Contains("bao nhiêu tiền") || lower.Contains("báo giá"))
+        // Tìm kiếm câu trả lời khớp nhất trong kho tri thức đã dạy
+        if (training.KnowledgeBase != null && training.KnowledgeBase.Count > 0)
         {
-            return """
-                Dạ, em chào anh/chị! Về chi phí thang máy tại Hà Hồng, mức giá phụ thuộc vào số tầng, tải trọng và dòng động cơ:
+            AiKnowledgeItemDto? bestMatch = null;
+            int highestScore = 0;
 
-                • **Thang máy gia đình liên doanh (Homelift):** Khoảng từ **280 - 450 triệu VNĐ** (linh kiện chính như máy kéo, tủ điện nhập khẩu Ý/Đức/Nhật, cabin gia công inox cao cấp trong nước).
-                • **Thang máy nhập khẩu nguyên chiếc:** Khoảng từ **550 triệu - 1,2 tỷ VNĐ** (châu Âu, Nhật Bản).
-                • **Gói cải tạo, nâng cấp cabin:** Khoảng từ **80 - 180 triệu VNĐ**.
+            foreach (var item in training.KnowledgeBase)
+            {
+                int score = 0;
+                var qLower = item.Question.ToLowerInvariant();
+                var kwList = (item.Keywords ?? "").ToLowerInvariant().Split(new[] { ',', ';', '|' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 
-                👉 Anh/chị có thể để lại **Số điện thoại** hoặc số tầng dự kiến, kỹ sư bên em sẽ tính toán bảng dự toán chi tiết và gửi qua Zalo cho mình ngay ạ!
-                """;
+                // Điểm theo câu hỏi
+                if (lowerMsg.Contains(qLower) || qLower.Contains(lowerMsg))
+                {
+                    score += 10;
+                }
+
+                // Điểm theo từ khóa
+                foreach (var kw in kwList)
+                {
+                    if (lowerMsg.Contains(kw))
+                    {
+                        score += 3;
+                    }
+                }
+
+                // Điểm theo từ ngữ chung
+                var qWords = qLower.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                foreach (var w in qWords)
+                {
+                    if (w.Length > 2 && lowerMsg.Contains(w))
+                    {
+                        score += 1;
+                    }
+                }
+
+                if (score > highestScore)
+                {
+                    highestScore = score;
+                    bestMatch = item;
+                }
+            }
+
+            if (bestMatch != null && highestScore >= 2)
+            {
+                var response = bestMatch.Answer;
+                if (!string.IsNullOrWhiteSpace(detectedPhone))
+                {
+                    response = $"Dạ em đã ghi nhận số điện thoại **{detectedPhone}** của anh/chị!\n\n" + response;
+                }
+                return response;
+            }
         }
 
-        if (lower.Contains("kích thước") || lower.Contains("hố thang") || lower.Contains("diện tích") || lower.Contains("pit") || lower.Contains("oh") || lower.Contains("mặt bằng"))
-        {
-            return """
-                Dạ, chào anh/chị! Kích thước hố thang phụ thuộc vào tải trọng và không gian nhà mình:
-
-                • **Tải trọng 300kg - 350kg (chở 3-4 người):** Kích thước hố thông thủy chỉ cần từ **1300mm x 1300mm** (lọt lòng cabin khoảng 900 x 900mm).
-                • **Tải trọng 450kg (chở 6 người):** Kích thước hố từ **1500mm x 1500mm** (cabin khoảng 1100 x 1000mm).
-                • **Hố PIT:** Dòng Homelift của Hà Hồng chỉ cần âm sâu **250 - 300mm**, không ảnh hưởng đến đà kiềng hay bể phốt nhà phố.
-                • **Chiều cao tầng trên cùng (OH):** Tối thiểu chỉ từ **2800 - 3200mm**.
-
-                👉 Nhà mình đang là nhà xây mới hay nhà cải tạo, và diện tích dự kiến dành cho thang là bao nhiêu mét ạ?
-                """;
-        }
-
-        if (lower.Contains("thang kính") || lower.Contains("kính") || lower.Contains("quan sát"))
-        {
-            return """
-                Dạ, **Thang máy kính quan sát** (thang máy vách kính) hiện là xu hướng rất được ưa chuộng tại Hà Hồng cho biệt thự và nhà phố hiện đại:
-
-                • **Ưu điểm:** Lấy sáng tự nhiên, không gian thông thoáng, nhìn xuyên thấu sang trọng và nâng tầm kiến trúc ngôi nhà.
-                • **Kết cấu:** Khung thép định hình sơn tĩnh điện cao cấp kết hợp kính cường lực an toàn 10mm - 12mm.
-                • **Chi phí:** Thường cao hơn thang tường gạch truyền thống khoảng 15% - 25% do phần kết cấu khung thép và kính cường lực.
-
-                👉 Anh/chị có muốn tham khảo một số mẫu thang kính thực tế bên em vừa bàn giao không ạ?
-                """;
-        }
-
-        if (lower.Contains("bảo trì") || lower.Contains("bảo dưỡng") || lower.Contains("sửa chữa") || lower.Contains("hư") || lower.Contains("kẹt"))
-        {
-            return """
-                Dạ, dịch vụ **Bảo trì & Cứu hộ thang máy** của Hà Hồng cam kết:
-
-                • **Tần suất bảo trì định kỳ:** 1 tháng/lần hoặc 2 tháng/lần theo tiêu chuẩn an toàn quốc gia.
-                • **Quy trình kiểm tra:** Đầy đủ 24 hạng mục (thắng cơ, ray dẫn hướng, cáp tải, nút bấm, cảm biến cửa Photocell, hệ thống liên lạc cứu hộ Intercom).
-                • **Hỗ trợ khẩn cấp 24/7:** Đội ngũ kỹ thuật viên có mặt kịp thời xử lý sự cố.
-
-                👉 Anh/chị cần bảo trì thang máy đang sử dụng hay cần hỗ trợ kỹ thuật gấp, vui lòng liên hệ Hotline: **0909 9333 58** để được cử kỹ thuật viên đến ngay ạ!
-                """;
-        }
-
-        if (lower.Contains("mấy người") || lower.Contains("tải trọng") || lower.Contains("450kg") || lower.Contains("350kg") || lower.Contains("630kg"))
-        {
-            return """
-                Dạ, tải trọng thang máy được tính theo số lượng người sử dụng trung bình:
-
-                • **250kg - 300kg:** Chở 2 - 3 người (rất nhỏ gọn cho nhà diện tích hẹp).
-                • **350kg:** Chở 4 - 5 người (lựa chọn phổ biến nhất cho nhà phố 3 - 6 tầng).
-                • **450kg:** Chở 6 người (rất thoải mái cho gia đình nhiều thế hệ hoặc kết hợp văn phòng nhỏ).
-                • **630kg - 1000kg:** Chở 8 - 14 người (phù hợp văn phòng, khách sạn, căn hộ dịch vụ).
-
-                👉 Công trình nhà mình có khoảng bao nhiêu thành viên sử dụng hằng ngày ạ?
-                """;
-        }
-
-        return """
+        // Nếu không khớp câu nào trong kho tri thức, trả về hướng dẫn chung
+        return $"""
             Dạ, em chào anh/chị! Em là trợ lý kỹ thuật của **Thang Máy Hà Hồng** 🏢
 
-            Em có thể hỗ trợ anh/chị giải đáp nhanh về:
-            1. **Tư vấn kích thước hố thang & tải trọng** (300kg - 1000kg) phù hợp mặt bằng nhà mình.
-            2. **Báo giá dự toán thang máy gia đình, thang kính, thang văn phòng**.
-            3. **Quy trình lắp đặt, bảo trì định kỳ và cứu hộ 24/7**.
-
-            Anh/chị đang quan tâm đến hạng mục nào, hoặc có thể để lại **Số điện thoại** để kỹ sư bên em gửi bản vẽ và báo giá cụ thể cho mình nhé!
+            Hiện em đang được đào tạo chuyên sâu về kỹ thuật, kích thước hố thang, báo giá và dịch vụ bảo trì thang máy.
+            
+            👉 Anh/chị có thể nhắn rõ hơn về nhu cầu (ví dụ: số tầng, tải trọng mong muốn) hoặc để lại **Số điện thoại** để kỹ sư Hà Hồng liên hệ tư vấn trực tiếp và gửi bản vẽ chi tiết cho mình nhé!
             """;
     }
 
-    private static List<string> GenerateSuggestions(string userMessage)
+    private static List<string> GenerateSuggestions(string userMessage, AiTrainingSettingsDto training)
     {
-        var lower = userMessage.ToLowerInvariant();
-
-        if (lower.Contains("giá") || lower.Contains("chi phí"))
+        // Ưu tiên lấy các câu hỏi từ kho tri thức mà người dùng đã dạy
+        if (training.KnowledgeBase != null && training.KnowledgeBase.Count > 0)
         {
-            return [
-                "Kích thước hố thang 350kg cần bao nhiêu?",
-                "Nên làm thang kính hay thang tường gạch?",
-                "Quy trình khảo sát tại nhà thế nào?"
-            ];
-        }
-
-        if (lower.Contains("kích thước") || lower.Contains("hố thang"))
-        {
-            return [
-                "Chi phí thang gia đình 4 tầng khoảng bao nhiêu?",
-                "Hố PIT nông 300mm có an toàn không?",
-                "Tư vấn thang kính cho nhà cải tạo"
-            ];
+            return training.KnowledgeBase
+                .Where(k => !string.IsNullOrWhiteSpace(k.Question))
+                .Select(k => k.Question)
+                .Take(4)
+                .ToList();
         }
 
         return [
             "Báo giá thang máy gia đình 4 tầng",
             "Tư vấn kích thước hố thang nhỏ nhất",
-            "Chi phí bảo trì thang máy định kỳ"
+            "Nên chọn thang kính hay thang inox?",
+            "Chính sách bảo trì và bảo hành"
         ];
+    }
+
+    public static AiTrainingSettingsDto GetDefaultTrainingSettings()
+    {
+        return new AiTrainingSettingsDto
+        {
+            SystemPrompt = """
+                Bạn là Chuyên gia Tư vấn Kỹ thuật Cao cấp của Công ty Cổ phần Thương mại Dịch vụ Thang máy Hà Hồng (Hà Hồng Elevator).
+                Thông tin công ty:
+                - Hotline 24/7: 0909 9333 58
+                - Email: hahongco@gmail.com
+                - Website: thangmayhahong.xyz
+                - Dịch vụ: Tư vấn thiết kế bản vẽ 2D/3D, thi công lắp đặt trọn gói, nâng cấp cải tạo, bảo trì định kỳ và cứu hộ khẩn cấp 24/7.
+                - Phong cách: Lịch sự, chuyên nghiệp, bắt đầu bằng 'Dạ, em chào anh/chị!'. Luôn hướng dẫn rõ ràng, trung thực về thông số kỹ thuật và khéo léo mời khách để lại Số điện thoại để gửi dự toán chi tiết.
+                """,
+            CustomApiKey = "",
+            DefaultGreeting = "Dạ, em chào anh/chị! Em là trợ lý kỹ thuật của Thang Máy Hà Hồng 🏢\n\nAnh/chị đang cần tư vấn kích thước hố thang, tải trọng hay báo giá dòng thang nào cho công trình của mình ạ?",
+            KnowledgeBase = [
+                new AiKnowledgeItemDto
+                {
+                    Id = "kb-1",
+                    Question = "Báo giá thang máy gia đình 4 tầng",
+                    Keywords = "báo giá, giá, 4 tầng, chi phí, bao nhiêu tiền, homelift",
+                    Answer = """
+                        Dạ, em chào anh/chị! Về chi phí thang máy gia đình 4 tầng tại Hà Hồng:
+
+                        • **Thang liên doanh (Homelift):** Khoảng từ **280 - 340 triệu VNĐ** (động cơ Fuji Nhật Bản hoặc Montanari Ý, tủ điện vi xử lý hiện đại, cabin inox gương kết hợp sọc nhuyễn).
+                        • **Thang máy kính quan sát:** Khoảng từ **350 - 450 triệu VNĐ** (bao gồm kết cấu khung thép sơn tĩnh điện và kính cường lực an toàn).
+                        • **Thang nhập khẩu nguyên chiếc:** Từ **550 triệu VNĐ trở lên** (tùy thương hiệu châu Âu hoặc Nhật Bản).
+
+                        👉 Mức giá trên đã bao gồm lắp đặt, kiểm định an toàn và bảo hành. Anh/chị có thể để lại **Số điện thoại** để kỹ sư Hà Hồng gửi bảng dự toán chi tiết qua Zalo nhé!
+                        """
+                },
+                new AiKnowledgeItemDto
+                {
+                    Id = "kb-2",
+                    Question = "Kích thước hố thang và độ sâu hố PIT",
+                    Keywords = "kích thước, hố thang, hố pit, pit, oh, diện tích, nhỏ nhất",
+                    Answer = """
+                        Dạ, với dòng thang máy gia đình Homelift của Hà Hồng, kích thước được tối ưu cực kỳ nhỏ gọn:
+
+                        • **Tải trọng 300kg (3 người):** Kích thước hố thông thủy chỉ cần **1300mm x 1300mm** (cabin lọt lòng 900mm x 900mm).
+                        • **Tải trọng 450kg (6 người):** Kích thước hố khoảng **1500mm x 1500mm** (cabin 1100mm x 1000mm).
+                        • **Hố PIT nông:** Chỉ cần âm sâu **250mm - 300mm**, hoàn toàn không đụng móng nhà hay bể phốt, rất lý tưởng cho nhà cải tạo.
+                        • **Chiều cao tầng trên cùng (OH):** Tối thiểu chỉ từ **2800mm - 3200mm**.
+
+                        👉 Anh/chị cho em hỏi diện tích dự kiến làm thang máy ở nhà mình là khoảng bao nhiêu mét vuông ạ?
+                        """
+                },
+                new AiKnowledgeItemDto
+                {
+                    Id = "kb-3",
+                    Question = "Nên chọn thang máy kính hay thang inox truyền thống?",
+                    Keywords = "thang kính, kính, inox, so sánh, vách kính, quan sát",
+                    Answer = """
+                        Dạ, cả hai loại đều có ưu điểm riêng tùy theo kiến trúc ngôi nhà của mình:
+
+                        • **Thang máy kính quan sát:** Lấy sáng tự nhiên, không gian thông thoáng không bị bí bách, nhìn thấy giếng trời rất sang trọng. Chi phí cao hơn khoảng 15% - 25% do có phần kết cấu khung thép chịu lực và vách kính cường lực.
+                        • **Thang inox truyền thống:** Bền bỉ, chống trầy xước tốt, dễ vệ sinh, chi phí tối ưu và che kín hố thang nếu muốn sự riêng tư.
+
+                        👉 Nếu vị trí đặt thang nằm ở giữa lòng cầu thang bộ hoặc giếng trời, làm thang kính sẽ giúp ngôi nhà sáng và thoáng hơn rất nhiều ạ!
+                        """
+                },
+                new AiKnowledgeItemDto
+                {
+                    Id = "kb-4",
+                    Question = "Chính sách bảo trì và cứu hộ khẩn cấp",
+                    Keywords = "bảo trì, bảo hành, cứu hộ, sửa chữa, định kỳ, 24/7",
+                    Answer = """
+                        Dạ, Thang Máy Hà Hồng cam kết dịch vụ bảo trì tiêu chuẩn an toàn cao nhất:
+
+                        • **Bảo hành chính hãng:** Từ 12 đến 24 tháng cho toàn bộ thiết bị và động cơ.
+                        • **Bảo trì định kỳ:** 1 tháng/lần với đầy đủ 24 hạng mục kiểm tra (thắng cơ, ray, cáp tải, cảm biến chống kẹt cửa Photocell, bộ cứu hộ ARD).
+                        • **Đội cứu hộ 24/7:** Kỹ thuật viên túc trực xử lý khẩn cấp mọi lúc, kể cả ngày nghỉ và lễ Tết.
+
+                        👉 Hotline kỹ thuật khẩn cấp 24/7 của Hà Hồng: **0909 9333 58**.
+                        """
+                }
+            ]
+        };
     }
 }

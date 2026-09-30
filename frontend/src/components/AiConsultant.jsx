@@ -69,6 +69,38 @@ function AiConsultant() {
     }
   }, [isOpen, messages, loading]);
 
+  useEffect(() => {
+    let active = true;
+    apiClient
+      .get("/chat/init")
+      .then((res) => {
+        if (!active || !res?.data) return;
+        const { greeting, suggestions } = res.data;
+        if (greeting) {
+          setMessages((prev) => {
+            if (prev.length === 1 && prev[0].id === "welcome") {
+              return [
+                {
+                  id: "welcome",
+                  role: "model",
+                  text: greeting,
+                  suggestions: suggestions?.length ? suggestions : cauHoiKhoiTao,
+                },
+              ];
+            }
+            return prev;
+          });
+        }
+      })
+      .catch(() => {
+        // Fallback mặc định đã có sẵn trong state
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
   const handleSend = async (messageToSend) => {
     const text = (messageToSend || inputValue).trim();
     if (!text || loading) return;

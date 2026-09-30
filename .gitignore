@@ -17,5 +17,6 @@ backend/HaHongElevator.Api/appsettings.Production.json
 *.pem
 
 load-tests/results/
+
 BaoCao/
 tools/

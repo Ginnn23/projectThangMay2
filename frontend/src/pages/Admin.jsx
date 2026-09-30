@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { API_BASE_URL, API_ORIGIN, apiClient } from "../api/client";
+import AiTrainingAdmin from "../components/AiTrainingAdmin";
 import { boLocDuAn, chuanHoaPhanLoaiDuAn, layNhanPhanLoaiDuAn, phanLoaiDuAn } from "../data/projectCategories";
 import { anhDuAnMacDinh } from "../data/projectData";
 
@@ -306,6 +307,7 @@ function AdminToolbar({ activeTab, onChangeTab, user, onLogout }) {
     { key: "home", label: "Trang chủ", icon: "bi-house-gear" },
     { key: "services", label: "Dịch vụ", icon: "bi-tools" },
     { key: "projects", label: "Dự án", icon: "bi-buildings" },
+    { key: "ai", label: "Huấn luyện AI", icon: "bi-robot" },
   ];
 
   return (
@@ -1096,6 +1098,7 @@ function Admin() {
     let dangHoatDong = true;
 
     const taiDuLieuTheoTab = async () => {
+      if (activeTab === "ai") return;
       setLoading(true);
       setError("");
       setHomeMessage("");
@@ -1545,6 +1548,10 @@ function Admin() {
             onChange={(field, value) => setProjectForm((prev) => ({ ...prev, [field]: value }))}
             onReset={() => { setProjectForm(duAnRong); setEditingProjectId(null); }}
           />
+        )}
+
+        {activeTab === "ai" && (
+          <AiTrainingAdmin onShowToast={hienThongBao} />
         )}
       </div>
     </main>

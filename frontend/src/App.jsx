@@ -5,7 +5,6 @@ import { Route, Routes, useLocation } from "react-router-dom";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import FloatingContact from "./components/FloatingContact";
-import AiConsultant from "./components/AiConsultant";
 import Admin from "./pages/Admin";
 import ChiTietDuAn from "./pages/ChiTietDuAn";
 import DichVu from "./pages/DichVu";
@@ -58,7 +57,6 @@ function App() {
         <Route path="/admin" element={<Admin />} />
       </Routes>
       {!laTrangAdmin && <FloatingContact />}
-      {!laTrangAdmin && <AiConsultant />}
       {!laTrangAdmin && <Footer />}
     </>
   );
