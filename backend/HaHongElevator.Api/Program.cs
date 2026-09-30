@@ -35,6 +35,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddScoped<JwtTokenService>();
+builder.Services.AddHttpClient<AiConsultantService>();
 
 var jwtKey = builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException("JWT key is not configured.");
 if (!builder.Environment.IsDevelopment() && jwtKey.Contains("REPLACE_WITH", StringComparison.OrdinalIgnoreCase))
