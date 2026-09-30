@@ -182,7 +182,7 @@ public class AiConsultantService
             return (false, "Chưa nhập API Key. Vui lòng nhập khóa Google Gemini API Key.", null);
         }
 
-        string[] modelsToTry = ["gemini-1.5-flash", "gemini-2.0-flash"];
+        string[] modelsToTry = ["gemini-3.8-flash", "gemini-3.5-flash", "gemini-3.1-flash-lite"];
         string lastError = string.Empty;
 
         foreach (var model in modelsToTry)
@@ -283,7 +283,7 @@ public class AiConsultantService
             }
         };
 
-        string[] modelsToTry = ["gemini-1.5-flash", "gemini-2.0-flash"];
+        string[] modelsToTry = ["gemini-3.8-flash", "gemini-3.5-flash", "gemini-3.1-flash-lite"];
         Exception? lastException = null;
 
         foreach (var model in modelsToTry)
