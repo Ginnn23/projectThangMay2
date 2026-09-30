@@ -38,7 +38,7 @@ function Header() {
         <div className="site-container">
           <NavLink className="navbar-brand" to="/" onClick={dongMenu}>
             <span className="brand-logo-wrap">
-              <img src={logoHaHong} alt="Logo Thang Máy Hà Hồng" />
+              <img src={logoHaHong} alt="Logo Thang Máy Hà Hồng - Lắp đặt thang máy gia đình uy tín TPHCM" />
             </span>
             <span className="brand-text">
               <strong>HÀ HỒNG</strong>

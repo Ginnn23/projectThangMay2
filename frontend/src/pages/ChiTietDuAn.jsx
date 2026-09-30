@@ -4,6 +4,7 @@ import { Link, useParams } from "react-router-dom";
 import { apiClient } from "../api/client";
 import { chuanHoaPhanLoaiDuAn, layNhanPhanLoaiDuAn } from "../data/projectCategories";
 import { chuanHoaDuAn, duAnMau } from "../data/projectData";
+import SeoHead from "../components/SeoHead";
 
 const noiDungChiTietTheoSlug = {
   "thang-may-gia-dinh": {
@@ -236,6 +237,13 @@ function ChiTietDuAn() {
 
   return (
     <main>
+      <SeoHead
+        title={`${duAn.name} - Thông Số Kỹ Thuật, Báo Giá & Hình Ảnh | Hà Hồng`}
+        description={`${duAn.name} - ${duAn.description} Mức giá tham khảo: ${duAn.priceRange}. Đơn vị thi công lắp đặt thang máy uy tín TPHCM.`}
+        keywords={`${duAn.name}, báo giá ${duAn.name.toLowerCase()}, thi công ${duAn.name.toLowerCase()}, thang máy hà hồng`}
+        canonical={`https://thangmayhahong.xyz/du-an/${slug}`}
+        ogImage={projectImages[0]}
+      />
       <section className="project-detail-hero">
         <div className="site-container">
           <nav className="about-breadcrumb" aria-label="breadcrumb">

@@ -23,7 +23,7 @@ function Footer() {
           <div className="col-lg-4">
             <Link className="footer-brand" to="/">
               <span className="brand-logo-wrap footer-logo-wrap">
-                <img src={logoHaHong} alt="Logo Thang Máy Hà Hồng" />
+                <img src={logoHaHong} alt="Thang Máy Hà Hồng - Lắp đặt và bảo trì thang máy gia đình TPHCM" />
               </span>
               <span className="brand-text">
                 <strong>HÀ HỒNG</strong>
@@ -31,8 +31,7 @@ function Footer() {
               </span>
             </Link>
             <p>
-              Đơn vị tư vấn, lắp đặt, nâng cấp và bảo trì giải pháp thang máy
-              phù hợp cho từng công trình.
+              Chuyên tư vấn, thiết kế, thi công lắp đặt thang máy gia đình, homelift kính và dịch vụ bảo trì thang máy 24/7 uy tín tại TPHCM.
             </p>
           </div>
 

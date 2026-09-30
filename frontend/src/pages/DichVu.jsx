@@ -6,6 +6,7 @@ import heroImage from "../assets/images/hero-elevator.jpg";
 import hotelLobbyImage from "../assets/images/elevator-hotel-lobby.jpg";
 import lobbyImage from "../assets/images/elevator-lobby.jpg";
 import { soDienThoaiCongTy, soDienThoaiLienKet } from "../data/contactInfo";
+import SeoHead from "../components/SeoHead";
 
 const anhDichVuMacDinh = [lobbyImage, heroImage, elevatorDoorsImage, hotelLobbyImage];
 
@@ -317,6 +318,12 @@ function KeuGoiHanhDong() {
 function DichVu() {
   return (
     <main>
+      <SeoHead
+        title="Dịch Vụ Thang Máy Chuyên Nghiệp - Lắp Đặt, Bảo Trì & Sửa Chữa 24/7 | Hà Hồng"
+        description="Dịch vụ thang máy trọn gói tại TPHCM: Tư vấn thiết kế, thi công lắp đặt thang máy gia đình, bảo trì bảo dưỡng định kỳ, cải tạo nâng cấp và cứu hộ khẩn cấp 24/7."
+        keywords="dịch vụ thang máy, lắp đặt thang máy, bảo trì thang máy tphcm, sửa chữa thang máy, bảo dưỡng thang máy định kỳ, thang máy gia đình hà hồng"
+        canonical="https://thangmayhahong.xyz/dich-vu"
+      />
       <BannerTrang />
       <GioiThieuDichVu />
       <DanhSachDichVu />

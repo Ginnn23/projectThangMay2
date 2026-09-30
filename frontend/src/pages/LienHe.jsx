@@ -10,6 +10,7 @@ import {
   soDienThoaiCongTy,
   soDienThoaiLienKet,
 } from "../data/contactInfo";
+import SeoHead from "../components/SeoHead";
 
 const soDienThoai = soDienThoaiCongTy;
 const emailLienHe = emailCongTy;
@@ -431,6 +432,12 @@ function KeuGoiLienHe() {
 function LienHe() {
   return (
     <main>
+      <SeoHead
+        title="Liên Hệ & Yêu Cầu Báo Giá Thang Máy Gia Đình | Thang Máy Hà Hồng"
+        description="Liên hệ ngay Thang Máy Hà Hồng để nhận tư vấn kỹ thuật miễn phí, khảo sát công trình và bảng báo giá thang máy gia đình, homelift ưu đãi nhất TPHCM. Hotline: 0909 9333 58."
+        keywords="báo giá thang máy gia đình, liên hệ thang máy hà hồng, tư vấn lắp đặt thang máy, khảo sát thang máy tphcm"
+        canonical="https://thangmayhahong.xyz/lien-he"
+      />
       <BannerLienHe />
       <ThongTinLienHe />
       <FormLienHe />

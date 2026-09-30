@@ -2,6 +2,7 @@ import heroImage from "../assets/images/hero-elevator.jpg";
 import lobbyImage from "../assets/images/elevator-lobby.jpg";
 import { soDienThoaiCongTy, soDienThoaiLienKet } from "../data/contactInfo";
 import hotelLobbyImage from "../assets/images/elevator-hotel-lobby.jpg";
+import SeoHead from "../components/SeoHead";
 
 const diemNoiBat = [
   "Tư vấn dựa trên nhu cầu thực tế",
@@ -301,6 +302,12 @@ function CtaSection() {
 function GioiThieu() {
   return (
     <main>
+      <SeoHead
+        title="Giới Thiệu Công Ty Thang Máy Hà Hồng - Uy Tín & Trách Nhiệm TPHCM"
+        description="Thang Máy Hà Hồng - Đơn vị hàng đầu trong tư vấn, cung cấp, thi công lắp đặt thang máy gia đình, thang máy tải khách và bảo trì định kỳ chuyên nghiệp tại TPHCM."
+        keywords="giới thiệu thang máy hà hồng, công ty thang máy tphcm, đơn vị lắp thang máy uy tín, bảo trì thang máy hà hồng"
+        canonical="https://thangmayhahong.xyz/gioi-thieu"
+      />
       <AboutBanner />
       <GioiThieuDoanhNghiep />
       <GiaTriSection />

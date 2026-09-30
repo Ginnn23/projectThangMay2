@@ -6,6 +6,7 @@ import heroImage from "../assets/images/hero-elevator.jpg";
 import { soDienThoaiCongTy, soDienThoaiLienKet } from "../data/contactInfo";
 import { boLocDuAn, chuanHoaPhanLoaiDuAn, layNhanPhanLoaiDuAn } from "../data/projectCategories";
 import { anhDuAnMacDinh, chuanHoaDuAn, duAnMau } from "../data/projectData";
+import SeoHead from "../components/SeoHead";
 
 const SO_DU_AN_MOI_TRANG = 6;
 
@@ -34,7 +35,7 @@ function BannerDuAn() {
           <span>Dự án</span>
         </nav>
         <span className="section-eyebrow">THƯ VIỆN DỰ ÁN</span>
-        <h1>Giải pháp cho từng không gian</h1>
+        <h1>Dự Án Thi Công Thang Máy Tiêu Biểu</h1>
         <p>Tham khảo các dòng thang máy và hạng mục kỹ thuật phù hợp với nhà ở, văn phòng, doanh nghiệp, khách sạn và công trình thương mại.</p>
       </div>
     </section>
@@ -121,6 +122,12 @@ function DuAn() {
 
   return (
     <main>
+      <SeoHead
+        title="Dự Án Thang Máy Thực Tế - Thang Máy Gia Đình, Homelift, Kính Đẹp | Hà Hồng"
+        description="Tổng hợp các dự án thi công thang máy gia đình, biệt thự, thang máy kính homelift và thang máy văn phòng đã hoàn thiện bởi Thang Máy Hà Hồng."
+        keywords="dự án thang máy, mẫu thang máy gia đình đẹp, thang máy kính gia đình, thang máy văn phòng, thi công thang máy thực tế"
+        canonical="https://thangmayhahong.xyz/du-an"
+      />
       <BannerDuAn />
       <section className="project-filter-section">
         <div className="site-container">

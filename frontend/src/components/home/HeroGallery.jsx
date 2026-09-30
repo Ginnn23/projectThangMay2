@@ -45,15 +45,15 @@ function HeroGallery() {
   return (
     <div className="hero-gallery" data-aos="fade-left" data-aos-delay="120">
       <div className="hero-gallery-main">
-        <img src={activeImage} alt="Sảnh thang máy Hà Hồng" key={activeImage} />
+        <img src={activeImage} alt="Lắp đặt thang máy gia đình hiện đại - Thang Máy Hà Hồng" key={activeImage} />
       </div>
 
       <div className="hero-gallery-side">
         <div className="hero-gallery-small">
-          <img src={heroSettings.sideImages[0]} alt="Cabin thang máy Hà Hồng" />
+          <img src={heroSettings.sideImages[0]} alt="Nội thất cabin thang máy inox sang trọng" />
         </div>
         <div className="hero-gallery-small">
-          <img src={heroSettings.sideImages[1]} alt="Không gian thang máy hoàn thiện" />
+          <img src={heroSettings.sideImages[1]} alt="Thi công thang máy trọn gói chất lượng cao" />
         </div>
         <div className="hero-gallery-badge">
           <i className="bi bi-shield-check"></i>

@@ -10,6 +10,7 @@ import { apiClient } from "../api/client";
 import { soDienThoaiCongTy, soDienThoaiLienKet } from "../data/contactInfo";
 import { layNhanPhanLoaiDuAn } from "../data/projectCategories";
 import { chuanHoaDuAn } from "../data/projectData";
+import SeoHead from "../components/SeoHead";
 
 const services = [
   {
@@ -108,6 +109,12 @@ function Home() {
 
   return (
     <main>
+      <SeoHead
+        title="Thang Máy Hà Hồng - Lắp Đặt, Cải Tạo & Bảo Trì Thang Máy Gia Đình Uy Tín TPHCM"
+        description="Công ty Thang Máy Hà Hồng chuyên tư vấn, thiết kế, lắp đặt thang máy gia đình, thang máy kính homelift, cải tạo và bảo trì thang máy uy tín giá tốt tại TPHCM. Hotline 24/7: 0909 9333 58."
+        keywords="thang máy, thang máy gia đình, thang máy gia đình tphcm, báo giá thang máy, thang máy kính, thang máy homelift, lắp đặt thang máy, bảo trì thang máy, thang máy hà hồng"
+        canonical="https://thangmayhahong.xyz/"
+      />
       <Hero />
       <TrustStrip />
 

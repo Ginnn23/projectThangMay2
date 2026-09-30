@@ -7,15 +7,14 @@ function Hero() {
       <div className="site-container hero-container">
         <div className="hero-grid">
           <div className="hero-content" data-aos="fade-right">
-            <span className="hero-eyebrow">HÀ HỒNG ELEVATOR</span>
+            <span className="hero-eyebrow">CHUYÊN GIA THANG MÁY GIA ĐÌNH & CÔNG TRÌNH TPHCM</span>
             <h1>
-              <span className="hero-title-line">Giải pháp thang máy</span>
+              <span className="hero-title-line">Thang máy gia đình uy tín</span>
               <span className="hero-title-line hero-title-highlight">an toàn, tinh gọn</span>
-              <span className="hero-title-line hero-title-highlight">và hiện đại</span>
+              <span className="hero-title-line hero-title-highlight">và chuẩn kỹ thuật</span>
             </h1>
             <p>
-              Tư vấn, lắp đặt, bảo trì và nâng cấp thang máy cho nhà ở, văn phòng và công trình dân dụng với quy trình rõ ràng,
-              kỹ thuật chắc chắn và thẩm mỹ chuyên nghiệp.
+              Tư vấn, báo giá, lắp đặt và bảo trì thang máy gia đình, homelift kính, thang máy tải khách tại TP. Hồ Chí Minh và khu vực phía Nam. Khảo sát công trình tận nơi miễn phí.
             </p>
             <div className="hero-actions">
               <a href="/lien-he" className="btn hero-primary-button">

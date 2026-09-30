@@ -29,11 +29,7 @@ public class ChatController : ControllerBase
             return BadRequest(new { message = "Tin nhắn không được để trống." });
         }
 
-        var clientIp = HttpContext.Request.Headers["X-Forwarded-For"].FirstOrDefault()
-            ?? HttpContext.Connection.RemoteIpAddress?.ToString()
-            ?? "unknown";
-
-        var response = await _aiConsultantService.ConsultAsync(request, clientIp, _dbContext, cancellationToken);
+        var response = await _aiConsultantService.ConsultAsync(request, _dbContext, cancellationToken);
         return Ok(response);
     }
 
