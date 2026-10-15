@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { apiClient } from "../api/client";
 import { soDienThoaiCongTy, soDienThoaiLienKet, emailCongTy } from "../data/contactInfo";
 import SeoHead from "../components/SeoHead";
+import CabinVisualizer from "../components/CabinVisualizer";
 import logoHaHong from "../assets/images/logo-ha-hong.jpg";
 import heroImage from "../assets/images/hero-elevator.jpg";
 
@@ -355,6 +356,32 @@ export default function DuToanThangMay() {
                     </div>
                   ))}
                 </div>
+
+                <div className="mt-4 pt-3 border-top">
+                  <label className="form-label fw-bold d-block mb-2">Quy cách mở cửa tự động:</label>
+                  <div className="row g-2">
+                    <div className="col-6">
+                      <button
+                        type="button"
+                        className={`estimator-option-btn w-100 text-start p-2 rounded-2 border ${doorType === "CO" ? "active-option" : ""}`}
+                        onClick={() => setDoorType("CO")}
+                      >
+                        <strong className="d-block fs-6">Cửa mở tim (CO)</strong>
+                        <small className="text-muted" style={{ fontSize: "11px" }}>2 cánh mở về 2 phía cân đối</small>
+                      </button>
+                    </div>
+                    <div className="col-6">
+                      <button
+                        type="button"
+                        className={`estimator-option-btn w-100 text-start p-2 rounded-2 border ${doorType === "SO" ? "active-option" : ""}`}
+                        onClick={() => setDoorType("SO")}
+                      >
+                        <strong className="d-block fs-6">Cửa mở lùa (SO)</strong>
+                        <small className="text-muted" style={{ fontSize: "11px" }}>2 cánh lùa 1 bên (cho hố hẹp)</small>
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </div>
 
               {/* Step 4: Motor Brand */}
@@ -388,6 +415,15 @@ export default function DuToanThangMay() {
             {/* Right Column: Live Estimates & Blueprint Display */}
             <div className="col-lg-5">
               <div className="estimator-sticky-sidebar">
+                {/* Real-time Interactive 2.5D Cabin Visualizer */}
+                <CabinVisualizer
+                  elevatorType={elevatorType}
+                  onChangeElevatorType={setElevatorType}
+                  capacityKg={Number(capacityKg)}
+                  stops={Number(stops)}
+                  doorType={doorType}
+                />
+
                 {/* Price Display Card */}
                 <div className="card shadow-sm border-0 mb-4 overflow-hidden rounded-3">
                   <div className="card-header bg-primary text-white p-3">
