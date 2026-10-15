@@ -22,6 +22,26 @@ export default function DuToanThangMay() {
   const [address, setAddress] = useState("");
   const [customerNotes, setCustomerNotes] = useState("");
 
+  // Bespoke Cabin Specs (Wall, Floor, Ceiling, Handrail)
+  const [cabinSpecs, setCabinSpecs] = useState({
+    wall: "Vách Kính Panorama",
+    floor: "Đá Granite Kim Sa Đen",
+    ceiling: "Trần Vòm Âm LED",
+    handrail: "Tay Vịn Tròn Mạ Vàng"
+  });
+
+  const handleCabinConsultation = (specs) => {
+    if (specs) {
+      setCabinSpecs(specs);
+      const noteText = `Khách hàng quan tâm cấu hình Cabin: Vách: ${specs.wall}, Sàn: ${specs.floor}, Trần: ${specs.ceiling}, Tay vịn: ${specs.handrail}.`;
+      setCustomerNotes(noteText);
+    }
+    const formElement = document.querySelector(".quote-form-card");
+    if (formElement) {
+      formElement.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
   // Result state
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -176,7 +196,9 @@ export default function DuToanThangMay() {
         elevatorType,
         motorBrand,
         doorType,
-        customerNotes: customerNotes.trim() || null
+        customerNotes: customerNotes.trim()
+          ? customerNotes.trim()
+          : `Nội thất Cabin lựa chọn: Vách ${cabinSpecs.wall}, Sàn ${cabinSpecs.floor}, Trần ${cabinSpecs.ceiling}, Tay vịn ${cabinSpecs.handrail}.`
       };
 
       const res = await apiClient.post("/estimates", payload);
@@ -422,6 +444,8 @@ export default function DuToanThangMay() {
                   capacityKg={Number(capacityKg)}
                   stops={Number(stops)}
                   doorType={doorType}
+                  onApplyConfig={setCabinSpecs}
+                  onRequestConsultation={handleCabinConsultation}
                 />
 
                 {/* Price Display Card */}
@@ -697,6 +721,7 @@ export default function DuToanThangMay() {
               <tr><td style={{ border: "1px solid #ddd", padding: "6px 8px" }}>Số tầng phục vụ</td><td style={{ border: "1px solid #ddd", padding: "6px 8px" }}><strong>{stops} Điểm dừng (Stops)</strong></td></tr>
               <tr><td style={{ border: "1px solid #ddd", padding: "6px 8px" }}>Tải trọng định mức</td><td style={{ border: "1px solid #ddd", padding: "6px 8px" }}><strong>{capacityKg} kg</strong> (Khoảng 4 - 6 người)</td></tr>
               <tr><td style={{ border: "1px solid #ddd", padding: "6px 8px" }}>Dòng thang máy</td><td style={{ border: "1px solid #ddd", padding: "6px 8px" }}>{elevatorType === "homelift-kinh" ? "Thang máy kính Homelift Panorama" : (elevatorType === "inox-guong-vang" ? "Cabin Inox Gương Vàng Luxury" : "Inox 304 Tiêu Chuẩn")}</td></tr>
+              <tr><td style={{ border: "1px solid #ddd", padding: "6px 8px" }}>Nội thất Cabin cấu hình</td><td style={{ border: "1px solid #ddd", padding: "6px 8px" }}><strong>Vách:</strong> {cabinSpecs.wall} | <strong>Sàn:</strong> {cabinSpecs.floor} | <strong>Trần:</strong> {cabinSpecs.ceiling} | <strong>Tay vịn:</strong> {cabinSpecs.handrail}</td></tr>
               <tr><td style={{ border: "1px solid #ddd", padding: "6px 8px" }}>Động cơ chính</td><td style={{ border: "1px solid #ddd", padding: "6px 8px" }}><strong>{motorBrand}</strong> {result?.motorPowerKw}kW (Không hộp số tiết kiệm điện)</td></tr>
               <tr><td style={{ border: "1px solid #ddd", padding: "6px 8px" }}>Kích thước giếng thang (W x D)</td><td style={{ border: "1px solid #ddd", padding: "6px 8px" }}>{result?.shaftWidth} x {result?.shaftDepth} mm</td></tr>
               <tr><td style={{ border: "1px solid #ddd", padding: "6px 8px" }}>Kích thước cabin (W x D x H)</td><td style={{ border: "1px solid #ddd", padding: "6px 8px" }}>{result?.cabinWidth} x {result?.cabinDepth} x 2200 mm</td></tr>

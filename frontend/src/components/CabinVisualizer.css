@@ -1,330 +1,372 @@
 /* ==========================================================================
-   CabinVisualizer.css - Bộ phối cảnh Cabin Thang Máy Trực Quan 2.5D/3D
-   Thang Máy Hà Hồng - Real-time Interactive Customizer
+   CabinVisualizer.css - Premium Elevator Cabin Configurator
+   Thang Máy Hà Hồng - Architectural Bespoke Design Language
+   Colors: Navy (#0b132b, #1c2541), Champagne Gold (#c5a880, #d4af37), Metal Grey (#e2e8f0, #94a3b8)
    ========================================================================== */
 
-.cabin-visualizer-container {
-  background: linear-gradient(145deg, #0b1329 0%, #172554 100%);
+.premium-cabin-configurator {
+  background: #0f172a;
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 16px 36px -8px rgba(2, 6, 23, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.08);
+  box-shadow: 0 20px 40px -15px rgba(2, 6, 23, 0.6), 0 0 0 1px rgba(197, 168, 128, 0.15);
   color: #f8fafc;
-  margin-bottom: 1.5rem;
-  font-family: inherit;
-  position: relative;
+  margin-bottom: 2rem;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  transition: all 0.3s ease;
 }
 
-/* Header bar */
-.cabin-viz-header {
+/* 1. Header Bar */
+.configurator-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 18px;
-  background: rgba(15, 23, 42, 0.75);
-  backdrop-filter: blur(8px);
+  padding: 16px 20px;
+  background: linear-gradient(180deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.95) 100%);
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.cabin-viz-title {
+.configurator-title-wrap {
   display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.92rem;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.configurator-eyebrow {
+  font-size: 0.68rem;
   font-weight: 700;
-  letter-spacing: 0.5px;
-  color: #f1f5f9;
-  margin: 0;
-}
-
-.cabin-viz-badge {
-  background: linear-gradient(135deg, #d97706, #f59e0b);
-  color: #0f172a;
-  font-size: 0.7rem;
-  font-weight: 800;
-  padding: 3px 8px;
-  border-radius: 999px;
+  letter-spacing: 1.5px;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.cabin-viz-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.cabin-viz-btn-action {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  color: #f8fafc;
-  padding: 5px 12px;
-  border-radius: 8px;
-  font-size: 0.78rem;
-  font-weight: 600;
+  color: #c5a880; /* Champagne gold */
   display: flex;
   align-items: center;
   gap: 6px;
-  cursor: pointer;
-  transition: all 0.2s ease;
 }
 
-.cabin-viz-btn-action:hover {
-  background: rgba(255, 255, 255, 0.2);
+.configurator-title {
+  font-size: 1.05rem;
+  font-weight: 700;
   color: #ffffff;
-  border-color: rgba(255, 255, 255, 0.3);
+  margin: 0;
+  letter-spacing: -0.2px;
 }
 
-.cabin-viz-btn-action.active {
-  background: #2563eb;
+.configurator-quick-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cfg-tool-btn {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #cbd5e1;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.cfg-tool-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.cfg-tool-btn.active {
+  background: #1e3a8a;
   border-color: #3b82f6;
   color: #ffffff;
-  box-shadow: 0 0 12px rgba(37, 99, 235, 0.5);
+  box-shadow: 0 0 12px rgba(59, 130, 246, 0.35);
 }
 
-/* 3D Viewport Stage */
-.cabin-stage {
+/* 2. 3D Architectural Viewport Stage */
+.cabin-viewport-stage {
   position: relative;
-  height: 380px;
-  perspective: 1100px;
+  height: 420px;
+  perspective: 1200px;
+  perspective-origin: 50% 48%;
   display: flex;
   justify-content: center;
   align-items: center;
-  background: radial-gradient(circle at 50% 35%, #1e293b 0%, #090d16 100%);
+  background: radial-gradient(circle at 50% 30%, #1e293b 0%, #080d1a 100%);
   overflow: hidden;
+  user-select: none;
 }
 
-/* Floor Landing outside */
-.cabin-landing-surround {
+/* Hallway / Landing frame surround */
+.cabin-hallway-frame {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: 
-    linear-gradient(to right, rgba(15, 23, 42, 0.92) 0%, transparent 18%, transparent 82%, rgba(15, 23, 42, 0.92) 100%),
-    linear-gradient(to bottom, rgba(15, 23, 42, 0.8) 0%, transparent 15%, transparent 85%, rgba(15, 23, 42, 0.9) 100%);
-  z-index: 5;
+  z-index: 10;
+  border: 14px solid #0b132b;
+  box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.85);
 }
 
-/* Header indicator display (Floor status) */
-.cabin-landing-indicator {
+/* Modern Status Indicator Header inside elevator shaft */
+.cabin-status-bar {
   position: absolute;
-  top: 14px;
+  top: 24px;
   left: 50%;
   transform: translateX(-50%);
-  background: #020617;
-  border: 1px solid rgba(245, 158, 11, 0.4);
-  box-shadow: 0 0 15px rgba(245, 158, 11, 0.2);
-  padding: 4px 14px;
-  border-radius: 6px;
+  z-index: 20;
   display: flex;
   align-items: center;
-  gap: 10px;
-  z-index: 10;
-  font-family: "Courier New", monospace;
+  gap: 12px;
+  background: rgba(2, 6, 23, 0.85);
+  border: 1px solid rgba(197, 168, 128, 0.35);
+  backdrop-filter: blur(10px);
+  padding: 5px 16px;
+  border-radius: 30px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  font-family: monospace;
 }
 
-.cabin-landing-indicator .floor-num {
-  font-size: 1.15rem;
+.status-floor {
+  color: #facc15;
   font-weight: 800;
-  color: #f59e0b;
-  text-shadow: 0 0 8px rgba(245, 158, 11, 0.6);
+  font-size: 1.15rem;
+  letter-spacing: 1px;
 }
 
-.cabin-landing-indicator .dir-arrow {
-  font-size: 1rem;
+.status-dir {
   color: #10b981;
-  animation: pulse-arrow 1.2s infinite ease-in-out;
+  font-size: 0.95rem;
+  animation: dir-pulse 1.4s infinite ease-in-out;
 }
 
-@keyframes pulse-arrow {
+@keyframes dir-pulse {
   0%, 100% { opacity: 0.4; }
   50% { opacity: 1; transform: translateY(-2px); }
 }
 
-.cabin-landing-indicator .capacity-badge {
-  font-size: 0.72rem;
+.status-meta {
   color: #94a3b8;
-  border-left: 1px solid #334155;
-  padding-left: 8px;
+  font-size: 0.75rem;
+  padding-left: 10px;
+  border-left: 1px solid rgba(255, 255, 255, 0.15);
 }
 
-/* Main Elevator Car 3D Box */
-.cabin-car-box {
+/* Main 3D Elevator Box */
+.cabin-3d-box {
   position: relative;
-  width: 290px;
-  height: 330px;
+  width: 320px;
+  height: 360px;
   transform-style: preserve-3d;
-  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
-  border-radius: 6px;
-  overflow: hidden;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.85);
+}
+
+/* Perspective view variations */
+.cabin-3d-box.view-interior {
+  transform: rotateX(2deg) rotateY(-3deg);
+}
+
+.cabin-3d-box.view-landing {
+  transform: rotateX(0deg) rotateY(0deg) scale(0.96);
 }
 
 /* Ceiling */
-.cabin-ceiling {
+.cabin-3d-ceiling {
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
-  height: 48px;
-  background: linear-gradient(180deg, #334155 0%, #1e293b 100%);
-  border-bottom: 2px solid rgba(255, 255, 255, 0.15);
+  height: 52px;
+  transform-origin: top center;
+  transform: rotateX(-35deg);
+  background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+  border-bottom: 2px solid rgba(255, 255, 255, 0.2);
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 4;
+  z-index: 5;
+  transition: all 0.3s ease;
 }
 
-/* Ceiling LED lighting styles */
-.cabin-ceiling.light-on {
-  box-shadow: 0 20px 45px rgba(254, 240, 138, 0.45);
-}
-
-.cabin-ceiling-lamp {
-  width: 140px;
+/* Ceiling Styles */
+.ceiling-modern-dome .ceiling-fixture {
+  width: 170px;
   height: 18px;
   border-radius: 999px;
   background: #ffffff;
-  transition: all 0.3s ease;
-  box-shadow: 0 0 25px 8px rgba(255, 255, 255, 0.8), 0 0 50px 15px rgba(254, 240, 138, 0.6);
+  box-shadow: 0 0 25px 8px rgba(255, 255, 255, 0.9), 0 0 50px 18px rgba(254, 240, 138, 0.55);
 }
 
-.cabin-ceiling.light-off .cabin-ceiling-lamp {
-  background: #64748b;
-  box-shadow: none;
+.ceiling-laser-diamond .ceiling-fixture {
+  width: 180px;
+  height: 20px;
+  background: repeating-linear-gradient(45deg, #ffffff 0px, #ffffff 10px, #e2e8f0 10px, #e2e8f0 20px);
+  border-radius: 4px;
+  border: 1px solid #facc15;
+  box-shadow: 0 0 22px 6px rgba(250, 204, 21, 0.7);
 }
 
-/* Ambient glow falling down inside cabin */
-.cabin-ambient-light {
+.ceiling-linear-minimal .ceiling-fixture {
+  width: 190px;
+  height: 8px;
+  background: #38bdf8;
+  border-radius: 2px;
+  box-shadow: 0 0 20px 6px rgba(56, 189, 248, 0.85);
+}
+
+.cabin-3d-ceiling.light-off .ceiling-fixture {
+  background: #475569 !important;
+  box-shadow: none !important;
+}
+
+/* Volumetric Downward Ambient Light */
+.cabin-light-cone {
   position: absolute;
-  top: 48px;
+  top: 52px;
   left: 0;
   right: 0;
-  bottom: 50px;
+  bottom: 60px;
+  background: radial-gradient(ellipse at 50% 0%, rgba(254, 240, 138, 0.18) 0%, transparent 70%);
   pointer-events: none;
-  background: radial-gradient(ellipse at 50% 0%, rgba(254, 240, 138, 0.22) 0%, transparent 70%);
-  z-index: 3;
+  z-index: 4;
   transition: opacity 0.4s ease;
 }
 
-.cabin-ceiling.light-off + .cabin-ambient-light {
-  opacity: 0.1;
+.cabin-3d-ceiling.light-off + .cabin-light-cone {
+  opacity: 0.05;
 }
 
 /* Back Wall */
-.cabin-back-wall {
+.cabin-3d-backwall {
   position: absolute;
   inset: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  z-index: 1;
+  z-index: 2;
   transition: all 0.4s ease;
+  overflow: hidden;
 }
 
-/* Wall Material: Glass Panorama */
-.wall-homelift-kinh {
+/* Wall Material: Vách Kính Panorama */
+.wall-mat-homelift-kinh {
   background: 
-    linear-gradient(135deg, rgba(56, 189, 248, 0.15) 0%, rgba(14, 165, 233, 0.05) 50%, rgba(2, 132, 199, 0.2) 100%),
-    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.08) 0px, rgba(255, 255, 255, 0.08) 1px, transparent 1px, transparent 40px);
-  border: 4px solid #0284c7;
-  position: relative;
+    linear-gradient(135deg, rgba(56, 189, 248, 0.12) 0%, rgba(14, 165, 233, 0.04) 50%, rgba(3, 105, 161, 0.16) 100%),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.06) 0px, rgba(255, 255, 255, 0.06) 1px, transparent 1px, transparent 50px);
+  border: 4px solid #0369a1;
+  box-shadow: inset 0 0 50px rgba(14, 165, 233, 0.2);
 }
 
-.wall-homelift-kinh::after {
+.wall-mat-homelift-kinh::after {
   content: "";
   position: absolute;
-  top: 0; left: 10%; width: 35%; height: 100%;
-  background: linear-gradient(75deg, rgba(255, 255, 255, 0.25) 0%, transparent 60%);
-  transform: skewX(-15deg);
+  top: 0; left: 15%; width: 40%; height: 100%;
+  background: linear-gradient(75deg, rgba(255, 255, 255, 0.22) 0%, transparent 60%);
+  transform: skewX(-16deg);
   pointer-events: none;
 }
 
-/* Wall Material: Gold Mirror Luxury */
-.wall-inox-guong-vang {
+/* Wall Material: Inox Gương Vàng Champagne Luxury */
+.wall-mat-inox-guong-vang {
   background: 
-    linear-gradient(135deg, #78350f 0%, #b45309 25%, #fef08a 50%, #d97706 75%, #92400e 100%);
-  border: 3px solid #facc15;
-  box-shadow: inset 0 0 40px rgba(120, 53, 15, 0.6);
-  position: relative;
+    linear-gradient(135deg, #713f12 0%, #a16207 20%, #fef08a 48%, #ca8a04 70%, #854d0e 100%);
+  border: 3px solid #eab308;
+  box-shadow: inset 0 0 50px rgba(113, 63, 18, 0.55);
 }
 
-.wall-inox-guong-vang::before {
+.wall-mat-inox-guong-vang::before {
   content: "";
   position: absolute;
-  inset: 15px;
-  border: 1px solid rgba(254, 240, 138, 0.5);
-  background: radial-gradient(circle at 50% 50%, transparent 40%, rgba(120, 53, 15, 0.25) 100%);
+  inset: 16px;
+  border: 1px solid rgba(254, 240, 138, 0.6);
+  background: radial-gradient(circle at 50% 50%, transparent 50%, rgba(113, 63, 18, 0.25) 100%);
 }
 
-.wall-inox-guong-vang::after {
-  content: "👑 HÀ HỒNG LUXURY GOLD";
+.wall-mat-inox-guong-vang::after {
+  content: "✦ HÀ HỒNG BESPOKE ✦";
   position: absolute;
-  top: 35%;
+  top: 36%;
+  left: 0; right: 0;
+  text-align: center;
   font-size: 0.68rem;
-  letter-spacing: 2px;
+  letter-spacing: 3px;
   color: #fef08a;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.7);
   font-weight: 800;
-  opacity: 0.85;
+  opacity: 0.8;
 }
 
-/* Wall Material: Hairline Inox Standard */
-.wall-inox-tieu-chuan {
+/* Wall Material: Inox Sọc Nhuyễn 304 Tiêu Chuẩn */
+.wall-mat-inox-tieu-chuan {
   background: 
     repeating-linear-gradient(0deg, #94a3b8 0px, #94a3b8 1px, #cbd5e1 1px, #cbd5e1 3px),
-    linear-gradient(90deg, #64748b 0%, #cbd5e1 35%, #94a3b8 65%, #64748b 100%);
-  border: 2px solid #94a3b8;
-  position: relative;
+    linear-gradient(90deg, #64748b 0%, #e2e8f0 40%, #94a3b8 65%, #64748b 100%);
+  border: 2px solid #cbd5e1;
 }
 
-.wall-inox-tieu-chuan::after {
+.wall-mat-inox-tieu-chuan::after {
   content: "";
   position: absolute;
-  top: 0; left: 25%; width: 50%; height: 100%;
-  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.4) 50%, transparent 100%);
+  top: 0; left: 30%; width: 40%; height: 100%;
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.35) 50%, transparent 100%);
   pointer-events: none;
 }
 
-/* Handrail inside cabin */
-.cabin-handrail {
-  position: absolute;
-  bottom: 95px;
-  left: 20px;
-  right: 20px;
-  height: 10px;
-  border-radius: 999px;
-  background: linear-gradient(180deg, #ffffff 0%, #94a3b8 60%, #475569 100%);
-  box-shadow: 0 8px 12px rgba(0, 0, 0, 0.45);
-  z-index: 3;
+/* Wall Material: Inox Gương Bạc Phối Hairline */
+.wall-mat-inox-guong-bac {
+  background: 
+    linear-gradient(90deg, #64748b 0%, #cbd5e1 22%, #ffffff 50%, #cbd5e1 78%, #64748b 100%);
+  border: 2px solid #e2e8f0;
 }
 
-.wall-inox-guong-vang .cabin-handrail {
-  background: linear-gradient(180deg, #fef08a 0%, #eab308 60%, #a16207 100%);
-  box-shadow: 0 8px 14px rgba(120, 53, 15, 0.5);
+.wall-mat-inox-guong-bac::before {
+  content: "";
+  position: absolute;
+  top: 15%; bottom: 15%; left: 24%; right: 24%;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.8) 0%, rgba(226, 232, 240, 0.4) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.25);
+}
+
+/* Side Walls (Left & Right 3D Panels) */
+.cabin-sidewall-left {
+  position: absolute;
+  top: 0; bottom: 0; left: 0;
+  width: 40px;
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0.5) 0%, transparent 100%);
+  z-index: 3;
+  pointer-events: none;
+}
+
+.cabin-sidewall-right {
+  position: absolute;
+  top: 0; bottom: 0; right: 0;
+  width: 40px;
+  background: linear-gradient(270deg, rgba(0, 0, 0, 0.5) 0%, transparent 100%);
+  z-index: 3;
+  pointer-events: none;
 }
 
 /* Car Operating Panel (COP) */
-.cabin-cop-panel {
+.cabin-cop-column {
   position: absolute;
-  right: 14px;
-  top: 60px;
-  bottom: 80px;
-  width: 28px;
-  background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  right: 18px;
+  top: 65px;
+  bottom: 85px;
+  width: 30px;
+  background: linear-gradient(180deg, #1e293b 0%, #020617 100%);
+  border: 1px solid rgba(255, 255, 255, 0.25);
   border-radius: 4px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 6px 2px;
-  z-index: 4;
-  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.4);
+  padding: 8px 2px;
+  z-index: 6;
+  box-shadow: -4px 0 12px rgba(0, 0, 0, 0.5);
 }
 
-.cabin-cop-screen {
-  width: 20px;
-  height: 22px;
+.cop-mini-display {
+  width: 22px;
+  height: 24px;
   background: #020617;
   border: 1px solid #0284c7;
   border-radius: 2px;
@@ -336,165 +378,311 @@
   font-size: 0.65rem;
   font-weight: 800;
   color: #38bdf8;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
 }
 
-.cabin-cop-buttons {
+.cop-buttons-stack {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 5px;
 }
 
-.cop-dot {
-  width: 9px;
-  height: 9px;
+.cop-btn-dot {
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
   background: #334155;
   border: 1px solid #64748b;
-  transition: all 0.2s ease;
 }
 
-.cop-dot.active {
-  background: #f59e0b;
-  border-color: #fbbf24;
-  box-shadow: 0 0 6px #f59e0b;
+.cop-btn-dot.lit {
+  background: #facc15;
+  border-color: #fef08a;
+  box-shadow: 0 0 6px #facc15;
 }
 
-/* Flooring */
-.cabin-floor {
+/* Handrail */
+.cabin-3d-handrail {
+  position: absolute;
+  bottom: 105px;
+  left: 20px;
+  right: 20px;
+  height: 12px;
+  z-index: 5;
+  transition: all 0.3s ease;
+}
+
+.handrail-round-gold {
+  background: linear-gradient(180deg, #fef08a 0%, #eab308 50%, #854d0e 100%);
+  border-radius: 999px;
+  box-shadow: 0 10px 18px rgba(113, 63, 18, 0.6);
+}
+
+.handrail-flat-silver {
+  background: linear-gradient(180deg, #ffffff 0%, #cbd5e1 50%, #475569 100%);
+  border-radius: 2px;
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.5);
+}
+
+.handrail-wood-duo {
+  background: linear-gradient(180deg, #b45309 0%, #78350f 70%, #451a03 100%);
+  border-radius: 4px;
+  border-top: 1px solid #fde047;
+  box-shadow: 0 10px 18px rgba(0, 0, 0, 0.6);
+}
+
+/* Floor */
+.cabin-3d-floor {
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
-  height: 55px;
-  transform-origin: bottom;
-  transform: rotateX(25deg);
+  height: 65px;
+  transform-origin: bottom center;
+  transform: rotateX(32deg);
   border-top: 2px solid rgba(255, 255, 255, 0.3);
-  z-index: 3;
-  transition: all 0.4s ease;
+  z-index: 4;
   overflow: hidden;
+  transition: all 0.4s ease;
 }
 
-/* Floor Styles */
-.floor-royal-carpet {
+.floor-mat-royal-carpet {
   background: 
-    radial-gradient(circle at 50% 50%, #facc15 0%, #ca8a04 18%, #78350f 35%, #451a03 60%, #1c1917 100%);
-  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8);
+    radial-gradient(circle at 50% 50%, #fde047 0%, #ca8a04 18%, #78350f 40%, #3a1503 65%, #18120c 100%);
+  box-shadow: inset 0 0 25px rgba(0, 0, 0, 0.8);
 }
 
-.floor-royal-carpet::before {
+.floor-mat-royal-carpet::after {
   content: "";
   position: absolute;
-  inset: 6px;
-  border: 2px dashed rgba(253, 224, 71, 0.6);
+  inset: 8px;
+  border: 2px dashed rgba(254, 240, 138, 0.6);
   border-radius: 4px;
 }
 
-.floor-black-galaxy {
+.floor-mat-black-galaxy {
   background: 
-    radial-gradient(1px 1px at 20px 30px, #ffffff, rgba(0, 0, 0, 0)),
-    radial-gradient(1px 1px at 40px 70px, #facc15, rgba(0, 0, 0, 0)),
-    radial-gradient(1.5px 1.5px at 90px 40px, #ffffff, rgba(0, 0, 0, 0)),
-    radial-gradient(1px 1px at 160px 20px, #fde047, rgba(0, 0, 0, 0)),
+    radial-gradient(1px 1px at 25px 35px, #ffffff, transparent),
+    radial-gradient(1px 1px at 50px 80px, #facc15, transparent),
+    radial-gradient(1.5px 1.5px at 110px 45px, #ffffff, transparent),
+    radial-gradient(1px 1px at 190px 25px, #fef08a, transparent),
     linear-gradient(135deg, #09090b 0%, #18181b 50%, #09090b 100%);
-  background-size: 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%;
+  box-shadow: inset 0 0 25px rgba(0, 0, 0, 0.7);
 }
 
-.floor-white-carrara {
-  background: 
-    linear-gradient(125deg, #f8fafc 0%, #e2e8f0 40%, #cbd5e1 55%, #f1f5f9 100%);
-  box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.2);
+.floor-mat-white-carrara {
+  background: linear-gradient(125deg, #f8fafc 0%, #e2e8f0 40%, #cbd5e1 60%, #f1f5f9 100%);
+  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.25);
 }
 
-.floor-white-carrara::after {
+.floor-mat-white-carrara::after {
   content: "";
   position: absolute;
   inset: 0;
-  background: repeating-linear-gradient(45deg, transparent, transparent 15px, rgba(100, 116, 139, 0.1) 15px, rgba(100, 116, 139, 0.1) 18px);
+  background: repeating-linear-gradient(45deg, transparent, transparent 18px, rgba(71, 85, 105, 0.12) 18px, rgba(71, 85, 105, 0.12) 22px);
 }
 
-/* Sliding Doors (Left & Right) */
-.cabin-door {
+.floor-mat-luxury-wood {
+  background: repeating-linear-gradient(90deg, #78350f 0px, #78350f 30px, #92400e 30px, #92400e 60px);
+  box-shadow: inset 0 0 25px rgba(0, 0, 0, 0.7);
+}
+
+/* Sliding Automatic Doors */
+.cabin-3d-door {
   position: absolute;
   top: 0;
   bottom: 0;
   width: 50%;
-  z-index: 6;
+  z-index: 8;
   transition: transform 0.85s cubic-bezier(0.25, 1, 0.5, 1);
-  box-shadow: 0 0 15px rgba(0, 0, 0, 0.6);
-  display: flex;
-  align-items: center;
+  box-shadow: 0 0 25px rgba(0, 0, 0, 0.75);
 }
 
-.cabin-door.door-left {
+.cabin-3d-door.door-left {
   left: 0;
-  border-right: 2px solid #334155;
-  background: linear-gradient(90deg, #334155 0%, #64748b 70%, #94a3b8 100%);
-  justify-content: flex-end;
+  border-right: 2px solid #1e293b;
+  background: linear-gradient(90deg, #1e293b 0%, #475569 65%, #94a3b8 100%);
 }
 
-.cabin-door.door-right {
+.cabin-3d-door.door-right {
   right: 0;
-  border-left: 2px solid #334155;
-  background: linear-gradient(270deg, #334155 0%, #64748b 70%, #94a3b8 100%);
-  justify-content: flex-start;
+  border-left: 2px solid #1e293b;
+  background: linear-gradient(270deg, #1e293b 0%, #475569 65%, #94a3b8 100%);
 }
 
-/* Door styles based on type */
-.wall-homelift-kinh ~ .cabin-door {
-  background: linear-gradient(180deg, rgba(30, 41, 59, 0.85) 0%, rgba(15, 23, 42, 0.9) 100%);
+/* Door styles matching wall */
+.wall-mat-homelift-kinh ~ .cabin-3d-door {
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.9) 0%, rgba(30, 41, 59, 0.92) 100%);
   border: 2px solid #0284c7;
 }
 
-.wall-homelift-kinh ~ .cabin-door::before {
+.wall-mat-homelift-kinh ~ .cabin-3d-door::before {
   content: "";
   position: absolute;
-  inset: 12px 8px;
-  background: rgba(56, 189, 248, 0.15);
-  border: 1px solid rgba(56, 189, 248, 0.4);
+  inset: 12px 10px;
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.35);
 }
 
-.wall-inox-guong-vang ~ .cabin-door {
-  background: linear-gradient(180deg, #78350f 0%, #d97706 50%, #92400e 100%);
-  border: 2px solid #facc15;
+.wall-mat-inox-guong-vang ~ .cabin-3d-door {
+  background: linear-gradient(180deg, #713f12 0%, #ca8a04 50%, #854d0e 100%);
+  border: 2px solid #eab308;
 }
 
-/* Door open states */
-.cabin-car-box.doors-open .door-left {
-  transform: translateX(-94%);
+/* Open door transforms */
+.cabin-3d-box.doors-open .door-left {
+  transform: translateX(-96%);
 }
 
-.cabin-car-box.doors-open .door-right {
-  transform: translateX(94%);
+.cabin-3d-box.doors-open .door-right {
+  transform: translateX(96%);
 }
 
-/* Safety sensor beam indicator */
-.cabin-door-gap-indicator {
+/* Door safety beam */
+.cabin-door-safety-beam {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  top: 10%; bottom: 10%; left: 50%;
   width: 2px;
-  height: 80%;
-  background: rgba(239, 68, 68, 0.7);
-  box-shadow: 0 0 8px #ef4444;
-  z-index: 7;
+  transform: translateX(-50%);
+  background: rgba(239, 68, 68, 0.85);
+  box-shadow: 0 0 10px #ef4444;
+  z-index: 9;
   opacity: 0;
   transition: opacity 0.3s ease;
 }
 
-.cabin-car-box:not(.doors-open) .cabin-door-gap-indicator {
+.cabin-3d-box:not(.doors-open) .cabin-door-safety-beam {
   opacity: 1;
 }
 
-/* Bottom Controls Toolbar */
-.cabin-viz-controls {
-  padding: 14px 18px;
-  background: rgba(15, 23, 42, 0.95);
+/* 3. Swatch & Material Selection Tabs */
+.configurator-selector-tabs {
+  background: rgba(15, 23, 42, 0.98);
   border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 16px 20px;
 }
 
-.cabin-viz-controls-row {
+.cfg-nav-tabs {
+  display: flex;
+  gap: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 10px;
+  margin-bottom: 14px;
+  overflow-x: auto;
+}
+
+.cfg-tab-item {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.cfg-tab-item:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.cfg-tab-item.active {
+  color: #ffffff;
+  background: #1e3a8a;
+  box-shadow: 0 0 12px rgba(30, 58, 138, 0.4);
+}
+
+.cfg-tab-item.active i {
+  color: #38bdf8;
+}
+
+/* Material Swatches Grid */
+.swatches-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(135px, 1fr));
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.swatch-card {
+  background: rgba(30, 41, 59, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 10px;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  position: relative;
+  text-align: left;
+}
+
+.swatch-card:hover {
+  background: rgba(30, 41, 59, 0.95);
+  border-color: rgba(255, 255, 255, 0.25);
+  transform: translateY(-2px);
+}
+
+.swatch-card.selected {
+  background: linear-gradient(145deg, rgba(30, 58, 138, 0.35) 0%, rgba(15, 23, 42, 0.8) 100%);
+  border-color: #38bdf8;
+  box-shadow: 0 0 15px rgba(56, 189, 248, 0.25);
+}
+
+.swatch-thumbnail {
+  height: 52px;
+  border-radius: 6px;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.swatch-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.swatch-name {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #f1f5f9;
+  line-height: 1.25;
+}
+
+.swatch-desc {
+  font-size: 0.68rem;
+  color: #94a3b8;
+  line-height: 1.3;
+}
+
+.swatch-check {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 18px;
+  height: 18px;
+  background: #0284c7;
+  color: #ffffff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+}
+
+/* 4. Configuration Summary & Action Footer */
+.configurator-footer {
+  padding: 14px 20px;
+  background: rgba(8, 13, 26, 0.98);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -502,76 +690,92 @@
   gap: 12px;
 }
 
-.cabin-control-group {
+.cfg-summary-badges {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.cfg-badge-pill {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #e2e8f0;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 500;
+}
+
+.cfg-badge-pill strong {
+  color: #facc15;
+  font-weight: 700;
+}
+
+.cfg-action-buttons {
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
-.cabin-control-label {
-  font-size: 0.76rem;
-  font-weight: 700;
-  color: #94a3b8;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin: 0;
-}
-
-.cabin-btn-chip {
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+.cfg-btn-reset {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
   color: #cbd5e1;
-  padding: 4px 10px;
-  border-radius: 6px;
-  font-size: 0.75rem;
+  padding: 7px 14px;
+  border-radius: 8px;
+  font-size: 0.78rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
+}
+
+.cfg-btn-reset:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+.cfg-btn-apply {
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+  border: 1px solid #38bdf8;
+  color: #ffffff;
+  padding: 7px 16px;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 6px;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 14px rgba(2, 132, 199, 0.35);
 }
 
-.cabin-btn-chip:hover {
-  background: rgba(255, 255, 255, 0.14);
-  color: #ffffff;
+.cfg-btn-apply:hover {
+  background: linear-gradient(135deg, #0369a1 0%, #075985 100%);
+  box-shadow: 0 6px 18px rgba(2, 132, 199, 0.5);
+  transform: translateY(-1px);
 }
 
-.cabin-btn-chip.active {
-  background: #2563eb;
-  border-color: #60a5fa;
-  color: #ffffff;
-  box-shadow: 0 0 10px rgba(37, 99, 235, 0.4);
-}
-
-.cabin-btn-chip .dot-preview {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  display: inline-block;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-}
-
-/* Dot preview colors */
-.dot-royal { background: radial-gradient(circle, #facc15, #78350f); }
-.dot-black { background: #09090b; border-color: #475569; }
-.dot-white { background: #f8fafc; border-color: #cbd5e1; }
-
-.dot-glass { background: #38bdf8; }
-.dot-gold { background: #eab308; }
-.dot-silver { background: #94a3b8; }
-
-/* Responsive */
-@media (max-width: 576px) {
-  .cabin-stage {
-    height: 320px;
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .cabin-viewport-stage {
+    height: 350px;
   }
-  .cabin-car-box {
-    width: 240px;
-    height: 280px;
+  .cabin-3d-box {
+    width: 260px;
+    height: 300px;
   }
-  .cabin-viz-controls-row {
+  .configurator-footer {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
+  }
+  .cfg-action-buttons {
+    width: 100%;
+    justify-content: stretch;
+  }
+  .cfg-btn-reset, .cfg-btn-apply {
+    flex: 1;
+    justify-content: center;
   }
 }
