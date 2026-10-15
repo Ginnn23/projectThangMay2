@@ -1,15 +1,14 @@
 /* ==========================================================================
-   CabinVisualizer.css - Studio Elevator Cabin Showcase & Configurator
-   Thang Máy Hà Hồng - Professional Commercial Design
-   Colors: Navy (#0a1128, #001f54), Champagne Gold (#d4af37, #c5a880), Slate (#f8fafc)
+   CabinVisualizer.css - Studio Phối Cảnh Cabin 2.5D Tương Tác Thật
+   Thang Máy Hà Hồng - Real-time Architectural SVG Engine
    ========================================================================== */
 
-.studio-cabin-configurator {
-  background: #0b1329;
-  border: 1px solid rgba(212, 175, 55, 0.25);
+.cabin-visualizer-container {
+  background: #0a1022;
+  border: 1px solid rgba(212, 175, 55, 0.3);
   border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.08);
+  box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.08);
   color: #f8fafc;
   margin-bottom: 2rem;
   font-family: inherit;
@@ -17,50 +16,32 @@
   z-index: 1;
 }
 
-/* 1. Header Bar */
-.studio-cfg-header {
+/* 1. Header Toolbar */
+.cabin-viz-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 14px 18px;
+  padding: 12px 18px;
   background: linear-gradient(180deg, #131d38 0%, #0b1329 100%);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   flex-wrap: wrap;
   gap: 10px;
 }
 
-.studio-cfg-branding {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.studio-cfg-tag {
-  font-size: 0.68rem;
-  font-weight: 800;
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-  color: #d4af37;
+.cabin-viz-title {
   display: flex;
   align-items: center;
-  gap: 6px;
-}
-
-.studio-cfg-title {
-  font-size: 1.05rem;
-  font-weight: 700;
+  gap: 10px;
   color: #ffffff;
-  margin: 0;
-  letter-spacing: -0.2px;
 }
 
-.studio-cfg-actions {
+.cabin-viz-actions {
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
-.studio-btn-toggle {
+.cabin-viz-btn-action {
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.18);
   color: #f1f5f9;
@@ -76,59 +57,44 @@
   user-select: none;
 }
 
-.studio-btn-toggle:hover {
+.cabin-viz-btn-action:hover {
   background: rgba(255, 255, 255, 0.18);
   color: #ffffff;
   border-color: rgba(212, 175, 55, 0.5);
 }
 
-.studio-btn-toggle.active {
+.cabin-viz-btn-action.active {
   background: #1d4ed8;
   border-color: #60a5fa;
   color: #ffffff;
   box-shadow: 0 0 14px rgba(37, 99, 235, 0.45);
 }
 
-/* 2. Visual Viewport Stage (High-Res Architectural Rendering) */
-.studio-viewport {
+/* 2. Sân khấu Đồ họa 2.5D SVG */
+.cabin-stage {
   position: relative;
   width: 100%;
-  height: 380px;
   background: #020617;
   overflow: hidden;
   display: flex;
-  align-items: center;
+  flex-direction: column;
   justify-content: center;
+  align-items: center;
 }
 
-.studio-image-display {
+.cabin-svg-canvas {
   width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
-  transition: opacity 0.4s ease, transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), filter 0.3s ease;
-  will-change: opacity, transform;
+  height: auto;
+  max-height: 440px;
+  display: block;
+  filter: drop-shadow(0 15px 30px rgba(0, 0, 0, 0.8));
 }
 
-.studio-viewport.light-off .studio-image-display {
-  filter: brightness(0.4) contrast(1.2);
-}
-
-/* Shading vignette over the image */
-.studio-vignette {
+/* Chỉ báo tầng & tải trọng trên nóc thang */
+.cabin-landing-indicator {
   position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: radial-gradient(circle at 50% 50%, transparent 45%, rgba(11, 19, 41, 0.6) 85%, rgba(11, 19, 41, 0.95) 100%);
-  z-index: 2;
-}
-
-/* Shaft HUD Indicator Badge */
-.studio-hud-badge {
-  position: absolute;
-  top: 14px;
+  top: 12px;
   left: 14px;
-  z-index: 10;
   background: rgba(2, 6, 23, 0.85);
   border: 1px solid rgba(212, 175, 55, 0.4);
   backdrop-filter: blur(8px);
@@ -139,94 +105,63 @@
   gap: 8px;
   font-family: monospace;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+  z-index: 10;
 }
 
-.hud-floor {
+.cabin-landing-indicator .floor-num {
   color: #facc15;
   font-weight: 800;
   font-size: 1rem;
 }
 
-.hud-dir {
+.cabin-landing-indicator .dir-arrow {
   color: #10b981;
   font-size: 0.85rem;
+  animation: pulse-arrow 1.2s infinite ease-in-out;
 }
 
-.hud-cap {
+@keyframes pulse-arrow {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; transform: translateY(-2px); }
+}
+
+.cabin-landing-indicator .capacity-badge {
   color: #cbd5e1;
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   border-left: 1px solid rgba(255, 255, 255, 0.2);
   padding-left: 8px;
 }
 
-/* Interactive Hotspot Pins on the image */
-.studio-hotspot {
+/* Toast thông báo tương tác nổi */
+.cabin-live-toast {
   position: absolute;
-  z-index: 12;
-  cursor: pointer;
-  transform: translate(-50%, -50%);
-}
-
-.hotspot-pin {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: rgba(212, 175, 55, 0.9);
-  border: 2px solid #ffffff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #0b1329;
-  font-size: 0.72rem;
-  font-weight: 800;
-  box-shadow: 0 0 15px rgba(212, 175, 55, 0.8);
-  animation: hotspot-pulse 2s infinite ease-in-out;
-  transition: transform 0.2s ease;
-}
-
-.studio-hotspot:hover .hotspot-pin {
-  transform: scale(1.2);
-  background: #facc15;
-}
-
-@keyframes hotspot-pulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.6); }
-  50% { box-shadow: 0 0 0 8px rgba(212, 175, 55, 0); }
-}
-
-.hotspot-tooltip {
-  position: absolute;
-  bottom: 30px;
+  top: 55px;
   left: 50%;
   transform: translateX(-50%);
   background: rgba(15, 23, 42, 0.95);
-  border: 1px solid #d4af37;
-  color: #ffffff;
-  padding: 6px 12px;
-  border-radius: 6px;
-  font-size: 0.72rem;
-  white-space: nowrap;
-  pointer-events: none;
-  opacity: 0;
-  visibility: hidden;
-  transition: all 0.2s ease;
+  color: #38bdf8;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid #38bdf8;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
-  z-index: 20;
+  z-index: 30;
+  pointer-events: none;
+  animation: fadeInDown 0.25s ease-out;
 }
 
-.studio-hotspot:hover .hotspot-tooltip {
-  opacity: 1;
-  visibility: visible;
-  bottom: 34px;
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translate(-50%, -10px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
 }
 
-/* Current Style Watermark Banner */
-.studio-style-watermark {
+/* Thanh watermark hiển thị cấu hình dưới sàn */
+.cabin-status-watermark {
   position: absolute;
-  bottom: 12px;
+  bottom: 10px;
   left: 14px;
   right: 14px;
-  z-index: 10;
   background: linear-gradient(90deg, rgba(2, 6, 23, 0.9) 0%, rgba(15, 23, 42, 0.8) 100%);
   border: 1px solid rgba(255, 255, 255, 0.12);
   backdrop-filter: blur(8px);
@@ -235,15 +170,13 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-}
-
-.watermark-name {
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   font-weight: 700;
   color: #f1f5f9;
+  z-index: 10;
 }
 
-.watermark-badge {
+.badge-door-type {
   background: rgba(212, 175, 55, 0.15);
   border: 1px solid rgba(212, 175, 55, 0.4);
   color: #facc15;
@@ -253,13 +186,13 @@
   border-radius: 4px;
 }
 
-/* 3. Selector Tabs & Swatches Area */
-.studio-cfg-body {
+/* 3. Bộ chọn vật liệu tương tác (Tabs & Thẻ Swatch) */
+.cabin-cfg-controls {
   padding: 16px 18px;
   background: #0b1329;
 }
 
-.studio-tabs-row {
+.cabin-tabs-nav {
   display: flex;
   gap: 8px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
@@ -268,7 +201,7 @@
   overflow-x: auto;
 }
 
-.studio-tab-btn {
+.cabin-tab-item {
   background: transparent;
   border: 1px solid transparent;
   color: #94a3b8;
@@ -285,29 +218,29 @@
   user-select: none;
 }
 
-.studio-tab-btn:hover {
+.cabin-tab-item:hover {
   color: #ffffff;
   background: rgba(255, 255, 255, 0.06);
 }
 
-.studio-tab-btn.active {
+.cabin-tab-item.active {
   color: #ffffff;
   background: #1e3a8a;
   border-color: #3b82f6;
   box-shadow: 0 0 12px rgba(59, 130, 246, 0.35);
 }
 
-/* Material Swatches Grid */
-.studio-cards-grid {
+/* Lưới hiển thị các thẻ vật liệu */
+.cabin-cards-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  gap: 10px;
-  margin-bottom: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 12px;
+  margin-bottom: 8px;
 }
 
-.studio-material-card {
+.cabin-material-card {
   background: #131d38;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 10px;
   padding: 10px;
   cursor: pointer;
@@ -321,55 +254,30 @@
   width: 100%;
 }
 
-.studio-material-card:hover {
+.cabin-material-card:hover {
   background: #1a274c;
-  border-color: rgba(212, 175, 55, 0.4);
+  border-color: rgba(212, 175, 55, 0.5);
   transform: translateY(-2px);
 }
 
-.studio-material-card.active {
+.cabin-material-card.active {
   background: linear-gradient(145deg, #1e3a8a 0%, #172554 100%);
   border-color: #facc15;
-  box-shadow: 0 0 16px rgba(250, 204, 21, 0.3);
+  box-shadow: 0 0 16px rgba(250, 204, 21, 0.35);
 }
 
-.card-thumb-wrap {
-  height: 60px;
+.swatch-preview-box {
+  height: 52px;
   border-radius: 6px;
-  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.2);
   position: relative;
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  overflow: hidden;
 }
 
-.card-thumb-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.card-details {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.card-title {
-  font-size: 0.78rem;
-  font-weight: 700;
-  color: #ffffff;
-  line-height: 1.25;
-}
-
-.card-desc {
-  font-size: 0.68rem;
-  color: #94a3b8;
-  line-height: 1.3;
-}
-
-.card-check-badge {
+.swatch-check-icon {
   position: absolute;
-  top: 6px;
-  right: 6px;
+  top: 5px;
+  right: 5px;
   width: 18px;
   height: 18px;
   border-radius: 50%;
@@ -383,8 +291,39 @@
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
 }
 
-/* 4. Footer & Action Bar */
-.studio-cfg-footer {
+.swatch-content {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.swatch-name {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1.25;
+}
+
+.swatch-desc {
+  font-size: 0.68rem;
+  color: #94a3b8;
+  line-height: 1.3;
+}
+
+.swatch-badge {
+  display: inline-block;
+  align-self: flex-start;
+  font-size: 0.64rem;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #fde047;
+  margin-top: 2px;
+}
+
+/* 4. Footer & Đồng bộ */
+.cabin-viz-footer {
   padding: 14px 18px;
   background: #070d1e;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
@@ -395,14 +334,14 @@
   gap: 12px;
 }
 
-.studio-spec-badges {
+.cabin-selected-badges {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
   align-items: center;
 }
 
-.studio-badge {
+.badge-item {
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.12);
   color: #cbd5e1;
@@ -412,18 +351,18 @@
   font-weight: 500;
 }
 
-.studio-badge strong {
+.badge-item strong {
   color: #facc15;
   font-weight: 700;
 }
 
-.studio-action-btns {
+.cabin-footer-actions {
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
-.btn-cfg-reset {
+.btn-viz-reset {
   background: transparent;
   border: 1px solid rgba(255, 255, 255, 0.2);
   color: #cbd5e1;
@@ -435,12 +374,12 @@
   transition: all 0.2s ease;
 }
 
-.btn-cfg-reset:hover {
+.btn-viz-reset:hover {
   background: rgba(255, 255, 255, 0.1);
   color: #ffffff;
 }
 
-.btn-cfg-apply {
+.btn-viz-apply {
   background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
   border: 1px solid #38bdf8;
   color: #ffffff;
@@ -456,7 +395,7 @@
   box-shadow: 0 4px 14px rgba(2, 132, 199, 0.35);
 }
 
-.btn-cfg-apply:hover {
+.btn-viz-apply:hover {
   background: linear-gradient(135deg, #0369a1 0%, #075985 100%);
   box-shadow: 0 6px 18px rgba(2, 132, 199, 0.5);
   transform: translateY(-1px);
@@ -464,17 +403,14 @@
 
 /* Responsive */
 @media (max-width: 576px) {
-  .studio-viewport {
-    height: 280px;
-  }
-  .studio-cfg-footer {
+  .cabin-viz-footer {
     flex-direction: column;
     align-items: stretch;
   }
-  .studio-action-btns {
+  .cabin-footer-actions {
     width: 100%;
   }
-  .btn-cfg-reset, .btn-cfg-apply {
+  .btn-viz-reset, .btn-viz-apply {
     flex: 1;
     justify-content: center;
   }
