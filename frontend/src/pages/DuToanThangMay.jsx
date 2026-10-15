@@ -626,6 +626,25 @@ export default function DuToanThangMay() {
                             />
                           </div>
 
+                          <div className="mb-3">
+                            <label className="form-label mb-1 d-flex justify-content-between align-items-center" style={{ fontSize: "12px", fontWeight: "600" }}>
+                              <span>Ghi chú cấu hình Cabin & Yêu cầu kỹ thuật</span>
+                              <span className="badge bg-primary-subtle text-primary" style={{ fontSize: "10px" }}>Đồng bộ Studio</span>
+                            </label>
+                            <textarea
+                              className="form-control form-control-sm"
+                              rows={2}
+                              placeholder="Cấu hình nội thất cabin và yêu cầu riêng..."
+                              value={customerNotes}
+                              onChange={(e) => setCustomerNotes(e.target.value)}
+                              maxLength={500}
+                              style={{ fontSize: "12px" }}
+                            />
+                            <small className="text-muted d-block mt-1" style={{ fontSize: "11px" }}>
+                              Đã bao gồm cấu hình vách, sàn đá, trần và tay vịn vừa chọn ở Studio Cabin.
+                            </small>
+                          </div>
+
                           <div className="d-grid gap-2 pt-2">
                             <button
                               type="submit"
