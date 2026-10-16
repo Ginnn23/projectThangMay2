@@ -1,6 +1,6 @@
 /* ==========================================================================
-   CabinVisualizer.css - Studio Phối Cảnh Cabin 2.5D Tương Tác Thật
-   Thang Máy Hà Hồng - Real-time Architectural SVG Engine
+   CabinVisualizer.css - Mô hình 3D Perspective Cabin Thang Máy Đơn Giản & Đẹp
+   Thang Máy Hà Hồng - Real-time Interactive 3D Box Customizer
    ========================================================================== */
 
 .cabin-visualizer-container {
@@ -75,62 +75,58 @@
   box-shadow: 0 0 14px rgba(37, 99, 235, 0.45);
 }
 
-/* 2. Sân khấu Đồ họa 2.5D SVG */
+/* 2. Sân khấu 3D Stage (Perspective 1100px - Đẹp, gọn gàng, chuẩn gốc) */
 .cabin-stage {
   position: relative;
-  width: 100%;
-  background: #020617;
-  overflow: hidden;
+  height: 380px;
+  perspective: 1100px;
   display: flex;
-  flex-direction: column;
   justify-content: center;
   align-items: center;
-  transition: background 0.4s ease;
+  background: radial-gradient(circle at 50% 35%, #1e293b 0%, #090d16 100%);
+  overflow: hidden;
 }
 
-.cabin-stage.light-on {
-  background: radial-gradient(circle at 50% 15%, #172554 0%, #030712 90%);
-}
-
-.cabin-stage.light-off {
-  background: radial-gradient(circle at 50% 15%, #0b1120 0%, #02040a 100%);
-}
-
-.cabin-svg-canvas {
-  width: 100%;
-  height: auto;
-  max-height: 440px;
-  display: block;
-  filter: drop-shadow(0 15px 30px rgba(0, 0, 0, 0.8));
+/* Khung sảnh tầng bên ngoài */
+.cabin-landing-surround {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: 
+    linear-gradient(to right, rgba(15, 23, 42, 0.92) 0%, transparent 18%, transparent 82%, rgba(15, 23, 42, 0.92) 100%),
+    linear-gradient(to bottom, rgba(15, 23, 42, 0.8) 0%, transparent 15%, transparent 85%, rgba(15, 23, 42, 0.9) 100%);
+  z-index: 5;
 }
 
 /* Chỉ báo tầng & tải trọng trên nóc thang */
 .cabin-landing-indicator {
   position: absolute;
   top: 12px;
-  left: 14px;
-  background: rgba(2, 6, 23, 0.9);
-  border: 1px solid rgba(212, 175, 55, 0.4);
-  backdrop-filter: blur(8px);
-  padding: 4px 14px;
-  border-radius: 999px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #020617;
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  box-shadow: 0 0 15px rgba(245, 158, 11, 0.2);
+  padding: 4px 16px;
+  border-radius: 6px;
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-family: monospace;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+  gap: 10px;
   z-index: 10;
+  font-family: "Courier New", monospace;
+  white-space: nowrap;
 }
 
 .cabin-landing-indicator .floor-num {
-  color: #facc15;
+  font-size: 1.15rem;
   font-weight: 800;
-  font-size: 1rem;
+  color: #f59e0b;
+  text-shadow: 0 0 8px rgba(245, 158, 11, 0.6);
 }
 
 .cabin-landing-indicator .dir-arrow {
+  font-size: 1rem;
   color: #10b981;
-  font-size: 0.85rem;
 }
 
 .cabin-landing-indicator .dir-arrow.moving {
@@ -140,17 +136,17 @@
 
 @keyframes pulse-arrow {
   0%, 100% { opacity: 0.4; transform: translateY(0); }
-  50% { opacity: 1; transform: translateY(-3px); }
+  50% { opacity: 1; transform: translateY(-2px); }
 }
 
 .cabin-landing-indicator .capacity-badge {
-  color: #cbd5e1;
   font-size: 0.72rem;
-  border-left: 1px solid rgba(255, 255, 255, 0.2);
+  color: #94a3b8;
+  border-left: 1px solid #334155;
   padding-left: 8px;
 }
 
-/* Toast thông báo tương tác nổi */
+/* Toast thông báo tương tác */
 .cabin-live-toast {
   position: absolute;
   top: 55px;
@@ -175,21 +171,565 @@
   to { opacity: 1; transform: translate(-50%, 0); }
 }
 
-/* Thanh watermark hiển thị cấu hình dưới sàn */
+/* KHỐI HỘP 3D CABIN (ELEVATOR CAR 3D BOX) */
+.cabin-car-box {
+  position: relative;
+  width: 305px;
+  height: 335px;
+  transform-style: preserve-3d;
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+  border-radius: 6px;
+  overflow: hidden;
+  background: #020617;
+}
+
+/* TRẦN CABIN (CEILING) */
+.cabin-ceiling {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 48px;
+  background: linear-gradient(180deg, #334155 0%, #1e293b 100%);
+  border-bottom: 2px solid rgba(255, 255, 255, 0.15);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 4;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+/* ĐÈN 1: Trần Vòm Âm LED (3000K Vàng Ấm) */
+.ceil-type-ceil-dome .cabin-ceiling-lamp {
+  width: 140px;
+  height: 20px;
+  border-radius: 999px;
+  background: #ffffff;
+  border: 2px solid #ca8a04;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.cabin-ceiling.ceil-type-ceil-dome.light-on .cabin-ceiling-lamp {
+  background: #fef08a;
+  box-shadow: 0 0 25px 8px rgba(250, 204, 21, 0.85), 0 0 50px 18px rgba(234, 179, 8, 0.6);
+}
+
+/* ĐÈN 2: Trần Cắt Laser Kim Cương (4000K Lấp Lánh) */
+.ceil-type-ceil-diamond .cabin-ceiling-lamp {
+  width: 150px;
+  height: 22px;
+  border-radius: 4px;
+  background: repeating-linear-gradient(45deg, #1e293b 0 3px, #facc15 3px 6px);
+  border: 2px solid #cbd5e1;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.cabin-ceiling.ceil-type-ceil-diamond.light-on .cabin-ceiling-lamp {
+  background: repeating-linear-gradient(45deg, #fef9c3 0 3px, #facc15 3px 6px);
+  box-shadow: 0 0 25px 8px rgba(254, 240, 138, 0.9), 0 0 45px 15px rgba(250, 204, 21, 0.5);
+}
+
+/* ĐÈN 3: Trần Linear Scandinavian (6000K Trắng Tinh Khiết) */
+.ceil-type-ceil-minimal .cabin-ceiling-lamp {
+  width: 160px;
+  height: 16px;
+  border-radius: 2px;
+  background: repeating-linear-gradient(90deg, #ffffff 0 6px, #0f172a 6px 14px);
+  border: 1px solid #38bdf8;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.cabin-ceiling.ceil-type-ceil-minimal.light-on .cabin-ceiling-lamp {
+  background: repeating-linear-gradient(90deg, #ffffff 0 6px, #0284c7 6px 14px);
+  box-shadow: 0 0 25px 8px rgba(255, 255, 255, 0.95), 0 0 45px 15px rgba(56, 189, 248, 0.65);
+}
+
+/* Khi đèn tắt */
+.cabin-ceiling.light-off .cabin-ceiling-lamp {
+  background: #334155 !important;
+  box-shadow: none !important;
+  border-color: #475569 !important;
+}
+
+/* CHÙM SÁNG CHIẾU RỌI (VOLUMETRIC DOWNLIGHT CONES) */
+.cabin-ambient-light {
+  position: absolute;
+  top: 48px;
+  left: 0;
+  right: 0;
+  bottom: 50px;
+  pointer-events: none;
+  z-index: 3;
+  transition: all 0.4s ease;
+}
+
+/* Ánh sáng vàng ấm cho trần vòm */
+.cabin-ambient-light.light-effect-ceil-dome {
+  background: radial-gradient(ellipse at 50% 0%, rgba(254, 240, 138, 0.32) 0%, rgba(234, 179, 8, 0.12) 55%, transparent 80%);
+}
+
+/* Ánh sáng kim cương tán xạ */
+.cabin-ambient-light.light-effect-ceil-diamond {
+  background: 
+    radial-gradient(ellipse at 50% 0%, rgba(254, 249, 195, 0.35) 0%, transparent 75%),
+    repeating-linear-gradient(45deg, rgba(250, 204, 21, 0.08) 0 10px, transparent 10px 25px);
+}
+
+/* Ánh sáng trắng Bắc Âu cho linear */
+.cabin-ambient-light.light-effect-ceil-minimal {
+  background: radial-gradient(ellipse at 50% 0%, rgba(255, 255, 255, 0.4) 0%, rgba(56, 189, 248, 0.15) 50%, transparent 75%);
+}
+
+/* VÁCH CABIN (BACK WALL) */
+.cabin-back-wall {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 1;
+  transition: all 0.4s ease;
+  cursor: pointer;
+}
+
+/* 1. Kính Cường Lực Trong Suốt Panorama */
+.wall-kinh-cuong-luc {
+  background: 
+    linear-gradient(135deg, rgba(2, 132, 199, 0.25) 0%, rgba(56, 189, 248, 0.08) 50%, rgba(2, 132, 199, 0.28) 100%),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.12) 0px, rgba(255, 255, 255, 0.12) 1px, transparent 1px, transparent 40px);
+  border: 4px solid #0284c7;
+  position: relative;
+  overflow: hidden;
+}
+
+.wall-kinh-cuong-luc::after {
+  content: "";
+  position: absolute;
+  top: 0; left: 12%; width: 35%; height: 100%;
+  background: linear-gradient(75deg, rgba(255, 255, 255, 0.3) 0%, transparent 60%);
+  transform: skewX(-15deg);
+  pointer-events: none;
+}
+
+/* 2. Kính Cường Lực Màu Trà (Bronze Glass) */
+.wall-kinh-mau-tra {
+  background: 
+    linear-gradient(135deg, rgba(120, 53, 15, 0.4) 0%, rgba(217, 119, 6, 0.15) 50%, rgba(69, 26, 3, 0.45) 100%),
+    repeating-linear-gradient(90deg, rgba(254, 240, 138, 0.12) 0px, rgba(254, 240, 138, 0.12) 1px, transparent 1px, transparent 40px);
+  border: 4px solid #b45309;
+  position: relative;
+  overflow: hidden;
+}
+
+.wall-kinh-mau-tra::after {
+  content: "";
+  position: absolute;
+  top: 0; left: 12%; width: 35%; height: 100%;
+  background: linear-gradient(75deg, rgba(254, 240, 138, 0.25) 0%, transparent 60%);
+  transform: skewX(-15deg);
+  pointer-events: none;
+}
+
+/* Cảnh quan bên ngoài kính */
+.cabin-scenery-backdrop {
+  position: absolute;
+  inset: -20px 0;
+  background: linear-gradient(180deg, #0369a1 0%, #38bdf8 45%, #bae6fd 75%, #e0f2fe 100%);
+  opacity: 0.75;
+  transition: transform 0.6s ease;
+  z-index: -1;
+}
+
+/* 3. Inox Gương Vàng PVD Hoàng Gia */
+.wall-inox-guong-vang {
+  background: 
+    linear-gradient(135deg, #78350f 0%, #b45309 25%, #fef08a 50%, #d97706 75%, #92400e 100%);
+  border: 3px solid #facc15;
+  box-shadow: inset 0 0 40px rgba(120, 53, 15, 0.6);
+  position: relative;
+}
+
+.wall-inox-guong-vang::before {
+  content: "";
+  position: absolute;
+  inset: 15px;
+  border: 1px solid rgba(254, 240, 138, 0.5);
+  background: radial-gradient(circle at 50% 50%, transparent 40%, rgba(120, 53, 15, 0.25) 100%);
+}
+
+.wall-inox-guong-vang::after {
+  content: "👑 HÀ HỒNG LUXURY GOLD";
+  position: absolute;
+  top: 35%;
+  font-size: 0.68rem;
+  letter-spacing: 2px;
+  color: #fef08a;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+  font-weight: 800;
+  opacity: 0.85;
+}
+
+/* 4. Inox 304 Sọc Nhuyễn Hairline */
+.wall-inox-tieu-chuan {
+  background: 
+    repeating-linear-gradient(0deg, #94a3b8 0px, #94a3b8 1px, #cbd5e1 1px, #cbd5e1 3px),
+    linear-gradient(90deg, #64748b 0%, #cbd5e1 35%, #94a3b8 65%, #64748b 100%);
+  border: 2px solid #94a3b8;
+  position: relative;
+}
+
+.wall-inox-tieu-chuan::after {
+  content: "";
+  position: absolute;
+  top: 0; left: 25%; width: 50%; height: 100%;
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.4) 50%, transparent 100%);
+  pointer-events: none;
+}
+
+/* 5. Gỗ Tự Nhiên & Inox Gương */
+.wall-wood-luxury {
+  background: 
+    repeating-linear-gradient(90deg, #451a03 0 20px, #78350f 20px 40px, #92400e 40px 60px),
+    linear-gradient(180deg, #451a03 0%, #2e1001 100%);
+  border: 3px solid #d4af37;
+  position: relative;
+}
+
+.wall-wood-luxury::before {
+  content: "";
+  position: absolute;
+  top: 20px; bottom: 20px; left: 25%; right: 25%;
+  background: linear-gradient(135deg, #e2e8f0 0%, #ffffff 40%, #94a3b8 100%);
+  border: 2px solid #facc15;
+}
+
+/* TAY VỊN TRONG CABIN (HANDRAIL) */
+.cabin-handrail {
+  position: absolute;
+  bottom: 95px;
+  left: 20px;
+  right: 20px;
+  height: 10px;
+  border-radius: 999px;
+  box-shadow: 0 8px 12px rgba(0, 0, 0, 0.5);
+  z-index: 3;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.cabin-handrail.rail-rail-gold {
+  background: linear-gradient(180deg, #fef08a 0%, #eab308 60%, #a16207 100%);
+  box-shadow: 0 8px 14px rgba(120, 53, 15, 0.5);
+}
+
+.cabin-handrail.rail-rail-silver {
+  background: linear-gradient(180deg, #ffffff 0%, #cbd5e1 50%, #475569 100%);
+}
+
+.cabin-handrail.rail-rail-wood {
+  background: linear-gradient(180deg, #b45309 0%, #78350f 60%, #451a03 100%);
+  border: 1px solid #d4af37;
+}
+
+/* BẢNG ĐIỀU KHIỂN CABIN COP */
+.cabin-cop-panel {
+  position: absolute;
+  right: 14px;
+  top: 60px;
+  bottom: 80px;
+  width: 28px;
+  background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 6px 2px;
+  z-index: 4;
+  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.4);
+}
+
+.cabin-cop-screen {
+  width: 22px;
+  height: 22px;
+  background: #020617;
+  border: 1px solid #0284c7;
+  border-radius: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  font-family: monospace;
+  font-size: 0.65rem;
+  font-weight: 800;
+  color: #38bdf8;
+  margin-bottom: 6px;
+}
+
+.cop-arrow {
+  color: #10b981;
+  font-size: 0.6rem;
+}
+
+.cabin-cop-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cop-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #334155;
+  border: 1px solid #64748b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.55rem;
+  font-weight: bold;
+  color: #cbd5e1;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cop-dot.active {
+  background: #f59e0b;
+  border-color: #fbbf24;
+  color: #0f172a;
+  box-shadow: 0 0 6px #f59e0b;
+}
+
+.cop-dot.calling {
+  background: #ef4444;
+  border-color: #fca5a5;
+  color: #ffffff;
+  animation: call-pulse 0.8s infinite alternate;
+}
+
+/* SÀN ĐÁ CABIN (FLOORING - GÓC 3D rotateX 25deg) */
+.cabin-floor {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 58px;
+  transform-origin: bottom;
+  transform: rotateX(25deg);
+  border-top: 2px solid rgba(255, 255, 255, 0.3);
+  z-index: 3;
+  transition: all 0.4s ease;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+/* Sàn 1: Đá Thảm CNC Hoàng Gia */
+.floor-floor-royal {
+  background: 
+    radial-gradient(circle at 50% 50%, #facc15 0%, #ca8a04 18%, #78350f 35%, #451a03 60%, #1c1917 100%);
+  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.85);
+}
+
+.floor-floor-royal::before {
+  content: "";
+  position: absolute;
+  inset: 6px;
+  border: 2px dashed rgba(253, 224, 71, 0.7);
+  border-radius: 4px;
+}
+
+/* Sàn 2: Đá Granite Kim Sa Đen */
+.floor-floor-galaxy {
+  background: 
+    radial-gradient(1.5px 1.5px at 20px 30px, #ffffff, rgba(0, 0, 0, 0)),
+    radial-gradient(1.5px 1.5px at 60px 40px, #facc15, rgba(0, 0, 0, 0)),
+    radial-gradient(2px 2px at 120px 20px, #ffffff, rgba(0, 0, 0, 0)),
+    radial-gradient(1.5px 1.5px at 180px 45px, #fde047, rgba(0, 0, 0, 0)),
+    linear-gradient(135deg, #09090b 0%, #18181b 50%, #09090b 100%);
+  background-size: 100% 100%;
+}
+
+/* Sàn 3: Đá Marble Trắng Ý Carrara */
+.floor-floor-carrara {
+  background: 
+    linear-gradient(125deg, #f8fafc 0%, #e2e8f0 40%, #cbd5e1 55%, #f1f5f9 100%);
+  box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.25);
+}
+
+.floor-floor-carrara::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(45deg, transparent, transparent 15px, rgba(100, 116, 139, 0.12) 15px, rgba(100, 116, 139, 0.12) 18px);
+}
+
+/* Vệt sáng bóng phản chiếu đèn trần trên sàn */
+.floor-specular-glow {
+  position: absolute;
+  top: 5px;
+  left: 20%;
+  right: 20%;
+  height: 25px;
+  border-radius: 50%;
+  pointer-events: none;
+  transition: all 0.3s ease;
+}
+
+.floor-specular-glow.glow-ceil-dome {
+  background: radial-gradient(ellipse, rgba(254, 240, 138, 0.6) 0%, transparent 75%);
+}
+
+.floor-specular-glow.glow-ceil-diamond {
+  background: radial-gradient(ellipse, rgba(255, 255, 255, 0.7) 0%, rgba(250, 204, 21, 0.3) 50%, transparent 80%);
+}
+
+.floor-specular-glow.glow-ceil-minimal {
+  background: radial-gradient(ellipse, rgba(255, 255, 255, 0.8) 0%, rgba(56, 189, 248, 0.3) 60%, transparent 80%);
+}
+
+/* CÁNH CỬA TRƯỢT SLIDING DOORS */
+.cabin-door {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 50%;
+  z-index: 6;
+  transition: transform 0.85s cubic-bezier(0.25, 1, 0.5, 1);
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+}
+
+.cabin-door.door-left {
+  left: 0;
+  border-right: 2px solid #334155;
+  background: linear-gradient(90deg, #334155 0%, #64748b 70%, #94a3b8 100%);
+}
+
+.cabin-door.door-right {
+  right: 0;
+  border-left: 2px solid #334155;
+  background: linear-gradient(270deg, #334155 0%, #64748b 70%, #94a3b8 100%);
+}
+
+/* Cửa theo chất liệu vách */
+.door-wall-kinh-cuong-luc.cabin-door,
+.door-wall-kinh-mau-tra.cabin-door {
+  background: linear-gradient(180deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.95) 100%);
+  border: 2px solid #0284c7;
+}
+
+.door-wall-inox-guong-vang.cabin-door {
+  background: linear-gradient(180deg, #78350f 0%, #d97706 50%, #92400e 100%);
+  border: 2px solid #facc15;
+}
+
+/* Trạng thái mở cửa */
+.cabin-car-box.doors-open .door-left {
+  transform: translateX(-94%);
+}
+
+.cabin-car-box.doors-open .door-right {
+  transform: translateX(94%);
+}
+
+/* Tia cảm biến an toàn */
+.cabin-door-gap-indicator {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 2px;
+  height: 80%;
+  background: rgba(239, 68, 68, 0.7);
+  box-shadow: 0 0 8px #ef4444;
+  z-index: 7;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.cabin-car-box:not(.doors-open) .cabin-door-gap-indicator {
+  opacity: 1;
+}
+
+/* Khi tắt đèn */
+.cabin-car-box.light-off .cabin-back-wall {
+  filter: brightness(0.35) contrast(1.1);
+}
+
+.cabin-car-box.light-off .cabin-floor {
+  filter: brightness(0.4);
+}
+
+/* NÚT GHIM TƯƠNG TÁC (HOTSPOT PINS 1 - 4 CHUẨN THỨ TỰ) */
+.cabin-hotspot-pin {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #facc15;
+  color: #0b1329;
+  border: 2px solid #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  font-weight: 800;
+  box-shadow: 0 0 10px rgba(250, 204, 21, 0.8);
+  cursor: pointer;
+  z-index: 8;
+  transition: all 0.2s ease;
+}
+
+.cabin-hotspot-pin:hover {
+  transform: scale(1.2);
+  background: #fef08a;
+  box-shadow: 0 0 16px #facc15;
+}
+
+.pin-wall {
+  top: 38%;
+  left: 28%;
+}
+
+.pin-floor {
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.pin-ceiling {
+  top: -2px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.pin-handrail {
+  top: -6px;
+  right: 28%;
+}
+
+/* Thanh watermark hiển thị cấu hình */
 .cabin-status-watermark {
   position: absolute;
-  bottom: 10px;
+  bottom: 8px;
   left: 14px;
   right: 14px;
-  background: linear-gradient(90deg, rgba(2, 6, 23, 0.9) 0%, rgba(15, 23, 42, 0.8) 100%);
+  background: rgba(2, 6, 23, 0.85);
   border: 1px solid rgba(255, 255, 255, 0.12);
   backdrop-filter: blur(8px);
-  padding: 8px 14px;
-  border-radius: 8px;
+  padding: 6px 14px;
+  border-radius: 6px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   font-weight: 700;
   color: #f1f5f9;
   z-index: 10;
@@ -199,13 +739,13 @@
   background: rgba(212, 175, 55, 0.15);
   border: 1px solid rgba(212, 175, 55, 0.4);
   color: #facc15;
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   font-weight: 700;
   padding: 2px 8px;
   border-radius: 4px;
 }
 
-/* 3. BẢNG GỌI TẦNG THỰC TẾ (BẤM TẦNG THANG TỰ ĐỘNG CHẠY) */
+/* 3. BẢNG GỌI TẦNG THỰC TẾ */
 .cabin-floor-call-station {
   padding: 12px 18px;
   background: linear-gradient(180deg, #0d152c 0%, #070d1e 100%);
@@ -244,7 +784,7 @@
 
 .btn-floor-call {
   flex: 1;
-  min-width: 70px;
+  min-width: 65px;
   background: #131d38;
   border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 8px;
@@ -267,7 +807,7 @@
 }
 
 .btn-floor-call .floor-number {
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 800;
   font-family: monospace;
   color: #ffffff;
@@ -278,7 +818,6 @@
   color: #94a3b8;
 }
 
-/* Tầng hiện tại đang đỗ */
 .btn-floor-call.current {
   background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
   border-color: #38bdf8;
@@ -305,12 +844,11 @@
   box-shadow: 0 0 6px #22c55e;
 }
 
-/* Tầng đang được gọi & thang máy đang di chuyển tới */
 .btn-floor-call.calling {
   background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
   border-color: #facc15;
   box-shadow: 0 0 16px rgba(250, 204, 21, 0.6);
-  animation: call-pulse 1s infinite alternate;
+  animation: call-pulse 0.9s infinite alternate;
 }
 
 .btn-floor-call.calling .floor-number {
@@ -327,7 +865,7 @@
   to { box-shadow: 0 0 20px rgba(250, 204, 21, 0.9); }
 }
 
-/* 4. Bộ chọn vật liệu tương tác (Tabs & Thẻ Swatch) */
+/* 4. BỘ CHỌN VẬT LIỆU (TABS & THẺ SWATCH) */
 .cabin-cfg-controls {
   padding: 16px 18px;
   background: #0b1329;
@@ -374,8 +912,8 @@
 /* Lưới hiển thị các thẻ vật liệu */
 .cabin-cards-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(145px, 1fr));
+  gap: 10px;
   margin-bottom: 8px;
 }
 
@@ -408,7 +946,7 @@
 }
 
 .swatch-preview-box {
-  height: 52px;
+  height: 48px;
   border-radius: 6px;
   border: 1px solid rgba(255, 255, 255, 0.2);
   position: relative;
@@ -417,17 +955,17 @@
 
 .swatch-check-icon {
   position: absolute;
-  top: 5px;
-  right: 5px;
-  width: 18px;
-  height: 18px;
+  top: 4px;
+  right: 4px;
+  width: 16px;
+  height: 16px;
   border-radius: 50%;
   background: #facc15;
   color: #0b1329;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.65rem;
+  font-size: 0.6rem;
   font-weight: 800;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
 }
@@ -435,18 +973,18 @@
 .swatch-content {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 2px;
 }
 
 .swatch-name {
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   font-weight: 700;
   color: #ffffff;
   line-height: 1.25;
 }
 
 .swatch-desc {
-  font-size: 0.68rem;
+  font-size: 0.66rem;
   color: #94a3b8;
   line-height: 1.3;
 }
@@ -454,7 +992,7 @@
 .swatch-badge {
   display: inline-block;
   align-self: flex-start;
-  font-size: 0.64rem;
+  font-size: 0.62rem;
   font-weight: 700;
   padding: 1px 6px;
   border-radius: 4px;
@@ -544,6 +1082,13 @@
 
 /* Responsive */
 @media (max-width: 576px) {
+  .cabin-stage {
+    height: 330px;
+  }
+  .cabin-car-box {
+    width: 250px;
+    height: 290px;
+  }
   .cabin-viz-footer {
     flex-direction: column;
     align-items: stretch;
