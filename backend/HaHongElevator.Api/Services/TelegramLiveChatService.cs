@@ -19,6 +19,8 @@ public class TelegramLiveChatService : ITelegramLiveChatService
     private static readonly ConcurrentDictionary<long, string> MsgToSessionCache = new();
     // Fast in-memory cache for mapping Admin Forwarded MessageId -> Customer's Telegram ChatId
     private static readonly ConcurrentDictionary<long, string> MsgToCustomerChatMap = new();
+    // Track last acknowledgment sent to customer to send it only ONCE per chat session
+    private static readonly ConcurrentDictionary<string, DateTime> CustomerLastAckMap = new();
     private static string? _lastActiveSessionId;
 
     public TelegramLiveChatService(
@@ -447,6 +449,7 @@ $@"💬 <b>TIN NHẮN TỪ KHÁCH TRÊN WEBSITE:</b>
                     var customerNotice = $"👨‍🔧 <b>Kỹ sư Thang Máy Hà Hồng:</b>\n\n{EscapeHtml(text)}";
                     await PostTelegramMessageAsync(botToken, customerChatId, customerNotice, cancellationToken);
                     await SendTelegramReplyAsync(botToken, configuredChatId!, "✅ <i>Đã gửi câu trả lời đến khách hàng trên Telegram!</i>", msg.MessageId, cancellationToken);
+                    CustomerLastAckMap[customerChatId] = DateTime.UtcNow;
                     return;
                 }
 
@@ -497,9 +500,13 @@ Bot sẽ tự động chuyển tiếp câu trả lời về đúng khách hàng 
             // ==========================================
             if (string.IsNullOrWhiteSpace(configuredChatId) || string.IsNullOrWhiteSpace(senderChatId)) return;
 
+            var now = DateTime.UtcNow;
+            var vnTime = ToVietnamTime(now);
+
             // Nếu khách bấm /start lần đầu
             if (text.Equals("/start", StringComparison.OrdinalIgnoreCase))
             {
+                CustomerLastAckMap[senderChatId] = now;
                 var welcomeCustomer =
 @"🏢 <b>CHÀO MỪNG BẠN ĐẾN VỚI THANG MÁY HÀ HỒNG!</b>
 ━━━━━━━━━━━━━━━━━━━
@@ -518,9 +525,6 @@ Anh/chị hãy nhắn tin nội dung hoặc câu hỏi tại đây, Kỹ sư c�
             var customerName = $"{msg.From?.FirstName} {msg.From?.LastName}".Trim();
             if (string.IsNullOrWhiteSpace(customerName)) customerName = "Khách hàng Telegram";
             var username = !string.IsNullOrWhiteSpace(msg.From?.Username) ? $"@{msg.From.Username}" : "Chưa đặt username";
-
-            var now = DateTime.UtcNow;
-            var vnTime = ToVietnamTime(now);
 
             // Chuyển tiếp tin nhắn của khách hàng về cho ADMIN (Bạn)
             var forwardToAdmin =
@@ -541,9 +545,19 @@ $@"💬 <b>CÓ KHÁCH HÀNG CHAT QUA TELEGRAM!</b>
                 await SaveCustomerChatMapDbAsync(adminMsgId.Value, senderChatId, cancellationToken);
             }
 
-            // Gửi xác nhận cho khách hàng biết tin nhắn đã được chuyển tới kỹ sư
-            var ackToCustomer = "Dạ em đã chuyển tin nhắn của anh/chị đến Kỹ sư Thang Máy Hà Hồng. Kỹ sư sẽ phản hồi anh/chị ngay tại đây trong giây lát ạ! 👨‍🔧";
-            await PostTelegramMessageAsync(botToken, senderChatId, ackToCustomer, cancellationToken);
+            // Gửi xác nhận cho khách hàng: CHỈ GỬI 1 LẦN duy nhất trong phiên chat (cooldown 60 phút), tránh gửi lặp lại mỗi khi khách nhắn từng tin
+            bool shouldSendAck = false;
+            if (!CustomerLastAckMap.TryGetValue(senderChatId, out var lastAckTime) || (now - lastAckTime).TotalMinutes > 60)
+            {
+                shouldSendAck = true;
+                CustomerLastAckMap[senderChatId] = now;
+            }
+
+            if (shouldSendAck)
+            {
+                var ackToCustomer = "Dạ em đã chuyển tin nhắn của anh/chị đến Kỹ sư Thang Máy Hà Hồng. Kỹ sư sẽ phản hồi anh/chị ngay tại đây trong giây lát ạ! 👨‍🔧";
+                await PostTelegramMessageAsync(botToken, senderChatId, ackToCustomer, cancellationToken);
+            }
         }
     }
 
