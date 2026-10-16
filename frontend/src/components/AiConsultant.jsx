@@ -10,21 +10,13 @@ const cauHoiKhoiTao = [
   "Chính sách bảo trì và bảo hành"
 ];
 
-function getOrCreateSessionId() {
-  let sid = localStorage.getItem("hahong_livechat_session");
-  if (!sid) {
-    sid = "vis_" + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2, 6);
-    localStorage.setItem("hahong_livechat_session", sid);
-  }
-  return sid;
-}
-
 function formatAiMessage(text) {
   if (!text) return "";
   const lines = text.split("\n");
 
   return lines.map((line, index) => {
     let formatted = line;
+    // Replace bold **text**
     const parts = [];
     const regex = /\*\*(.*?)\*\*/g;
     let lastIndex = 0;
@@ -53,29 +45,16 @@ function formatAiMessage(text) {
 
 function AiConsultant() {
   const [isOpen, setIsOpen] = useState(false);
-  const [chatMode, setChatMode] = useState("live"); // "live" (Kỹ sư Hà Hồng qua Telegram) | "ai" (Trợ lý AI Gemini)
-  
-  // Live Chat state
-  const [sessionId] = useState(getOrCreateSessionId);
-  const [liveMessages, setLiveMessages] = useState([]);
-  const [customerName, setCustomerName] = useState(() => localStorage.getItem("hahong_chat_name") || "");
-  const [customerPhone, setCustomerPhone] = useState(() => localStorage.getItem("hahong_chat_phone") || "");
-  const [showPhonePrompt, setShowPhonePrompt] = useState(false);
-  const [phoneSaved, setPhoneSaved] = useState(false);
-  const [liveSending, setLiveSending] = useState(false);
-
-  // AI Chat state
-  const [aiMessages, setAiMessages] = useState([
+  const [messages, setMessages] = useState([
     {
-      id: "welcome-ai",
+      id: "welcome",
       role: "model",
       text: "Dạ, em chào anh/chị! Em là trợ lý kỹ thuật của Thang Máy Hà Hồng 🏢\n\nAnh/chị đang cần tư vấn kích thước hố thang, tải trọng hay báo giá dòng thang nào cho công trình của mình ạ?",
       suggestions: cauHoiKhoiTao
     }
   ]);
-  const [aiLoading, setAiLoading] = useState(false);
-
   const [inputValue, setInputValue] = useState("");
+  const [loading, setLoading] = useState(false);
   const [hasNewPrompt, setHasNewPrompt] = useState(true);
   const messagesEndRef = useRef(null);
 
@@ -88,66 +67,8 @@ function AiConsultant() {
       scrollToBottom();
       setHasNewPrompt(false);
     }
-  }, [isOpen, liveMessages, aiMessages, chatMode]);
+  }, [isOpen, messages, loading]);
 
-  // Load Live Chat history initially
-  const fetchLiveHistory = async (afterId = null) => {
-    try {
-      const url = afterId
-        ? `/livechat/history?sessionId=${sessionId}&afterId=${afterId}`
-        : `/livechat/history?sessionId=${sessionId}`;
-      const res = await apiClient.get(url);
-      const data = res?.data || [];
-
-      if (!afterId) {
-        if (data.length === 0) {
-          // Add default live welcome message
-          setLiveMessages([
-            {
-              id: "welcome-live",
-              sender: "agent",
-              senderName: "Kỹ sư Thang Máy Hà Hồng",
-              message: "Dạ, em chào anh/chị! Kỹ sư kỹ thuật Thang Máy Hà Hồng đang trực tuyến 🟢.\n\nAnh/chị đang quan tâm dòng thang nào hoặc cần tư vấn kích thước hố thang cho công trình, anh/chị cứ nhắn tại đây, em sẽ phản hồi ngay qua Telegram nhé!",
-              createdAt: new Date().toISOString()
-            }
-          ]);
-        } else {
-          setLiveMessages(data);
-        }
-      } else if (data.length > 0) {
-        setLiveMessages((prev) => {
-          const existingIds = new Set(prev.map((m) => m.id));
-          const newItems = data.filter((m) => !existingIds.has(m.id));
-          if (newItems.length === 0) return prev;
-          return [...prev, ...newItems];
-        });
-      }
-    } catch {
-      // ignore network errors
-    }
-  };
-
-  // Initial load when open
-  useEffect(() => {
-    if (isOpen && chatMode === "live") {
-      fetchLiveHistory();
-    }
-  }, [isOpen, chatMode, sessionId]);
-
-  // Polling for live messages when chat window is open
-  useEffect(() => {
-    if (!isOpen || chatMode !== "live") return undefined;
-
-    const interval = setInterval(() => {
-      const lastMsg = liveMessages[liveMessages.length - 1];
-      const afterId = typeof lastMsg?.id === "number" ? lastMsg.id : null;
-      fetchLiveHistory(afterId);
-    }, 2500);
-
-    return () => clearInterval(interval);
-  }, [isOpen, chatMode, liveMessages, sessionId]);
-
-  // Fetch AI initial prompt
   useEffect(() => {
     let active = true;
     apiClient
@@ -156,11 +77,11 @@ function AiConsultant() {
         if (!active || !res?.data) return;
         const { greeting, suggestions } = res.data;
         if (greeting) {
-          setAiMessages((prev) => {
-            if (prev.length === 1 && prev[0].id === "welcome-ai") {
+          setMessages((prev) => {
+            if (prev.length === 1 && prev[0].id === "welcome") {
               return [
                 {
-                  id: "welcome-ai",
+                  id: "welcome",
                   role: "model",
                   text: greeting,
                   suggestions: suggestions?.length ? suggestions : cauHoiKhoiTao,
@@ -171,115 +92,57 @@ function AiConsultant() {
           });
         }
       })
-      .catch(() => {});
+      .catch(() => {
+        // Fallback mặc định đã có sẵn trong state
+      });
 
     return () => {
       active = false;
     };
   }, []);
 
-  const handleSaveContactInfo = async (e) => {
-    e?.preventDefault();
-    if (!customerPhone.trim()) return;
-
-    localStorage.setItem("hahong_chat_phone", customerPhone.trim());
-    if (customerName.trim()) {
-      localStorage.setItem("hahong_chat_name", customerName.trim());
-    }
-
-    try {
-      await apiClient.post("/livechat/customer-info", {
-        sessionId,
-        fullName: customerName.trim() || undefined,
-        phoneNumber: customerPhone.trim()
-      });
-      setPhoneSaved(true);
-      setShowPhonePrompt(false);
-    } catch {
-      setShowPhonePrompt(false);
-    }
-  };
-
   const handleSend = async (messageToSend) => {
     const text = (messageToSend || inputValue).trim();
-    if (!text) return;
+    if (!text || loading) return;
 
     setInputValue("");
+    const userMsg = { id: `user-${Date.now()}`, role: "user", text };
+    setMessages((prev) => [...prev, userMsg]);
+    setLoading(true);
 
-    if (chatMode === "live") {
-      // Send to Live Chat (Telegram Bridge)
-      setLiveSending(true);
-      const tempId = Date.now();
-      const optimisticMsg = {
-        id: tempId,
-        sessionId,
-        sender: "customer",
-        senderName: customerName || "Khách",
+    // Chuẩn bị lịch sử hội thoại gửi lên backend
+    const history = messages
+      .filter((m) => m.id !== "welcome")
+      .map((m) => ({
+        role: m.role === "model" ? "model" : "user",
+        text: m.text
+      }));
+
+    try {
+      const response = await apiClient.post("/chat/consult", {
         message: text,
-        createdAt: new Date().toISOString()
+        history
+      });
+
+      const replyData = response.data;
+      const modelMsg = {
+        id: `model-${Date.now()}`,
+        role: "model",
+        text: replyData.reply,
+        suggestions: replyData.suggestedQuestions || []
       };
 
-      setLiveMessages((prev) => [...prev, optimisticMsg]);
-
-      try {
-        const res = await apiClient.post("/livechat/send", {
-          sessionId,
-          senderName: customerName || undefined,
-          customerPhone: customerPhone || undefined,
-          message: text,
-          pageUrl: window.location.pathname
-        });
-
-        if (res?.data?.id) {
-          setLiveMessages((prev) =>
-            prev.map((m) => (m.id === tempId ? { ...m, id: res.data.id } : m))
-          );
-        }
-      } catch {
-        // error handling
-      } finally {
-        setLiveSending(false);
-      }
-    } else {
-      // Send to Gemini AI
-      if (aiLoading) return;
-      const userMsg = { id: `user-${Date.now()}`, role: "user", text };
-      setAiMessages((prev) => [...prev, userMsg]);
-      setAiLoading(true);
-
-      const history = aiMessages
-        .filter((m) => m.id !== "welcome-ai")
-        .map((m) => ({
-          role: m.role === "model" ? "model" : "user",
-          text: m.text
-        }));
-
-      try {
-        const response = await apiClient.post("/chat/consult", {
-          message: text,
-          history
-        });
-
-        const replyData = response.data;
-        const modelMsg = {
-          id: `model-${Date.now()}`,
-          role: "model",
-          text: replyData.reply,
-          suggestions: replyData.suggestedQuestions || []
-        };
-
-        setAiMessages((prev) => [...prev, modelMsg]);
-      } catch {
-        const errorMsg = {
-          id: `error-${Date.now()}`,
-          role: "model",
-          text: `Dạ, hiện tại em chưa kết nối được máy chủ kỹ thuật. Anh/chị có thể chuyển sang tab **Kỹ sư Hà Hồng** hoặc gọi Hotline 24/7: **${soDienThoaiCongTy}** để được hỗ trợ ngay ạ! 📞`,
-          suggestions: ["Chat với Kỹ sư Hà Hồng", "Gọi điện tư vấn 24/7"]
-        };
-        setAiMessages((prev) => [...prev, errorMsg]);
-      } finally {
-        setAiLoading(false);
-      }
+      setMessages((prev) => [...prev, modelMsg]);
+    } catch {
+      const errorMsg = {
+        id: `error-${Date.now()}`,
+        role: "model",
+        text: `Dạ, hiện tại em chưa kết nối được máy chủ kỹ thuật. Anh/chị có thể gọi trực tiếp Hotline 24/7: **${soDienThoaiCongTy}** để kỹ sư Hà Hồng hỗ trợ tư vấn ngay ạ! 📞`,
+        suggestions: ["Gọi điện tư vấn 24/7", "Xem danh sách dịch vụ"]
+      };
+      setMessages((prev) => [...prev, errorMsg]);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -291,50 +154,50 @@ function AiConsultant() {
   };
 
   return (
-    <aside className="ai-chat-root" aria-label="Tư vấn Thang Máy Hà Hồng">
-      {/* Nút bấm mở khung chat */}
-      <button
-        type="button"
-        className={`ai-chat-launcher ${isOpen ? "is-open" : ""}`}
-        onClick={() => setIsOpen(!isOpen)}
-        aria-expanded={isOpen}
-        aria-label={isOpen ? "Đóng chat" : "Chat với Kỹ sư Hà Hồng"}
-      >
-        <span className="ai-launcher-avatar">
-          <img src={logoHaHong} alt="Hà Hồng" />
-          <span className="live-dot-pulse" title="Kỹ sư đang trực tuyến qua Telegram" />
-        </span>
-        <span className="ai-launcher-label">
-          <strong>Kỹ sư Hà Hồng</strong>
-          <span>Live Chat 24/7</span>
-        </span>
-        {hasNewPrompt && !isOpen && <span className="ai-launcher-badge">1</span>}
-      </button>
+    <aside className="ai-consultant-root" aria-label="AI Tư vấn Thang Máy">
+      {/* Nút bấm mở chat nổi ở góc phải màn hình */}
+      {!isOpen && (
+        <button
+          type="button"
+          className="ai-chat-launcher"
+          onClick={() => setIsOpen(true)}
+          aria-label="Mở cửa sổ AI tư vấn thang máy"
+        >
+          <div className="ai-launcher-avatar">
+            <img src={logoHaHong} alt="Thang Máy Hà Hồng" />
+            <span className="ai-online-dot" />
+          </div>
+          <div className="ai-launcher-text">
+            <strong>AI Kỹ thuật</strong>
+            <small>Tư vấn 24/7</small>
+          </div>
+          {hasNewPrompt && <span className="ai-launcher-badge">1</span>}
+        </button>
+      )}
 
-      {/* Cửa sổ chat */}
+      {/* Cửa sổ Chat */}
       {isOpen && (
-        <div className="ai-chat-window" role="dialog" aria-labelledby="live-chat-heading">
+        <div className="ai-chat-window" role="dialog" aria-modal="false" aria-label="Khung chat tư vấn thang máy">
           {/* Header */}
           <div className="ai-chat-header">
             <div className="ai-chat-header-brand">
               <div className="ai-chat-avatar-wrap">
-                <img src={logoHaHong} alt="Thang Máy Hà Hồng" />
+                <img src={logoHaHong} alt="Logo Hà Hồng" />
                 <span className="ai-header-dot" />
               </div>
               <div>
-                <h3 id="live-chat-heading">Thang Máy Hà Hồng</h3>
+                <h3>Hà Hồng AI Consultant</h3>
                 <p>
-                  <span className="live-status-pill me-1">🟢 Trực tuyến</span>
-                  <span>{chatMode === "live" ? "Kỹ sư phản hồi qua Telegram" : "Trợ lý kỹ thuật AI"}</span>
+                  <i className="bi bi-patch-check-fill text-warning me-1"></i>
+                  Kỹ sư tư vấn trực tuyến 24/7
                 </p>
               </div>
             </div>
-
             <div className="ai-chat-header-actions">
               <a
                 href={`tel:${soDienThoaiLienKet}`}
                 className="ai-chat-call-btn"
-                title={`Gọi hotline ${soDienThoaiCongTy}`}
+                title={`Gọi ${soDienThoaiCongTy}`}
                 aria-label="Gọi điện trực tiếp"
               >
                 <i className="bi bi-telephone-fill"></i>
@@ -350,167 +213,54 @@ function AiConsultant() {
             </div>
           </div>
 
-          {/* Chuyển đổi 2 chế độ: Kỹ sư Telegram & Trợ lý AI */}
-          <div className="live-chat-mode-tabs">
-            <button
-              type="button"
-              className={`live-chat-tab-btn ${chatMode === "live" ? "active" : ""}`}
-              onClick={() => setChatMode("live")}
-            >
-              <i className="bi bi-person-workspace me-1 text-warning"></i>
-              <strong>Kỹ sư Hà Hồng</strong>
-              <span className="live-tag">Trực tiếp</span>
-            </button>
-            <button
-              type="button"
-              className={`live-chat-tab-btn ${chatMode === "ai" ? "active" : ""}`}
-              onClick={() => setChatMode("ai")}
-            >
-              <i className="bi bi-robot me-1 text-info"></i>
-              <span>Trợ lý AI 24/7</span>
-            </button>
-          </div>
-
-          {/* Thông báo chế độ Live Chat */}
-          {chatMode === "live" && (
-            <div className="live-chat-status-bar">
-              <div className="d-flex align-items-center justify-content-between">
-                <span>
-                  <i className="bi bi-telegram text-primary me-1"></i>
-                  Kết nối trực tiếp tới <strong>Kỹ sư trực tổng đài Telegram</strong>
-                </span>
-                {!phoneSaved && (
-                  <button
-                    type="button"
-                    className="btn btn-link btn-sm p-0 text-decoration-none fw-bold text-primary"
-                    onClick={() => setShowPhonePrompt(!showPhonePrompt)}
-                  >
-                    {showPhonePrompt ? "Đóng" : "Để lại SĐT"}
-                  </button>
-                )}
-              </div>
-
-              {/* Form nhanh nhập SĐT */}
-              {showPhonePrompt && !phoneSaved && (
-                <form className="live-chat-phone-form mt-2" onSubmit={handleSaveContactInfo}>
-                  <div className="d-flex gap-1">
-                    <input
-                      type="tel"
-                      placeholder="Số điện thoại của bạn..."
-                      value={customerPhone}
-                      onChange={(e) => setCustomerPhone(e.target.value)}
-                      className="form-control form-control-sm"
-                      autoFocus
-                    />
-                    <button type="submit" className="btn btn-primary btn-sm px-2">
-                      Lưu
-                    </button>
-                  </div>
-                  <small className="text-muted" style={{ fontSize: "11px" }}>
-                    Kỹ sư sẽ gọi lại ngay nếu bạn cần rời trang.
-                  </small>
-                </form>
-              )}
-            </div>
-          )}
-
           {/* Body tin nhắn */}
           <div className="ai-chat-body">
-            {chatMode === "live" ? (
-              // HIỂN THỊ TIN NHẮN LIVE CHAT (TELEGRAM BRIDGE)
-              <>
-                {liveMessages.map((m) => {
-                  const isUser = m.sender === "customer";
-                  return (
-                    <div key={m.id} className={`ai-message-row ${isUser ? "user-row" : "model-row"}`}>
-                      {!isUser && (
-                        <div className="ai-msg-avatar">
-                          <img src={logoHaHong} alt="Kỹ sư" />
-                        </div>
-                      )}
-                      <div className={`ai-msg-bubble ${!isUser ? "live-engineer-bubble" : ""}`}>
-                        {!isUser && (
-                          <div className="live-engineer-badge">
-                            <i className="bi bi-patch-check-fill text-warning me-1"></i>
-                            <strong>{m.senderName || "Kỹ sư Thang Máy Hà Hồng"}</strong>
-                            <span className="live-badge-tele">Telegram Verified</span>
-                          </div>
-                        )}
-                        <div className="ai-msg-content">{formatAiMessage(m.message)}</div>
-                        <div className="live-msg-time">
-                          {m.createdAt ? new Date(m.createdAt).toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" }) : ""}
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
+            <div className="ai-chat-announcement">
+              <i className="bi bi-shield-check"></i>
+              <span>Tư vấn kích thước hố thang, tải trọng và gửi báo giá sơ bộ miễn phí.</span>
+            </div>
 
-                {liveSending && (
-                  <div className="text-end pe-2">
-                    <small className="text-muted fst-italic" style={{ fontSize: "11px" }}>
-                      <i className="bi bi-arrow-up-right-circle me-1"></i> Đang gửi tới Kỹ sư Hà Hồng qua Telegram...
-                    </small>
+            {messages.map((m) => (
+              <div key={m.id} className={`ai-message-row ${m.role === "user" ? "user-row" : "model-row"}`}>
+                {m.role === "model" && (
+                  <div className="ai-msg-avatar">
+                    <img src={logoHaHong} alt="AI" />
                   </div>
                 )}
-              </>
-            ) : (
-              // HIỂN THỊ TIN NHẮN TRỢ LÝ AI (GEMINI)
-              <>
-                <div className="ai-chat-announcement">
-                  <i className="bi bi-shield-check"></i>
-                  <span>Trợ lý AI tư vấn kích thước hố thang, tải trọng và giải đáp nhanh 24/7.</span>
+                <div className="ai-msg-bubble">
+                  <div className="ai-msg-content">{formatAiMessage(m.text)}</div>
+                  {m.suggestions && m.suggestions.length > 0 && (
+                    <div className="ai-suggestions-wrap">
+                      {m.suggestions.map((s, idx) => (
+                        <button
+                          key={idx}
+                          type="button"
+                          className="ai-suggestion-chip"
+                          onClick={() => handleSend(s)}
+                          disabled={loading}
+                        >
+                          {s}
+                          <i className="bi bi-arrow-up-right ms-1"></i>
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
+              </div>
+            ))}
 
-                {aiMessages.map((m) => (
-                  <div key={m.id} className={`ai-message-row ${m.role === "user" ? "user-row" : "model-row"}`}>
-                    {m.role === "model" && (
-                      <div className="ai-msg-avatar">
-                        <img src={logoHaHong} alt="AI" />
-                      </div>
-                    )}
-                    <div className="ai-msg-bubble">
-                      <div className="ai-msg-content">{formatAiMessage(m.text)}</div>
-                      {m.suggestions && m.suggestions.length > 0 && (
-                        <div className="ai-suggestions-wrap">
-                          {m.suggestions.map((s, idx) => (
-                            <button
-                              key={idx}
-                              type="button"
-                              className="ai-suggestion-chip"
-                              onClick={() => {
-                                if (s.includes("Kỹ sư") || s.includes("Chat với")) {
-                                  setChatMode("live");
-                                } else {
-                                  handleSend(s);
-                                }
-                              }}
-                              disabled={aiLoading}
-                            >
-                              {s}
-                              <i className="bi bi-arrow-up-right ms-1"></i>
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ))}
-
-                {aiLoading && (
-                  <div className="ai-message-row model-row">
-                    <div className="ai-msg-avatar">
-                      <img src={logoHaHong} alt="AI" />
-                    </div>
-                    <div className="ai-msg-bubble ai-typing-bubble">
-                      <span className="ai-typing-dot"></span>
-                      <span className="ai-typing-dot"></span>
-                      <span className="ai-typing-dot"></span>
-                    </div>
-                  </div>
-                )}
-              </>
+            {loading && (
+              <div className="ai-message-row model-row">
+                <div className="ai-msg-avatar">
+                  <img src={logoHaHong} alt="AI" />
+                </div>
+                <div className="ai-msg-bubble ai-typing-bubble">
+                  <span className="ai-typing-dot"></span>
+                  <span className="ai-typing-dot"></span>
+                  <span className="ai-typing-dot"></span>
+                </div>
+              </div>
             )}
-
             <div ref={messagesEndRef} />
           </div>
 
@@ -522,19 +272,15 @@ function AiConsultant() {
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder={
-                  chatMode === "live"
-                    ? "Nhập câu hỏi để chat với Kỹ sư Hà Hồng..."
-                    : "Nhập câu hỏi hoặc SĐT để nhận báo giá..."
-                }
+                placeholder="Nhập câu hỏi hoặc SĐT để nhận báo giá..."
                 aria-label="Nội dung chat"
-                disabled={chatMode === "live" ? liveSending : aiLoading}
+                disabled={loading}
               />
               <button
                 type="button"
                 className="ai-send-btn"
                 onClick={() => handleSend()}
-                disabled={!inputValue.trim() || (chatMode === "live" ? liveSending : aiLoading)}
+                disabled={loading || !inputValue.trim()}
                 aria-label="Gửi tin nhắn"
               >
                 <i className="bi bi-send-fill"></i>

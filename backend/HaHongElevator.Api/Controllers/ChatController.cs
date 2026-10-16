@@ -13,11 +13,16 @@ public class ChatController : ControllerBase
 {
     private readonly AiConsultantService _aiConsultantService;
     private readonly ApplicationDbContext _dbContext;
+    private readonly ITelegramBotService _telegramService;
 
-    public ChatController(AiConsultantService aiConsultantService, ApplicationDbContext dbContext)
+    public ChatController(
+        AiConsultantService aiConsultantService,
+        ApplicationDbContext dbContext,
+        ITelegramBotService telegramService)
     {
         _aiConsultantService = aiConsultantService;
         _dbContext = dbContext;
+        _telegramService = telegramService;
     }
 
     [HttpPost("consult")]
@@ -30,6 +35,34 @@ public class ChatController : ControllerBase
         }
 
         var response = await _aiConsultantService.ConsultAsync(request, _dbContext, cancellationToken);
+
+        // Bắn thông báo lên Telegram cho Admin biết khách đang hỏi trên web
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                var question = EscapeHtml(request.Message.Trim());
+                var previewReply = EscapeHtml(response.Reply.Length > 200 ? response.Reply[..200] + "..." : response.Reply);
+
+                var telegramText =
+$@"💬 <b>KHÁCH ĐANG HỎI TRỢ LÝ AI TRÊN WEBSITE:</b>
+━━━━━━━━━━━━━━━━━━━
+💭 <b>Câu hỏi của khách:</b>
+<i>""{question}""</i>
+
+🤖 <b>Trợ lý AI đã trả lời:</b>
+<i>""{previewReply}""</i>
+━━━━━━━━━━━━━━━━━━━
+🌐 <i>Website Thang Máy Hà Hồng • Trợ lý AI trực tuyến</i>";
+
+                await _telegramService.SendTestNotificationAsync(telegramText);
+            }
+            catch
+            {
+                // fail-safe background notification
+            }
+        });
+
         return Ok(response);
     }
 
@@ -81,6 +114,15 @@ public class ChatController : ControllerBase
     {
         var (success, message, modelName) = await _aiConsultantService.TestGeminiKeyAsync(request.ApiKey, cancellationToken);
         return Ok(new { success, message, modelName });
+    }
+
+    private static string EscapeHtml(string? input)
+    {
+        if (string.IsNullOrEmpty(input)) return string.Empty;
+        return input
+            .Replace("&", "&amp;")
+            .Replace("<", "&lt;")
+            .Replace(">", "&gt;");
     }
 }
 
