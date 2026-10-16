@@ -92,6 +92,12 @@ public class TelegramLiveChatService : ITelegramLiveChatService
                     email VARCHAR(150),
                     last_active_at TIMESTAMP WITH TIME ZONE DEFAULT (NOW() AT TIME ZONE 'UTC')
                 );
+
+                CREATE TABLE IF NOT EXISTS telegram_customer_sessions (
+                    chat_id VARCHAR(100) PRIMARY KEY,
+                    last_ack_at TIMESTAMP WITH TIME ZONE,
+                    created_at TIMESTAMP WITH TIME ZONE DEFAULT (NOW() AT TIME ZONE 'UTC')
+                );
             ";
 
             await dbContext.Database.ExecuteSqlRawAsync(sql, cancellationToken);
@@ -449,7 +455,7 @@ $@"💬 <b>TIN NHẮN TỪ KHÁCH TRÊN WEBSITE:</b>
                     var customerNotice = $"👨‍🔧 <b>Kỹ sư Thang Máy Hà Hồng:</b>\n\n{EscapeHtml(text)}";
                     await PostTelegramMessageAsync(botToken, customerChatId, customerNotice, cancellationToken);
                     await SendTelegramReplyAsync(botToken, configuredChatId!, "✅ <i>Đã gửi câu trả lời đến khách hàng trên Telegram!</i>", msg.MessageId, cancellationToken);
-                    CustomerLastAckMap[customerChatId] = DateTime.UtcNow;
+                    await TouchCustomerRepliedAsync(customerChatId, cancellationToken);
                     return;
                 }
 
@@ -506,7 +512,7 @@ Bot sẽ tự động chuyển tiếp câu trả lời về đúng khách hàng 
             // Nếu khách bấm /start lần đầu
             if (text.Equals("/start", StringComparison.OrdinalIgnoreCase))
             {
-                CustomerLastAckMap[senderChatId] = now;
+                await TouchCustomerRepliedAsync(senderChatId, cancellationToken);
                 var welcomeCustomer =
 @"🏢 <b>CHÀO MỪNG BẠN ĐẾN VỚI THANG MÁY HÀ HỒNG!</b>
 ━━━━━━━━━━━━━━━━━━━
@@ -545,14 +551,8 @@ $@"💬 <b>CÓ KHÁCH HÀNG CHAT QUA TELEGRAM!</b>
                 await SaveCustomerChatMapDbAsync(adminMsgId.Value, senderChatId, cancellationToken);
             }
 
-            // Gửi xác nhận cho khách hàng: CHỈ GỬI 1 LẦN duy nhất trong phiên chat (cooldown 60 phút), tránh gửi lặp lại mỗi khi khách nhắn từng tin
-            bool shouldSendAck = false;
-            if (!CustomerLastAckMap.TryGetValue(senderChatId, out var lastAckTime) || (now - lastAckTime).TotalMinutes > 60)
-            {
-                shouldSendAck = true;
-                CustomerLastAckMap[senderChatId] = now;
-            }
-
+            // Gửi xác nhận cho khách hàng: CHỈ GỬI 1 LẦN duy nhất trong phiên chat (lưu Database, cooldown 60 phút)
+            var shouldSendAck = await ShouldSendCustomerAckAsync(senderChatId, cancellationToken);
             if (shouldSendAck)
             {
                 var ackToCustomer = "Dạ em đã chuyển tin nhắn của anh/chị đến Kỹ sư Thang Máy Hà Hồng. Kỹ sư sẽ phản hồi anh/chị ngay tại đây trong giây lát ạ! 👨‍🔧";
@@ -582,6 +582,100 @@ $@"💬 <b>CÓ KHÁCH HÀNG CHAT QUA TELEGRAM!</b>
         catch (Exception ex)
         {
             _logger.LogWarning(ex, "Failed to persist customer telegram chat map for message {MsgId}.", telegramMessageId);
+        }
+    }
+
+    private async Task<bool> ShouldSendCustomerAckAsync(string chatId, CancellationToken cancellationToken)
+    {
+        var now = DateTime.UtcNow;
+
+        // 1. In-memory check first (fastest)
+        if (CustomerLastAckMap.TryGetValue(chatId, out var lastMemory) && (now - lastMemory).TotalMinutes < 60)
+        {
+            return false;
+        }
+
+        // 2. Database check (persists across restarts/redeployments)
+        try
+        {
+            using var scope = _scopeFactory.CreateScope();
+            var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            var conn = dbContext.Database.GetDbConnection();
+            if (conn.State != System.Data.ConnectionState.Open) await conn.OpenAsync(cancellationToken);
+
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = @"
+                CREATE TABLE IF NOT EXISTS telegram_customer_sessions (
+                    chat_id VARCHAR(100) PRIMARY KEY,
+                    last_ack_at TIMESTAMP WITH TIME ZONE,
+                    created_at TIMESTAMP WITH TIME ZONE DEFAULT (NOW() AT TIME ZONE 'UTC')
+                );
+                SELECT last_ack_at FROM telegram_customer_sessions WHERE chat_id = @chat_id LIMIT 1;
+            ";
+            cmd.Parameters.Add(new NpgsqlParameter("chat_id", chatId));
+            var dbVal = await cmd.ExecuteScalarAsync(cancellationToken);
+
+            if (dbVal != null && dbVal != DBNull.Value && DateTime.TryParse(dbVal.ToString(), out var dbLastAck))
+            {
+                if ((now - dbLastAck).TotalMinutes < 60)
+                {
+                    CustomerLastAckMap[chatId] = dbLastAck;
+                    return false;
+                }
+            }
+
+            // Save new ack time
+            using var upsertCmd = conn.CreateCommand();
+            upsertCmd.CommandText = @"
+                INSERT INTO telegram_customer_sessions (chat_id, last_ack_at)
+                VALUES (@chat_id, @now)
+                ON CONFLICT (chat_id) DO UPDATE SET last_ack_at = EXCLUDED.last_ack_at;
+            ";
+            upsertCmd.Parameters.Add(new NpgsqlParameter("chat_id", chatId));
+            upsertCmd.Parameters.Add(new NpgsqlParameter("now", now));
+            await upsertCmd.ExecuteNonQueryAsync(cancellationToken);
+
+            CustomerLastAckMap[chatId] = now;
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to verify telegram customer session in DB.");
+            CustomerLastAckMap[chatId] = now;
+            return true;
+        }
+    }
+
+    private async Task TouchCustomerRepliedAsync(string customerChatId, CancellationToken cancellationToken)
+    {
+        var now = DateTime.UtcNow;
+        CustomerLastAckMap[customerChatId] = now;
+
+        try
+        {
+            using var scope = _scopeFactory.CreateScope();
+            var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            var conn = dbContext.Database.GetDbConnection();
+            if (conn.State != System.Data.ConnectionState.Open) await conn.OpenAsync(cancellationToken);
+
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = @"
+                CREATE TABLE IF NOT EXISTS telegram_customer_sessions (
+                    chat_id VARCHAR(100) PRIMARY KEY,
+                    last_ack_at TIMESTAMP WITH TIME ZONE,
+                    created_at TIMESTAMP WITH TIME ZONE DEFAULT (NOW() AT TIME ZONE 'UTC')
+                );
+                INSERT INTO telegram_customer_sessions (chat_id, last_ack_at)
+                VALUES (@chat_id, @now)
+                ON CONFLICT (chat_id) DO UPDATE SET last_ack_at = EXCLUDED.last_ack_at;
+            ";
+            cmd.Parameters.Add(new NpgsqlParameter("chat_id", customerChatId));
+            cmd.Parameters.Add(new NpgsqlParameter("now", now));
+            await cmd.ExecuteNonQueryAsync(cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to touch customer session in DB.");
         }
     }
 
