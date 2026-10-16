@@ -157,7 +157,7 @@ export const CEILING_OPTIONS = [
 // 4. TAY VỊN CABIN (3 TÙY CHỌN TỪ ẢNH THỰC TẾ)
 export const HANDRAIL_OPTIONS = [
   {
-    id: "rail-wood-brass",
+    id: "wood-brass",
     code: "HAHONG-R01",
     name: "Tay Vịn Gỗ Tự Nhiên Đầu Bọc Nẹp Kim Loại",
     spec: "Thân gỗ tròn phi 38 • Đầu bọc nẹp PVD vàng đồng",
@@ -166,7 +166,7 @@ export const HANDRAIL_OPTIONS = [
     type: "wood-brass"
   },
   {
-    id: "rail-flat-satin",
+    id: "flat-satin",
     code: "HAHONG-R02",
     name: "Tay Vịn Bản Dẹp Inox 304 Xước Satin",
     spec: "Inox 304 bản dẹp 40x10mm • Bát bắt tường giấu vít",
@@ -175,7 +175,7 @@ export const HANDRAIL_OPTIONS = [
     type: "flat-satin"
   },
   {
-    id: "rail-round-pvd",
+    id: "round-pvd",
     code: "HAHONG-R03",
     name: "Tay Vịn Tròn Inox Gương Vàng PVD Champagne",
     spec: "Inox 304 phi 38mm mạ PVD • Bo cong hai đầu",
@@ -191,6 +191,7 @@ export default function CabinVisualizer({
   capacityKg = 450,
   stops = 4,
   doorType = "CO",
+  onChangeDoorType,
   onApplyConfig,
   onRequestConsultation
 }) {
@@ -204,7 +205,7 @@ export default function CabinVisualizer({
   );
   const [selectedFloorId, setSelectedFloorId] = useState("floor-chevron-brass");
   const [selectedCeilingId, setSelectedCeilingId] = useState("ceil-cove-warm");
-  const [selectedHandrailId, setSelectedHandrailId] = useState("rail-wood-brass");
+  const [selectedHandrailId, setSelectedHandrailId] = useState("wood-brass");
 
   // State điều khiển Cửa & Đèn
   const [isDoorsOpen, setIsDoorsOpen] = useState(true);
@@ -249,6 +250,13 @@ export default function CabinVisualizer({
   const triggerToast = (msg) => {
     setToastMsg(msg);
     setTimeout(() => setToastMsg(""), 2800);
+  };
+
+  const handleToggleDoorType = (type) => {
+    if (onChangeDoorType) {
+      onChangeDoorType(type);
+    }
+    triggerToast(type === "CO" ? "Đã chọn Cửa Mở Tim (CO) • Mở từ giữa sang 2 bên" : "Đã chọn Cửa Mở Lùa (SO) • Mở dồn về 1 bên");
   };
 
   const notifyParent = (overrides = {}) => {
@@ -379,7 +387,7 @@ export default function CabinVisualizer({
     setSelectedWallId("wood-walnut-mirror");
     setSelectedFloorId("floor-chevron-brass");
     setSelectedCeilingId("ceil-cove-warm");
-    setSelectedHandrailId("rail-wood-brass");
+    setSelectedHandrailId("wood-brass");
     setIsDoorsOpen(true);
     setIsLightOn(true);
     setCurrentFloor(1);
@@ -394,7 +402,7 @@ export default function CabinVisualizer({
       wallId: "wood-walnut-mirror",
       floorId: "floor-chevron-brass",
       ceilingId: "ceil-cove-warm",
-      handrailId: "rail-wood-brass"
+      handrailId: "wood-brass"
     });
   };
 
@@ -537,7 +545,7 @@ export default function CabinVisualizer({
         </defs>
       </svg>
 
-      {/* 1. Header Toolbar */}
+      {/* 1. Header Toolbar (TÍCH HỢP BẢNG CHỈ BÁO TẦNG CAO, KHÔNG CHE THANG MÁY) */}
       <div className="cabin-viz-header">
         <div className="cabin-viz-title">
           <i className="bi bi-shield-check text-warning fs-5"></i>
@@ -546,9 +554,22 @@ export default function CabinVisualizer({
               PHỐI CẢNH CABIN KIẾN TRÚC CAO CẤP 2.5D
             </span>
             <small className="text-secondary" style={{ fontSize: "11px" }}>
-              Tiêu chuẩn sản xuất thực tế • Chi tiết nẹp kim loại & sàn đá độc bản
+              Tiêu chuẩn thực tế • Tầm nhìn toàn cảnh cabin thoáng đãng
             </small>
           </div>
+        </div>
+
+        {/* BẢNG CHỈ BÁO TẦNG ĐẶT TRÊN HEADER TOOLBAR (KHÔNG CHE PHẦN TRÊN CỦA CABIN) */}
+        <div className="cabin-landing-indicator">
+          <span className="floor-num">{currentFloor}F</span>
+          <span className={`dir-arrow ${moveDirection ? "moving" : ""}`}>
+            {moveDirection === "up" ? "▲" : moveDirection === "down" ? "▼" : "●"}
+          </span>
+          <span className="capacity-badge">
+            {elevatorStatus === "moving"
+              ? `Đang chạy ${moveDirection === "up" ? "lên" : "xuống"} Tầng ${targetFloor}...`
+              : `${capacityKg}kg • ${Math.round(capacityKg / 75)} người`}
+          </span>
         </div>
 
         <div className="cabin-viz-actions">
@@ -577,21 +598,8 @@ export default function CabinVisualizer({
         </div>
       </div>
 
-      {/* 2. Sân khấu 3D Perspective Box (Chuẩn kiến trúc cabin thực tế) */}
+      {/* 2. Sân khấu 3D Perspective Box (Chuẩn kiến trúc cabin thực tế, không bị che chắn) */}
       <div className="cabin-stage">
-        {/* Chỉ báo tầng & tải trọng trên nóc thang */}
-        <div className="cabin-landing-indicator">
-          <span className="floor-num">{currentFloor}F</span>
-          <span className={`dir-arrow ${moveDirection ? "moving" : ""}`}>
-            {moveDirection === "up" ? "▲" : moveDirection === "down" ? "▼" : "●"}
-          </span>
-          <span className="capacity-badge">
-            {elevatorStatus === "moving"
-              ? `Đang chạy ${moveDirection === "up" ? "lên" : "xuống"} Tầng ${targetFloor}...`
-              : `${capacityKg}kg • ${Math.round(capacityKg / 75)} người`}
-          </span>
-        </div>
-
         {/* Toast thông báo tương tác */}
         {toastMsg && (
           <div className="cabin-live-toast">
@@ -608,7 +616,7 @@ export default function CabinVisualizer({
         </div>
 
         {/* KHỐI HỘP 3D CABIN KIẾN TRÚC THỰC TẾ (Elevator Car 3D Architectural Box) */}
-        <div className={`cabin-car-box ${isDoorsOpen ? "doors-open" : ""} ${!isLightOn ? "light-off" : ""}`}>
+        <div className={`cabin-car-box door-mode-${doorType} ${isDoorsOpen ? "doors-open" : ""} ${!isLightOn ? "light-off" : ""}`}>
           
           {/* TRẦN CABIN & ĐÈN CHIẾU SÁNG (Kiểu đèn 3: Ứng với Tab 3) */}
           <div
@@ -659,7 +667,7 @@ export default function CabinVisualizer({
             {/* Nẹp chân tường Inox kickplate vách trái */}
             <div className="wall-kickplate kickplate-left"></div>
             {/* Tay vịn hông trái */}
-            <div className={`side-handrail rail-${selectedHandrailId}`}></div>
+            <div className={`side-handrail handrail-${selectedHandrailId}`}></div>
           </div>
 
           {/* VÁCH HÔNG PHẢI (RIGHT WALL) - GÓC NGHIÊNG PHỐI CẢNH 3D VỚI BẢNG ĐIỀU KHIỂN COP */}
@@ -668,7 +676,7 @@ export default function CabinVisualizer({
             {/* Nẹp chân tường Inox kickplate vách phải */}
             <div className="wall-kickplate kickplate-right"></div>
             {/* Tay vịn hông phải */}
-            <div className={`side-handrail rail-${selectedHandrailId}`}></div>
+            <div className={`side-handrail handrail-${selectedHandrailId}`}></div>
 
             {/* BẢNG ĐIỀU KHIỂN CABIN CHÂN THỰC (CAR OPERATING PANEL - COP) */}
             <div className="cabin-cop-panel">
@@ -717,18 +725,16 @@ export default function CabinVisualizer({
               {/* Tấm vách trái */}
               <div className="back-panel panel-sub-left"></div>
 
-              {/* Tấm trung tâm (Gương soi 8K / Inox hoa văn / Kính) */}
+              {/* Tấm trung tâm (Gương soi 8K sạch sẽ, KHÔNG CHỨA CHỮ RỜI RẠC) */}
               <div className="back-panel panel-center-feature">
                 {selectedWallId === "wood-walnut-mirror" && (
                   <div className="feature-mirror-glass">
                     <span className="mirror-bevel-edge"></span>
-                    <span className="mirror-brand-tag">HÀ HỒNG LUXURY</span>
                   </div>
                 )}
                 {selectedWallId === "inox-guong-vang" && (
                   <div className="feature-gold-motif">
                     <span className="motif-border"></span>
-                    <span className="motif-brand-text">👑 HÀ HỒNG GOLD PVD</span>
                   </div>
                 )}
               </div>
@@ -744,9 +750,9 @@ export default function CabinVisualizer({
               </div>
             )}
 
-            {/* TAY VỊN TRONG CABIN CHẠY NGANG (Kiểu tay vịn 4: Ứng với Tab 4) */}
+            {/* TAY VỊN TRONG CABIN CHẠY NGANG (Kiểu tay vịn 4: Ứng với Tab 4 - HIỂN THỊ RÕ RÀNG) */}
             <div
-              className={`cabin-handrail rail-${selectedHandrailId}`}
+              className={`cabin-handrail handrail-${selectedHandrailId}`}
               onClick={(e) => {
                 e.stopPropagation();
                 setActiveTab("handrail");
@@ -808,19 +814,37 @@ export default function CabinVisualizer({
             <span className="door-panel-texture"></span>
             <span className="door-edge-trim"></span>
           </div>
+        </div>
+      </div>
 
-          {/* Tia cảm biến an toàn Photocell */}
-          <div className="cabin-door-gap-indicator"></div>
+      {/* 2.5. THANH THÔNG TIN VẬT LIỆU & NÚT CHỌN KIỂU CỬA (NẰM DƯỚI KHUNG 3D, KHÔNG CHE SÀN CABIN) */}
+      <div className="cabin-summary-ribbon">
+        <div className="summary-specs">
+          <i className="bi bi-layers-fill text-warning me-2"></i>
+          <span className="spec-text">
+            {!isDoorsOpen ? "Cửa thang máy đang đóng kín" : `${curWallObj.name} • ${curFloorObj.name}`}
+          </span>
         </div>
 
-        {/* Thanh trạng thái dưới sàn */}
-        <div className="cabin-status-watermark">
-          <span>
-            {!isDoorsOpen ? "Cửa tầng tự động đang đóng kín" : `${curWallObj.name} • ${curFloorObj.name}`}
-          </span>
-          <span className="badge-door-type">
-            {doorType === "CO" ? "Cửa mở tim (CO)" : "Cửa mở lùa (SO)"}
-          </span>
+        {/* Nút chọn kiểu mở cửa: CO (Mở tim) vs SO (Mở lùa) */}
+        <div className="door-type-switch-group">
+          <span className="door-switch-label">Kiểu mở cửa:</span>
+          <button
+            type="button"
+            className={`btn-door-toggle ${doorType === "CO" ? "active" : ""}`}
+            onClick={() => handleToggleDoorType("CO")}
+            title="Cửa mở tim từ giữa sang hai bên"
+          >
+            Mở tim (CO)
+          </button>
+          <button
+            type="button"
+            className={`btn-door-toggle ${doorType === "SO" ? "active" : ""}`}
+            onClick={() => handleToggleDoorType("SO")}
+            title="Cửa mở lùa trượt dồn về một bên"
+          >
+            Mở lùa (SO)
+          </button>
         </div>
       </div>
 

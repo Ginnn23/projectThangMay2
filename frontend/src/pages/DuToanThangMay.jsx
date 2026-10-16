@@ -444,6 +444,7 @@ export default function DuToanThangMay() {
                   capacityKg={Number(capacityKg)}
                   stops={Number(stops)}
                   doorType={doorType}
+                  onChangeDoorType={setDoorType}
                   onApplyConfig={setCabinSpecs}
                   onRequestConsultation={handleCabinConsultation}
                 />
