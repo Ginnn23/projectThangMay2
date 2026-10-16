@@ -4959,3 +4959,24 @@ a {
 }
 
 
+
+/* ============================================================
+   FLOATING TELEGRAM CONTACT BUTTON (BOTTOM-LEFT)
+   ============================================================ */
+.floating-telegram {
+  background: linear-gradient(135deg, #0088cc, #29b6f6);
+  animation-delay: 0.7s;
+}
+
+.floating-telegram:hover {
+  background: linear-gradient(135deg, #0077b5, #0088cc);
+}
+
+.floating-telegram-icon {
+  background: #0077b5;
+  font-size: 20px;
+}
+
+.floating-telegram-icon::after {
+  border-color: rgba(0, 136, 204, 0.35);
+}

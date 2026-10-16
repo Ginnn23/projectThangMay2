@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { soDienThoaiCongTy, soDienThoaiLienKet } from "../data/contactInfo";
 
 const zaloUrl = `https://zalo.me/${soDienThoaiLienKet}`;
+const telegramUrl = "https://t.me/HaHongElevatorLeadBot";
 
 const thongBaoHoatDong = [
   {
@@ -85,6 +86,13 @@ function FloatingContact() {
       <a className="floating-contact-item floating-zalo" href={zaloUrl} target="_blank" rel="noopener noreferrer" aria-label="Chat Zalo với Hà Hồng">
         <span className="floating-contact-icon floating-zalo-icon">Zalo</span>
         <span className="floating-contact-text">Chat Zalo</span>
+      </a>
+
+      <a className="floating-contact-item floating-telegram" href={telegramUrl} target="_blank" rel="noopener noreferrer" aria-label="Chat Telegram với Hà Hồng">
+        <span className="floating-contact-icon floating-telegram-icon">
+          <i className="bi bi-telegram"></i>
+        </span>
+        <span className="floating-contact-text">Chat Telegram</span>
       </a>
     </div>
   );
