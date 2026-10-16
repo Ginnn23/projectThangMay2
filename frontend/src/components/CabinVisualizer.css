@@ -57,10 +57,15 @@
   user-select: none;
 }
 
-.cabin-viz-btn-action:hover {
+.cabin-viz-btn-action:hover:not(:disabled) {
   background: rgba(255, 255, 255, 0.18);
   color: #ffffff;
   border-color: rgba(212, 175, 55, 0.5);
+}
+
+.cabin-viz-btn-action:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .cabin-viz-btn-action.active {
@@ -80,6 +85,15 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  transition: background 0.4s ease;
+}
+
+.cabin-stage.light-on {
+  background: radial-gradient(circle at 50% 15%, #172554 0%, #030712 90%);
+}
+
+.cabin-stage.light-off {
+  background: radial-gradient(circle at 50% 15%, #0b1120 0%, #02040a 100%);
 }
 
 .cabin-svg-canvas {
@@ -95,7 +109,7 @@
   position: absolute;
   top: 12px;
   left: 14px;
-  background: rgba(2, 6, 23, 0.85);
+  background: rgba(2, 6, 23, 0.9);
   border: 1px solid rgba(212, 175, 55, 0.4);
   backdrop-filter: blur(8px);
   padding: 4px 14px;
@@ -117,12 +131,16 @@
 .cabin-landing-indicator .dir-arrow {
   color: #10b981;
   font-size: 0.85rem;
-  animation: pulse-arrow 1.2s infinite ease-in-out;
+}
+
+.cabin-landing-indicator .dir-arrow.moving {
+  animation: pulse-arrow 0.8s infinite ease-in-out;
+  color: #22c55e;
 }
 
 @keyframes pulse-arrow {
-  0%, 100% { opacity: 0.5; }
-  50% { opacity: 1; transform: translateY(-2px); }
+  0%, 100% { opacity: 0.4; transform: translateY(0); }
+  50% { opacity: 1; transform: translateY(-3px); }
 }
 
 .cabin-landing-indicator .capacity-badge {
@@ -140,7 +158,7 @@
   transform: translateX(-50%);
   background: rgba(15, 23, 42, 0.95);
   color: #38bdf8;
-  padding: 6px 16px;
+  padding: 6px 18px;
   border-radius: 20px;
   font-size: 12px;
   font-weight: 600;
@@ -149,6 +167,7 @@
   z-index: 30;
   pointer-events: none;
   animation: fadeInDown 0.25s ease-out;
+  white-space: nowrap;
 }
 
 @keyframes fadeInDown {
@@ -186,7 +205,129 @@
   border-radius: 4px;
 }
 
-/* 3. Bộ chọn vật liệu tương tác (Tabs & Thẻ Swatch) */
+/* 3. BẢNG GỌI TẦNG THỰC TẾ (BẤM TẦNG THANG TỰ ĐỘNG CHẠY) */
+.cabin-floor-call-station {
+  padding: 12px 18px;
+  background: linear-gradient(180deg, #0d152c 0%, #070d1e 100%);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.floor-station-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  font-size: 0.78rem;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.station-title {
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  color: #e2e8f0;
+  display: flex;
+  align-items: center;
+}
+
+.station-status {
+  font-size: 0.75rem;
+}
+
+.floor-buttons-row {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.btn-floor-call {
+  flex: 1;
+  min-width: 70px;
+  background: #131d38;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 8px;
+  padding: 8px 6px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  position: relative;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  color: #f1f5f9;
+}
+
+.btn-floor-call:hover {
+  background: #1e2c56;
+  border-color: rgba(212, 175, 55, 0.5);
+  transform: translateY(-2px);
+}
+
+.btn-floor-call .floor-number {
+  font-size: 1rem;
+  font-weight: 800;
+  font-family: monospace;
+  color: #ffffff;
+}
+
+.btn-floor-call .floor-subtext {
+  font-size: 0.65rem;
+  color: #94a3b8;
+}
+
+/* Tầng hiện tại đang đỗ */
+.btn-floor-call.current {
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+  border-color: #38bdf8;
+  box-shadow: 0 0 14px rgba(2, 132, 199, 0.5);
+}
+
+.btn-floor-call.current .floor-number {
+  color: #ffffff;
+}
+
+.btn-floor-call.current .floor-subtext {
+  color: #e0f2fe;
+  font-weight: 600;
+}
+
+.btn-floor-call.current .floor-active-dot {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 6px #22c55e;
+}
+
+/* Tầng đang được gọi & thang máy đang di chuyển tới */
+.btn-floor-call.calling {
+  background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+  border-color: #facc15;
+  box-shadow: 0 0 16px rgba(250, 204, 21, 0.6);
+  animation: call-pulse 1s infinite alternate;
+}
+
+.btn-floor-call.calling .floor-number {
+  color: #fef08a;
+}
+
+.btn-floor-call.calling .floor-subtext {
+  color: #fef9c3;
+  font-weight: 700;
+}
+
+@keyframes call-pulse {
+  from { box-shadow: 0 0 8px rgba(250, 204, 21, 0.4); }
+  to { box-shadow: 0 0 20px rgba(250, 204, 21, 0.9); }
+}
+
+/* 4. Bộ chọn vật liệu tương tác (Tabs & Thẻ Swatch) */
 .cabin-cfg-controls {
   padding: 16px 18px;
   background: #0b1329;
@@ -322,7 +463,7 @@
   margin-top: 2px;
 }
 
-/* 4. Footer & Đồng bộ */
+/* 5. Footer & Đồng bộ */
 .cabin-viz-footer {
   padding: 14px 18px;
   background: #070d1e;
@@ -413,5 +554,8 @@
   .btn-viz-reset, .btn-viz-apply {
     flex: 1;
     justify-content: center;
+  }
+  .floor-buttons-row {
+    flex-wrap: nowrap;
   }
 }
