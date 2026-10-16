@@ -1,113 +1,124 @@
 import { useState, useEffect, useRef } from "react";
 import "./CabinVisualizer.css";
 
-// 1. Dữ liệu Vách Cabin (Walls)
+// 1. DỮ LIỆU VÁCH CABIN (WALLS) - ĐÃ BỔ SUNG KÍNH CƯỜNG LỰC & CHUẨN HÓA VẬT LIỆU CHÂN THỰC
 export const WALL_OPTIONS = [
+  {
+    id: "kinh-cuong-luc",
+    name: "Kính Cường Lực Trong Suốt Panorama",
+    desc: "Kính cường lực an toàn 10mm siêu trong, ngắm cảnh 4 mặt, lấy sáng tự nhiên tối đa",
+    badge: "Bán chạy nhất",
+    syncValue: "homelift-kinh",
+    colorPreview: "linear-gradient(135deg, #0284c7 0%, #38bdf8 40%, #bae6fd 70%, #0369a1 100%)"
+  },
+  {
+    id: "kinh-mau-tra",
+    name: "Kính Cường Lực Màu Trà Hoàng Gia",
+    desc: "Kính cường lực màu trà Bronze luxury, chống chói lóa, riêng tư và quý phái",
+    badge: "Biệt thự cao cấp",
+    syncValue: "homelift-kinh",
+    colorPreview: "linear-gradient(135deg, #78350f 0%, #b45309 35%, #d97706 70%, #451a03 100%)"
+  },
   {
     id: "inox-guong-vang",
     name: "Inox Gương Vàng PVD Hoàng Gia",
-    desc: "Mạ titan vàng Champagne, vách gương bóng loáng phối hoa văn laser chìm",
-    badge: "Bán chạy nhất",
+    desc: "Mạ titan PVD vàng Champagne, gương soi phản chiếu bóng loáng phối nẹp chỉ âm U-gold",
+    badge: "Sang trọng đẳng cấp",
     syncValue: "inox-guong-vang",
-    colorPreview: "linear-gradient(135deg, #78350f, #d4af37, #fef08a, #ca8a04)"
-  },
-  {
-    id: "homelift-kinh",
-    name: "Vách Kính Panorama Trong Suốt",
-    desc: "Kính cường lực an toàn 10mm 4 mặt, lấy sáng tự nhiên và ngắm cảnh",
-    badge: "Hiện đại & Thoáng",
-    syncValue: "homelift-kinh",
-    colorPreview: "linear-gradient(135deg, #0284c7, #38bdf8, #bae6fd, #0369a1)"
+    colorPreview: "linear-gradient(135deg, #78350f 0%, #d4af37 30%, #fef08a 60%, #ca8a04 100%)"
   },
   {
     id: "inox-tieu-chuan",
-    name: "Inox 304 Sọc Nhuyễn Tiêu Chuẩn",
-    desc: "Vân xước hairline satin chống bám vân tay, độ bền cơ học vĩnh cửu",
-    badge: "Bền bỉ kinh tế",
+    name: "Inox 304 Sọc Nhuyễn Hairline",
+    desc: "Vân xước satin hairline chống bám vân tay, bền bỉ cơ học vĩnh cửu theo thời gian",
+    badge: "Hiện đại & Bền bỉ",
     syncValue: "inox-tieu-chuan",
-    colorPreview: "linear-gradient(135deg, #475569, #94a3b8, #e2e8f0, #64748b)"
+    colorPreview: "linear-gradient(135deg, #475569 0%, #94a3b8 35%, #f8fafc 70%, #64748b 100%)"
   },
   {
     id: "wood-luxury",
     name: "Gỗ Tự Nhiên & Inox Gương",
-    desc: "Ốp gỗ sồi / óc chó tự nhiên phối gương soi trung tâm tân cổ điển",
-    badge: "Biệt thự cao cấp",
+    desc: "Ốp gỗ óc chó Walnut tự nhiên vân nổi, nẹp T đồng thau phối gương soi trung tâm",
+    badge: "Tân cổ điển",
     syncValue: "inox-guong-vang",
-    colorPreview: "linear-gradient(135deg, #451a03, #92400e, #d4af37, #78350f)"
+    colorPreview: "linear-gradient(135deg, #451a03 0%, #92400e 35%, #d4af37 65%, #78350f 100%)"
   }
 ];
 
-// 2. Dữ liệu Sàn Cabin (Flooring)
+// 2. DỮ LIỆU SÀN CABIN (FLOORING) - HỌA TIẾT ĐÁ CẨM THẠCH & GRANITE CHÂN THỰC
 export const FLOOR_OPTIONS = [
   {
     id: "floor-royal",
     name: "Đá Thảm CNC Hoàng Gia",
-    desc: "Cẩm thạch tự nhiên cắt CNC hoa văn tròn đối xứng vàng đen sang trọng",
-    badge: "Cao cấp",
+    desc: "Đá cẩm thạch đen Nero Marquina cắt hoa văn Mandala la bàn vàng đen đối xứng 2.5D",
+    badge: "Đá tự nhiên CNC",
     colorPreview: "radial-gradient(circle, #facc15 15%, #ca8a04 35%, #1e1b18 65%, #0b0f19 90%)"
   },
   {
     id: "floor-galaxy",
     name: "Đá Granite Kim Sa Đen",
-    desc: "Nền đá đen tuyền ánh kim sa vàng lấp lánh, chống trầy xước và bền màu",
-    badge: "Bền màu",
-    colorPreview: "radial-gradient(circle, #fde047 1px, transparent 1px), #09090b"
+    desc: "Nền đá đen tuyền huyền bí ánh kim sa vàng & bạc lấp lánh như dải ngân hà, chống trầy",
+    badge: "Bền màu vĩnh cửu",
+    colorPreview: "radial-gradient(circle, #fde047 1.5px, transparent 1.5px), #09090b"
   },
   {
     id: "floor-carrara",
     name: "Đá Marble Trắng Ý Carrara",
-    desc: "Trắng ngọc vân mây xám thanh lịch, mở rộng không gian cabin",
-    badge: "Tao nhã",
-    colorPreview: "linear-gradient(135deg, #ffffff 0%, #cbd5e1 50%, #94a3b8 100%)"
+    desc: "Trắng ngọc vân mây xám Calacatta thanh lịch, bề mặt bóng sáng mở rộng không gian cabin",
+    badge: "Thanh lịch Ý",
+    colorPreview: "linear-gradient(135deg, #ffffff 0%, #e2e8f0 40%, #cbd5e1 65%, #94a3b8 100%)"
   }
 ];
 
-// 3. Dữ liệu Trần Cabin (Ceiling)
+// 3. DỮ LIỆU TRẦN & ĐÈN CHIẾU SÁNG (CEILING & LIGHTS) - ÁNH SÁNG ĐẶC TRƯNG TỪNG LOẠI
 export const CEILING_OPTIONS = [
   {
     id: "ceil-dome",
     name: "Trần Vòm Âm LED Gián Tiếp",
-    desc: "Vòm trần âm ánh sáng vàng ấm 3000K dịu mắt, chống chói khi nhìn lên",
-    badge: "Sang trọng",
+    desc: "Ánh sáng vàng ấm 3000K Champagne, vòm âm elip hắt ánh sáng dịu mắt chống chói",
+    badge: "Ánh sáng vàng 3000K",
+    lightType: "warm-gold",
     colorPreview: "radial-gradient(ellipse at center, #fef08a 20%, #eab308 55%, #1e293b 85%)"
   },
   {
     id: "ceil-diamond",
     name: "Trần Cắt Laser Kim Cương",
-    desc: "Inox gương khắc hoa văn kim cương tán xạ ánh sáng đa chiều lấp lánh",
-    badge: "Ấn tượng",
+    desc: "Ánh sáng đa chiều 4000K, hoa văn kim cương tán xạ tia sáng đan xen lộng lẫy",
+    badge: "Tán xạ kim cương",
+    lightType: "sparkle-diamond",
     colorPreview: "linear-gradient(45deg, #1e293b 25%, #475569 50%, #facc15 75%)"
   },
   {
     id: "ceil-minimal",
-    name: "Trần Linear Tối Giản Scandinavian",
-    desc: "Hệ thanh LED song song ánh sáng trắng 6000K chuẩn phong cách Bắc Âu",
-    badge: "Tối giản",
+    name: "Trần Linear Scandinavian",
+    desc: "Ánh sáng trắng tinh khiết 6000K, 2 dải thanh LED song song rọi sáng sắc nét Bắc Âu",
+    badge: "Ánh sáng trắng 6000K",
+    lightType: "cool-linear",
     colorPreview: "repeating-linear-gradient(90deg, #38bdf8 0 3px, #0f172a 3px 20px)"
   }
 ];
 
-// 4. Dữ liệu Tay Vịn Cabin (Handrail)
+// 4. DỮ LIỆU TAY VỊN (HANDRAIL)
 export const HANDRAIL_OPTIONS = [
   {
     id: "rail-gold",
     name: "Tay Vịn Tròn Inox Mạ Vàng PVD",
-    desc: "Inox 304 phi 38 mạ PVD vàng Champagne đồng bộ vách gương",
-    badge: "Hoàng Gia",
+    desc: "Inox 304 phi 38 mạ PVD vàng Champagne đồng bộ vách gương, góc bo tròn mềm mại",
+    badge: "Hoàng Gia PVD",
     colorPreview: "linear-gradient(180deg, #fef08a, #eab308, #713f12)"
   },
   {
     id: "rail-silver",
     name: "Tay Vịn Dẹp Inox 304 Xước Mờ",
-    desc: "Bản dẹp 40mm chống trơn trượt, góc bo cạnh satin cao cấp",
-    badge: "Tiêu chuẩn",
+    desc: "Bản dẹp 40mm chống trơn trượt, góc bo cạnh satin cao cấp chống trầy",
+    badge: "Tiêu chuẩn hiện đại",
     colorPreview: "linear-gradient(180deg, #ffffff, #94a3b8, #334155)"
   },
   {
     id: "rail-wood",
     name: "Tay Vịn Gỗ Tự Nhiên Phối Kim Loại",
-    desc: "Thân gỗ sồi/óc chó tự nhiên ấm cúng kết hợp chân đế mạ vàng PVD",
-    badge: "Biệt thự",
+    desc: "Thân gỗ sồi/óc chó tự nhiên ấm cúng kết hợp chân đế mạ vàng PVD chắc chắn",
+    badge: "Gỗ Walnut sang trọng",
     colorPreview: "linear-gradient(180deg, #92400e, #78350f, #d4af37)"
   }
 ];
@@ -121,13 +132,13 @@ export default function CabinVisualizer({
   onApplyConfig,
   onRequestConsultation
 }) {
-  // Tab lựa chọn hiện tại: 'walls' | 'flooring' | 'ceiling' | 'handrail'
+  // Tab đang chọn: 'walls' (1) | 'flooring' (2) | 'ceiling' (3) | 'handrail' (4)
   const [activeTab, setActiveTab] = useState("walls");
 
   // State các tùy chọn vật liệu đang chọn
   const [selectedWallId, setSelectedWallId] = useState(
     elevatorType === "inox-guong-vang" ? "inox-guong-vang" :
-    elevatorType === "inox-tieu-chuan" ? "inox-tieu-chuan" : "homelift-kinh"
+    elevatorType === "inox-tieu-chuan" ? "inox-tieu-chuan" : "kinh-cuong-luc"
   );
   const [selectedFloorId, setSelectedFloorId] = useState("floor-royal");
   const [selectedCeilingId, setSelectedCeilingId] = useState("ceil-dome");
@@ -138,18 +149,18 @@ export default function CabinVisualizer({
   const [isLightOn, setIsLightOn] = useState(true);
   const [toastMsg, setToastMsg] = useState("");
 
-  // State MÔ PHỎNG THANG MÁY CHẠY TẦNG (Elevator Floor Trip Simulation)
+  // State MÔ PHỎNG THANG MÁY CHẠY TẦNG (Tự động đóng cửa, chạy tầng, mở cửa)
   const [currentFloor, setCurrentFloor] = useState(1);
   const [targetFloor, setTargetFloor] = useState(1);
   const [elevatorStatus, setElevatorStatus] = useState("idle"); // 'idle' | 'closing' | 'moving' | 'opening'
   const [moveDirection, setMoveDirection] = useState(null); // 'up' | 'down' | null
   const tripIntervalRef = useRef(null);
 
-  // Danh sách các tầng khả dụng (từ Tầng 1 đến số điểm dừng stops)
+  // Danh sách các tầng (từ Tầng 1 đến số tầng stops do người dùng chọn ở Bước 2)
   const totalStops = Math.min(Math.max(Number(stops) || 4, 2), 10);
   const floorList = Array.from({ length: totalStops }, (_, i) => i + 1);
 
-  // Đảm bảo currentFloor không vượt quá tổng số tầng khi user giảm số tầng ở Bước 2
+  // Đảm bảo tầng hiện tại không vượt quá tổng số tầng
   useEffect(() => {
     if (currentFloor > totalStops) {
       setCurrentFloor(totalStops);
@@ -164,11 +175,11 @@ export default function CabinVisualizer({
     } else if (elevatorType === "inox-tieu-chuan") {
       setSelectedWallId("inox-tieu-chuan");
     } else if (elevatorType === "homelift-kinh") {
-      setSelectedWallId("homelift-kinh");
+      setSelectedWallId("kinh-cuong-luc");
     }
   }, [elevatorType]);
 
-  // Cleanup interval khi unmount
+  // Dọn dẹp interval khi component unmount
   useEffect(() => {
     return () => {
       if (tripIntervalRef.current) clearInterval(tripIntervalRef.current);
@@ -201,12 +212,10 @@ export default function CabinVisualizer({
     }
   };
 
-  // -------------------------------------------------------------
   // CHỨC NĂNG BẤM TẦNG THANG MÁY TỰ ĐÓNG VÀ MỞ CỬA TẠI TẦNG ĐÍCH
-  // -------------------------------------------------------------
   const handleCallFloor = (target) => {
     if (elevatorStatus !== "idle") {
-      triggerToast("Thang máy đang trong hành trình, vui lòng chờ...");
+      triggerToast("Thang máy đang di chuyển, vui lòng chờ...");
       return;
     }
 
@@ -215,7 +224,7 @@ export default function CabinVisualizer({
         setIsDoorsOpen(true);
         triggerToast(`Thang máy đang ở Tầng ${target} • Đang mở cửa đón khách`);
       } else {
-        triggerToast(`Thang máy hiện đang đỗ tại Tầng ${target}`);
+        triggerToast(`Thang máy hiện đang đỗ sẵn tại Tầng ${target}`);
       }
       return;
     }
@@ -224,12 +233,12 @@ export default function CabinVisualizer({
     setTargetFloor(target);
     setMoveDirection(direction);
     setElevatorStatus("closing");
-    triggerToast(`Đã bấm Tầng ${target} • Cửa đang tự động đóng lại...`);
+    triggerToast(`Đã chọn Tầng ${target} • Cửa đang tự động đóng lại...`);
 
-    // Bước 1: Tự động ĐÓNG CỬA
+    // 1. Tự động ĐÓNG CỬA
     setIsDoorsOpen(false);
 
-    // Bước 2: Sau khi cửa đóng kín (850ms), thang máy bắt đầu chạy
+    // 2. Cửa đóng kín sau 850ms -> Bắt đầu chạy thang
     setTimeout(() => {
       setElevatorStatus("moving");
       const stepsToTravel = Math.abs(target - currentFloor);
@@ -241,29 +250,27 @@ export default function CabinVisualizer({
         activeFloor = direction === "up" ? activeFloor + 1 : activeFloor - 1;
         setCurrentFloor(activeFloor);
 
-        // Khi đến tầng mục tiêu
+        // Đã đến tầng đích
         if (activeFloor === target || stepCount >= stepsToTravel) {
           clearInterval(tripIntervalRef.current);
           tripIntervalRef.current = null;
 
-          // Bước 3: Đến tầng đích -> Thông báo & Tự động MỞ CỬA
+          // 3. Chuông Ding & Tự động MỞ CỬA tại tầng đó
           setTimeout(() => {
             setElevatorStatus("opening");
             setMoveDirection(null);
             triggerToast(`🔔 Ding! Đã đến Tầng ${target} • Cửa đang tự động mở ra`);
             setIsDoorsOpen(true);
 
-            // Hoàn thành hành trình, trở về trạng thái sẵn sàng
             setTimeout(() => {
               setElevatorStatus("idle");
             }, 900);
           }, 450);
         }
-      }, 750); // Mỗi tầng chạy 0.75 giây
+      }, 750); // Mỗi tầng 0.75s
     }, 900);
   };
 
-  // Nút mở / đóng cửa thủ công
   const handleManualDoorToggle = () => {
     if (elevatorStatus === "moving") {
       triggerToast("Thang máy đang di chuyển giữa các tầng, không thể mở cửa!");
@@ -274,14 +281,12 @@ export default function CabinVisualizer({
     triggerToast(next ? "Cửa thang máy đang mở ra" : "Cửa thang máy đã đóng kín");
   };
 
-  // Nút bật / tắt đèn chiếu sáng
   const handleToggleLight = () => {
     const next = !isLightOn;
     setIsLightOn(next);
-    triggerToast(next ? "Đèn cabin bật sáng • Ánh sáng rọi trần & sàn" : "Đèn cabin tắt • Chế độ ban đêm & đèn báo phụ");
+    triggerToast(next ? "Đèn cabin bật sáng • Chiếu rọi trần & sàn" : "Đèn cabin tắt • Chế độ ban đêm dịu mắt");
   };
 
-  // Thao tác chọn Vách
   const handleSelectWall = (item) => {
     setSelectedWallId(item.id);
     if (onChangeElevatorType && item.syncValue) {
@@ -291,33 +296,29 @@ export default function CabinVisualizer({
     notifyParent({ wallId: item.id });
   };
 
-  // Thao tác chọn Sàn
   const handleSelectFloor = (item) => {
     setSelectedFloorId(item.id);
     triggerToast(`Đã đổi sàn: ${item.name}`);
     notifyParent({ floorId: item.id });
   };
 
-  // Thao tác chọn Trần
   const handleSelectCeiling = (item) => {
     setSelectedCeilingId(item.id);
-    triggerToast(`Đã đổi trần: ${item.name}`);
+    triggerToast(`Đã đổi kiểu đèn: ${item.name}`);
     notifyParent({ ceilingId: item.id });
   };
 
-  // Thao tác chọn Tay vịn
   const handleSelectHandrail = (item) => {
     setSelectedHandrailId(item.id);
     triggerToast(`Đã đổi tay vịn: ${item.name}`);
     notifyParent({ handrailId: item.id });
   };
 
-  // Đặt lại cấu hình
   const handleReset = () => {
-    setSelectedWallId("homelift-kinh");
-    setSelectedFloorId("floor-galaxy");
+    setSelectedWallId("kinh-cuong-luc");
+    setSelectedFloorId("floor-royal");
     setSelectedCeilingId("ceil-dome");
-    setSelectedHandrailId("rail-silver");
+    setSelectedHandrailId("rail-gold");
     setIsDoorsOpen(true);
     setIsLightOn(true);
     setCurrentFloor(1);
@@ -329,14 +330,13 @@ export default function CabinVisualizer({
     }
     triggerToast("Đã khôi phục cấu hình tiêu chuẩn");
     notifyParent({
-      wallId: "homelift-kinh",
-      floorId: "floor-galaxy",
+      wallId: "kinh-cuong-luc",
+      floorId: "floor-royal",
       ceilingId: "ceil-dome",
-      handrailId: "rail-silver"
+      handrailId: "rail-gold"
     });
   };
 
-  // Nút gửi tư vấn cấu hình
   const handleConsultClick = () => {
     const curWall = WALL_OPTIONS.find(w => w.id === selectedWallId)?.name || "";
     const curFloor = FLOOR_OPTIONS.find(f => f.id === selectedFloorId)?.name || "";
@@ -374,13 +374,13 @@ export default function CabinVisualizer({
               PHỐI CẢNH CABIN TRỰC QUAN 2.5D
             </span>
             <small className="text-secondary" style={{ fontSize: "11px" }}>
-              Mô phỏng chạy tầng • Đèn chiếu rọi chân thực
+              Mô phỏng chạy tầng • Đèn hắt & sàn đá thật
             </small>
           </div>
         </div>
 
         <div className="cabin-viz-actions">
-          {/* Nút bật / tắt đèn (Ánh sáng thực trong thang máy) */}
+          {/* Nút bật / tắt đèn */}
           <button
             type="button"
             className={`cabin-viz-btn-action ${isLightOn ? "active" : ""}`}
@@ -420,7 +420,7 @@ export default function CabinVisualizer({
           </span>
         </div>
 
-        {/* Toast thông báo tương tác nổi */}
+        {/* Toast thông báo tương tác */}
         {toastMsg && (
           <div className="cabin-live-toast">
             <i className="bi bi-info-circle-fill me-1 text-info"></i>
@@ -428,7 +428,7 @@ export default function CabinVisualizer({
           </div>
         )}
 
-        {/* KHUNG ĐỒ HỌA 2.5D SVG */}
+        {/* KHUNG ĐỒ HỌA 2.5D SVG NÂNG CẤP CHÂN THỰC */}
         <svg
           viewBox="0 0 800 520"
           className="cabin-svg-canvas"
@@ -436,218 +436,286 @@ export default function CabinVisualizer({
         >
           <defs>
             {/* --- GRADIENTS VÁCH CABIN --- */}
-            {/* Inox Gương Vàng PVD Hoàng Gia */}
-            <linearGradient id="grad-gold-back" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#78350f" />
-              <stop offset="18%" stopColor="#d4af37" />
-              <stop offset="35%" stopColor="#fef08a" />
-              <stop offset="50%" stopColor="#ca8a04" />
-              <stop offset="65%" stopColor="#fef9c3" />
-              <stop offset="82%" stopColor="#d4af37" />
-              <stop offset="100%" stopColor="#78350f" />
+            {/* 1. Kính Cường Lực Trong Suốt Panorama */}
+            <linearGradient id="grad-glass-clear-sky" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stopColor="#0284c7" />
+              <stop offset="35%" stopColor="#38bdf8" />
+              <stop offset="65%" stopColor="#bae6fd" />
+              <stop offset="100%" stopColor="#f0f9ff" />
+            </linearGradient>
+            <linearGradient id="grad-glass-clear-reflect" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="rgba(255,255,255,0.45)" />
+              <stop offset="25%" stopColor="rgba(255,255,255,0.06)" />
+              <stop offset="65%" stopColor="rgba(56,189,248,0.18)" />
+              <stop offset="100%" stopColor="rgba(255,255,255,0.3)" />
+            </linearGradient>
+
+            {/* 2. Kính Cường Lực Màu Trà Hoàng Gia (Bronze Glass) */}
+            <linearGradient id="grad-glass-bronze" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stopColor="#451a03" />
+              <stop offset="30%" stopColor="#78350f" />
+              <stop offset="70%" stopColor="#b45309" />
+              <stop offset="100%" stopColor="#d97706" />
+            </linearGradient>
+            <linearGradient id="grad-glass-bronze-reflect" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="rgba(254,240,138,0.35)" />
+              <stop offset="35%" stopColor="rgba(120,53,15,0.15)" />
+              <stop offset="70%" stopColor="rgba(217,119,6,0.25)" />
+              <stop offset="100%" stopColor="rgba(254,240,138,0.2)" />
+            </linearGradient>
+
+            {/* 3. Inox Gương Vàng PVD Hoàng Gia */}
+            <linearGradient id="grad-gold-pvd-back" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="#592b02" />
+              <stop offset="12%" stopColor="#b48328" />
+              <stop offset="25%" stopColor="#fef08a" />
+              <stop offset="38%" stopColor="#ca8a04" />
+              <stop offset="50%" stopColor="#fffbeb" />
+              <stop offset="62%" stopColor="#d4af37" />
+              <stop offset="75%" stopColor="#fef08a" />
+              <stop offset="88%" stopColor="#996515" />
+              <stop offset="100%" stopColor="#451a03" />
             </linearGradient>
             <linearGradient id="grad-gold-left" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#451a03" />
-              <stop offset="60%" stopColor="#b45309" />
+              <stop offset="0%" stopColor="#3d1b02" />
+              <stop offset="60%" stopColor="#996515" />
               <stop offset="100%" stopColor="#d4af37" />
             </linearGradient>
             <linearGradient id="grad-gold-right" x1="0%" y1="0%" x2="100%" y2="0%">
               <stop offset="0%" stopColor="#d4af37" />
-              <stop offset="40%" stopColor="#b45309" />
-              <stop offset="100%" stopColor="#451a03" />
+              <stop offset="40%" stopColor="#996515" />
+              <stop offset="100%" stopColor="#3d1b02" />
             </linearGradient>
 
-            {/* Vách Kính Homelift Panorama */}
-            <linearGradient id="grad-sky-view" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor="#0369a1" />
-              <stop offset="45%" stopColor="#38bdf8" />
-              <stop offset="70%" stopColor="#bae6fd" />
-              <stop offset="100%" stopColor="#e0f2fe" />
-            </linearGradient>
-            <linearGradient id="grad-glass-reflection" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="rgba(255,255,255,0.4)" />
-              <stop offset="35%" stopColor="rgba(255,255,255,0.06)" />
-              <stop offset="65%" stopColor="rgba(56,189,248,0.2)" />
-              <stop offset="100%" stopColor="rgba(255,255,255,0.3)" />
-            </linearGradient>
-
-            {/* Inox 304 Sọc Nhuyễn Tiêu Chuẩn */}
-            <linearGradient id="grad-inox-back" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#475569" />
-              <stop offset="25%" stopColor="#cbd5e1" />
+            {/* 4. Inox 304 Sọc Nhuyễn Hairline */}
+            <linearGradient id="grad-inox-hairline" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="#334155" />
+              <stop offset="20%" stopColor="#94a3b8" />
+              <stop offset="40%" stopColor="#cbd5e1" />
               <stop offset="50%" stopColor="#f8fafc" />
-              <stop offset="75%" stopColor="#cbd5e1" />
-              <stop offset="100%" stopColor="#475569" />
+              <stop offset="60%" stopColor="#cbd5e1" />
+              <stop offset="80%" stopColor="#94a3b8" />
+              <stop offset="100%" stopColor="#334155" />
             </linearGradient>
             <linearGradient id="grad-inox-left" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#334155" />
+              <stop offset="0%" stopColor="#1e293b" />
               <stop offset="100%" stopColor="#94a3b8" />
             </linearGradient>
             <linearGradient id="grad-inox-right" x1="0%" y1="0%" x2="100%" y2="0%">
               <stop offset="0%" stopColor="#94a3b8" />
-              <stop offset="100%" stopColor="#334155" />
+              <stop offset="100%" stopColor="#1e293b" />
             </linearGradient>
 
-            {/* Gỗ Tự Nhiên & Inox Gương */}
-            <linearGradient id="grad-wood-panel" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#451a03" />
-              <stop offset="20%" stopColor="#78350f" />
-              <stop offset="45%" stopColor="#92400e" />
-              <stop offset="70%" stopColor="#78350f" />
-              <stop offset="100%" stopColor="#451a03" />
+            {/* 5. Gỗ Tự Nhiên & Inox Gương */}
+            <linearGradient id="grad-wood-walnut" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="#2e1001" />
+              <stop offset="20%" stopColor="#5c2607" />
+              <stop offset="35%" stopColor="#78350f" />
+              <stop offset="65%" stopColor="#5c2607" />
+              <stop offset="85%" stopColor="#78350f" />
+              <stop offset="100%" stopColor="#2e1001" />
             </linearGradient>
 
-            {/* --- GRADIENTS SÀN CABIN --- */}
-            {/* Đá Thảm Hoàng Gia */}
-            <radialGradient id="grad-royal-medallion" cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stopColor="#fef08a" />
-              <stop offset="22%" stopColor="#eab308" />
-              <stop offset="45%" stopColor="#78350f" />
-              <stop offset="68%" stopColor="#1e1b18" />
+            {/* --- GRADIENTS SÀN CABIN CHÂN THỰC --- */}
+            {/* Đá Thảm CNC Hoàng Gia (Mandala vàng đen) */}
+            <radialGradient id="grad-royal-cnc-center" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stopColor="#fef9c3" />
+              <stop offset="15%" stopColor="#facc15" />
+              <stop offset="35%" stopColor="#ca8a04" />
+              <stop offset="55%" stopColor="#78350f" />
+              <stop offset="75%" stopColor="#1c1917" />
               <stop offset="90%" stopColor="#d4af37" />
-              <stop offset="100%" stopColor="#09090b" />
+              <stop offset="100%" stopColor="#0c0a09" />
             </radialGradient>
 
-            {/* Đá Granite Kim Sa Đen */}
-            <linearGradient id="grad-floor-galaxy" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor="#18181b" />
-              <stop offset="50%" stopColor="#09090b" />
+            {/* Đá Granite Kim Sa Đen (Đen tuyền ánh kim sa) */}
+            <linearGradient id="grad-granite-galaxy" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stopColor="#1c1917" />
+              <stop offset="45%" stopColor="#0c0a09" />
               <stop offset="100%" stopColor="#000000" />
             </linearGradient>
 
-            {/* Đá Marble Trắng Carrara */}
-            <linearGradient id="grad-floor-carrara" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor="#cbd5e1" />
-              <stop offset="40%" stopColor="#f8fafc" />
-              <stop offset="70%" stopColor="#e2e8f0" />
-              <stop offset="100%" stopColor="#ffffff" />
+            {/* Đá Marble Trắng Ý Carrara (Vân mây tự nhiên) */}
+            <linearGradient id="grad-carrara-base" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stopColor="#e2e8f0" />
+              <stop offset="30%" stopColor="#ffffff" />
+              <stop offset="70%" stopColor="#f8fafc" />
+              <stop offset="100%" stopColor="#f1f5f9" />
             </linearGradient>
 
-            {/* --- HỆ THỐNG ÁNH SÁNG ĐÈN CHÂN THỰC TRONG THANG MÁY --- */}
-            {/* 1. Luồng sáng hình nón chiếu rọi từ trần xuống sàn (Volumetric Downlight Beam) */}
-            <linearGradient id="grad-light-cone" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor={selectedCeilingId === "ceil-minimal" ? "rgba(255,255,255,0.7)" : "rgba(254,240,138,0.75)"} />
-              <stop offset="25%" stopColor={selectedCeilingId === "ceil-minimal" ? "rgba(186,230,253,0.35)" : "rgba(250,204,21,0.4)"} />
-              <stop offset="70%" stopColor={selectedCeilingId === "ceil-minimal" ? "rgba(56,189,248,0.12)" : "rgba(234,179,8,0.15)"} />
-              <stop offset="100%" stopColor="rgba(0,0,0,0)" />
-            </linearGradient>
-
-            {/* 2. Ánh sáng phản chiếu bóng loáng trên mặt sàn đá (Floor Specular Reflection) */}
-            <radialGradient id="grad-floor-specular" cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stopColor={selectedCeilingId === "ceil-minimal" ? "rgba(255,255,255,0.75)" : "rgba(254,240,138,0.8)"} />
-              <stop offset="45%" stopColor={selectedCeilingId === "ceil-minimal" ? "rgba(186,230,253,0.35)" : "rgba(250,204,21,0.35)"} />
-              <stop offset="85%" stopColor="rgba(0,0,0,0)" />
-            </radialGradient>
-
-            {/* 3. Vệt sáng phản chiếu mép gương trên cùng vách sau */}
-            <linearGradient id="grad-mirror-top-shine" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor="rgba(255,255,255,0.85)" />
-              <stop offset="100%" stopColor="rgba(255,255,255,0)" />
-            </linearGradient>
-
-            {/* Trần LED Vòm âm vàng ấm 3000K */}
-            <radialGradient id="grad-dome-glow" cx="50%" cy="50%" r="50%">
+            {/* --- HỆ THỐNG ÁNH SÁNG RIÊNG BIỆT CHO TỪNG LOẠI ĐÈN --- */}
+            {/* 1. Ánh sáng vàng ấm 3000K cho Trần Vòm Âm LED */}
+            <radialGradient id="grad-dome-3000k-bulb" cx="50%" cy="50%" r="50%">
               <stop offset="0%" stopColor="#ffffff" />
               <stop offset="25%" stopColor="#fef08a" />
-              <stop offset="60%" stopColor="#eab308" />
+              <stop offset="65%" stopColor="#eab308" />
               <stop offset="90%" stopColor="#ca8a04" />
-              <stop offset="100%" stopColor="#1e293b" />
+              <stop offset="100%" stopColor="rgba(202,138,4,0)" />
+            </radialGradient>
+            <linearGradient id="grad-cone-warm" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stopColor="rgba(254, 240, 138, 0.65)" />
+              <stop offset="30%" stopColor="rgba(234, 179, 8, 0.28)" />
+              <stop offset="75%" stopColor="rgba(202, 138, 4, 0.12)" />
+              <stop offset="100%" stopColor="rgba(0, 0, 0, 0)" />
+            </linearGradient>
+            <radialGradient id="grad-floor-specular-warm" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stopColor="rgba(254, 240, 138, 0.75)" />
+              <stop offset="40%" stopColor="rgba(234, 179, 8, 0.35)" />
+              <stop offset="85%" stopColor="rgba(0, 0, 0, 0)" />
             </radialGradient>
 
-            {/* Trần Linear LED trắng 6000K */}
-            <radialGradient id="grad-minimal-glow" cx="50%" cy="50%" r="50%">
+            {/* 2. Ánh sáng lấp lánh đa chiều 4000K cho Trần Laser Kim Cương */}
+            <radialGradient id="grad-diamond-4000k-bulb" cx="50%" cy="50%" r="50%">
               <stop offset="0%" stopColor="#ffffff" />
-              <stop offset="45%" stopColor="#7dd3fc" />
-              <stop offset="80%" stopColor="#0284c7" />
-              <stop offset="100%" stopColor="#0f172a" />
+              <stop offset="35%" stopColor="#fef9c3" />
+              <stop offset="70%" stopColor="#facc15" />
+              <stop offset="100%" stopColor="rgba(250,204,21,0)" />
+            </radialGradient>
+            <linearGradient id="grad-cone-diamond" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stopColor="rgba(254, 249, 195, 0.7)" />
+              <stop offset="25%" stopColor="rgba(250, 204, 21, 0.3)" />
+              <stop offset="65%" stopColor="rgba(234, 179, 8, 0.14)" />
+              <stop offset="100%" stopColor="rgba(0, 0, 0, 0)" />
+            </linearGradient>
+            <radialGradient id="grad-floor-specular-diamond" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stopColor="rgba(255, 255, 255, 0.85)" />
+              <stop offset="30%" stopColor="rgba(254, 240, 138, 0.45)" />
+              <stop offset="75%" stopColor="rgba(250, 204, 21, 0.15)" />
+              <stop offset="100%" stopColor="rgba(0, 0, 0, 0)" />
+            </radialGradient>
+
+            {/* 3. Ánh sáng trắng 6000K cho Trần Linear Scandinavian */}
+            <radialGradient id="grad-linear-6000k-bulb" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stopColor="#ffffff" />
+              <stop offset="40%" stopColor="#bae6fd" />
+              <stop offset="75%" stopColor="#38bdf8" />
+              <stop offset="100%" stopColor="rgba(56,189,248,0)" />
+            </radialGradient>
+            <linearGradient id="grad-cone-cool" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stopColor="rgba(255, 255, 255, 0.8)" />
+              <stop offset="30%" stopColor="rgba(186, 230, 253, 0.3)" />
+              <stop offset="70%" stopColor="rgba(56, 189, 248, 0.12)" />
+              <stop offset="100%" stopColor="rgba(0, 0, 0, 0)" />
+            </linearGradient>
+            <radialGradient id="grad-floor-specular-cool" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stopColor="rgba(255, 255, 255, 0.9)" />
+              <stop offset="35%" stopColor="rgba(186, 230, 253, 0.4)" />
+              <stop offset="80%" stopColor="rgba(0, 0, 0, 0)" />
             </radialGradient>
 
             {/* --- GRADIENTS TAY VỊN --- */}
-            <linearGradient id="grad-rail-gold" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor="#fef08a" />
-              <stop offset="30%" stopColor="#eab308" />
-              <stop offset="70%" stopColor="#a16207" />
-              <stop offset="100%" stopColor="#713f12" />
+            <linearGradient id="grad-rail-gold-pvd" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stopColor="#fffbeb" />
+              <stop offset="25%" stopColor="#fef08a" />
+              <stop offset="60%" stopColor="#d4af37" />
+              <stop offset="85%" stopColor="#a16207" />
+              <stop offset="100%" stopColor="#451a03" />
             </linearGradient>
-            <linearGradient id="grad-rail-silver" x1="0%" y1="0%" x2="0%" y2="100%">
+            <linearGradient id="grad-rail-silver-hairline" x1="0%" y1="0%" x2="0%" y2="100%">
               <stop offset="0%" stopColor="#ffffff" />
-              <stop offset="40%" stopColor="#cbd5e1" />
-              <stop offset="80%" stopColor="#64748b" />
+              <stop offset="30%" stopColor="#cbd5e1" />
+              <stop offset="70%" stopColor="#64748b" />
               <stop offset="100%" stopColor="#334155" />
             </linearGradient>
-            <linearGradient id="grad-rail-wood" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor="#d97706" />
-              <stop offset="40%" stopColor="#78350f" />
-              <stop offset="85%" stopColor="#451a03" />
+            <linearGradient id="grad-rail-wood-walnut" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stopColor="#b45309" />
+              <stop offset="35%" stopColor="#78350f" />
+              <stop offset="80%" stopColor="#451a03" />
               <stop offset="100%" stopColor="#d4af37" />
             </linearGradient>
 
-            {/* Bộ lọc đổ bóng */}
-            <filter id="shadow-filter" x="-10%" y="-10%" width="120%" height="130%">
-              <feDropShadow dx="0" dy="6" stdDeviation="6" floodColor="#000" floodOpacity="0.6" />
+            {/* Bộ lọc đổ bóng mềm */}
+            <filter id="soft-shadow" x="-10%" y="-10%" width="120%" height="130%">
+              <feDropShadow dx="0" dy="6" stdDeviation="6" floodColor="#000000" floodOpacity="0.65" />
             </filter>
           </defs>
 
           {/* 1. LỚP VÁCH SAU (Back Wall) */}
           <g id="layer-back-wall" onClick={() => setActiveTab("walls")} style={{ cursor: "pointer" }}>
-            {selectedWallId === "homelift-kinh" && (
+            {/* Vách 1: Kính Cường Lực Trong Suốt Panorama */}
+            {selectedWallId === "kinh-cuong-luc" && (
               <>
-                {/* Khung cảnh chuyển động parallax theo tầng hiện tại */}
-                <g style={{ transform: `translateY(${(currentFloor - 1) * -12}px)`, transition: "transform 0.6s ease" }}>
-                  <rect x="160" y="70" width="480" height="330" fill="url(#grad-sky-view)" />
-                  {/* Tòa nhà và cảnh quan bên ngoài */}
-                  <path d="M 160 300 L 220 270 L 250 280 L 320 240 L 370 275 L 430 230 L 490 260 L 550 245 L 600 280 L 640 270 L 640 380 L 160 380 Z" fill="rgba(2, 132, 199, 0.28)" />
-                  <path d="M 180 320 L 240 295 L 300 320 L 360 290 L 420 325 L 500 295 L 570 310 L 640 290 L 640 380 L 160 380 Z" fill="rgba(3, 105, 161, 0.35)" />
+                <g style={{ transform: `translateY(${(currentFloor - 1) * -14}px)`, transition: "transform 0.6s ease" }}>
+                  <rect x="160" y="60" width="480" height="340" fill="url(#grad-glass-clear-sky)" />
+                  <path d="M 160 300 L 220 270 L 250 280 L 320 235 L 370 270 L 430 220 L 490 255 L 550 240 L 600 275 L 640 265 L 640 380 L 160 380 Z" fill="rgba(2, 132, 199, 0.3)" />
+                  <path d="M 180 320 L 240 295 L 300 320 L 360 285 L 420 320 L 500 290 L 570 305 L 640 285 L 640 380 L 160 380 Z" fill="rgba(3, 105, 161, 0.4)" />
                 </g>
-                {/* Lớp kính an toàn và phản xạ ánh sáng */}
-                <rect x="160" y="90" width="480" height="290" fill="url(#grad-glass-reflection)" />
-                {/* Nẹp kính nhôm xingfa định hình */}
-                <line x1="320" y1="90" x2="320" y2="380" stroke="#0284c7" strokeWidth="3" opacity="0.8" />
-                <line x1="480" y1="90" x2="480" y2="380" stroke="#0284c7" strokeWidth="3" opacity="0.8" />
-                {/* Chân spider inox giữ kính */}
-                <circle cx="320" cy="190" r="5" fill="#e0f2fe" stroke="#0369a1" strokeWidth="2" />
-                <circle cx="480" cy="190" r="5" fill="#e0f2fe" stroke="#0369a1" strokeWidth="2" />
+                <rect x="160" y="90" width="480" height="290" fill="url(#grad-glass-clear-reflect)" />
+                <line x1="320" y1="90" x2="320" y2="380" stroke="#0284c7" strokeWidth="3" opacity="0.85" />
+                <line x1="480" y1="90" x2="480" y2="380" stroke="#0284c7" strokeWidth="3" opacity="0.85" />
+                <circle cx="320" cy="180" r="5" fill="#e0f2fe" stroke="#0369a1" strokeWidth="2" />
+                <circle cx="480" cy="180" r="5" fill="#e0f2fe" stroke="#0369a1" strokeWidth="2" />
+                <circle cx="320" cy="300" r="5" fill="#e0f2fe" stroke="#0369a1" strokeWidth="2" />
+                <circle cx="480" cy="300" r="5" fill="#e0f2fe" stroke="#0369a1" strokeWidth="2" />
               </>
             )}
 
+            {/* Vách 2: Kính Cường Lực Màu Trà Hoàng Gia (Bronze Glass) */}
+            {selectedWallId === "kinh-mau-tra" && (
+              <>
+                <g style={{ transform: `translateY(${(currentFloor - 1) * -14}px)`, transition: "transform 0.6s ease" }}>
+                  <rect x="160" y="60" width="480" height="340" fill="url(#grad-glass-bronze)" />
+                  <path d="M 160 310 L 230 280 L 310 300 L 400 250 L 470 290 L 560 260 L 640 295 L 640 380 L 160 380 Z" fill="rgba(69, 26, 3, 0.45)" />
+                </g>
+                <rect x="160" y="90" width="480" height="290" fill="url(#grad-glass-bronze-reflect)" />
+                <line x1="320" y1="90" x2="320" y2="380" stroke="#d4af37" strokeWidth="2.5" opacity="0.75" />
+                <line x1="480" y1="90" x2="480" y2="380" stroke="#d4af37" strokeWidth="2.5" opacity="0.75" />
+                <circle cx="320" cy="180" r="5" fill="#fef08a" stroke="#78350f" strokeWidth="2" />
+                <circle cx="480" cy="180" r="5" fill="#fef08a" stroke="#78350f" strokeWidth="2" />
+              </>
+            )}
+
+            {/* Vách 3: Inox Gương Vàng PVD Hoàng Gia */}
             {selectedWallId === "inox-guong-vang" && (
               <>
-                <rect x="160" y="90" width="480" height="290" fill="url(#grad-gold-back)" />
+                <rect x="160" y="90" width="480" height="290" fill="url(#grad-gold-pvd-back)" />
                 {/* Khung gương soi trung tâm dát vàng */}
-                <rect x="260" y="105" width="280" height="260" fill="linear-gradient(180deg, #fef9c3, #ca8a04)" stroke="#fef08a" strokeWidth="2" />
-                <rect x="270" y="115" width="260" height="240" fill={isLightOn ? "rgba(254, 240, 138, 0.3)" : "rgba(120, 53, 15, 0.4)"} />
-                {/* Chỉ nẹp kim loại hoa văn cổ điển */}
-                <line x1="260" y1="90" x2="260" y2="380" stroke="#facc15" strokeWidth="3" />
-                <line x1="540" y1="90" x2="540" y2="380" stroke="#facc15" strokeWidth="3" />
+                <rect x="250" y="100" width="300" height="270" fill="linear-gradient(180deg, #fef9c3 0%, #ca8a04 50%, #78350f 100%)" stroke="#fef08a" strokeWidth="2" />
+                <rect x="260" y="110" width="280" height="250" fill={isLightOn ? "rgba(254, 240, 138, 0.35)" : "rgba(89, 43, 2, 0.5)"} />
+                <line x1="250" y1="90" x2="250" y2="380" stroke="#facc15" strokeWidth="3" />
+                <line x1="550" y1="90" x2="550" y2="380" stroke="#facc15" strokeWidth="3" />
                 <text x="400" y="150" textAnchor="middle" fill="#78350f" fontSize="11" fontWeight="800" letterSpacing="3" opacity="0.6">
-                  HA HONG LUXURY GOLD
+                  HA HONG PVD GOLD
                 </text>
               </>
             )}
 
+            {/* Vách 4: Inox 304 Sọc Nhuyễn Hairline */}
             {selectedWallId === "inox-tieu-chuan" && (
               <>
-                <rect x="160" y="90" width="480" height="290" fill="url(#grad-inox-back)" />
-                <line x1="300" y1="90" x2="300" y2="380" stroke="#334155" strokeWidth="2" />
-                <line x1="500" y1="90" x2="500" y2="380" stroke="#334155" strokeWidth="2" />
-                {/* Gương soi lửng inox ở giữa */}
+                <rect x="160" y="90" width="480" height="290" fill="url(#grad-inox-hairline)" />
+                <line x1="300" y1="90" x2="300" y2="380" stroke="#1e293b" strokeWidth="2" />
+                <line x1="500" y1="90" x2="500" y2="380" stroke="#1e293b" strokeWidth="2" />
                 <rect x="315" y="110" width="170" height="150" fill="linear-gradient(135deg, #e2e8f0 0%, #ffffff 40%, #94a3b8 100%)" stroke="#cbd5e1" strokeWidth="2" />
               </>
             )}
 
+            {/* Vách 5: Gỗ Tự Nhiên & Inox Gương */}
             {selectedWallId === "wood-luxury" && (
               <>
-                <rect x="160" y="90" width="480" height="290" fill="url(#grad-wood-panel)" />
-                <line x1="250" y1="90" x2="250" y2="380" stroke="#d4af37" strokeWidth="2" />
-                <line x1="550" y1="90" x2="550" y2="380" stroke="#d4af37" strokeWidth="2" />
+                <rect x="160" y="90" width="480" height="290" fill="url(#grad-wood-walnut)" />
+                <line x1="250" y1="90" x2="250" y2="380" stroke="#d4af37" strokeWidth="2.5" />
+                <line x1="550" y1="90" x2="550" y2="380" stroke="#d4af37" strokeWidth="2.5" />
                 <rect x="280" y="105" width="240" height="260" fill="linear-gradient(135deg, #fef9c3 0%, #d4af37 50%, #78350f 100%)" stroke="#facc15" strokeWidth="2" />
-                <rect x="290" y="115" width="220" height="240" fill={isLightOn ? "rgba(255,255,255,0.25)" : "rgba(0,0,0,0.3)"} />
+                <rect x="290" y="115" width="220" height="240" fill={isLightOn ? "rgba(255,255,255,0.25)" : "rgba(0,0,0,0.35)"} />
               </>
             )}
 
-            {/* Vệt sáng gương chiếu rọi trên đỉnh vách sau khi BẬT ĐÈN */}
+            {/* Vệt phản chiếu mép trên vách khi bật đèn */}
             {isLightOn && (
-              <rect x="180" y="90" width="440" height="24" fill="url(#grad-mirror-top-shine)" opacity="0.45" pointerEvents="none" />
+              <rect
+                x="180"
+                y="90"
+                width="440"
+                height="22"
+                fill={
+                  selectedCeilingId === "ceil-minimal"
+                    ? "rgba(255,255,255,0.65)"
+                    : "rgba(254,240,138,0.6)"
+                }
+                opacity="0.45"
+                pointerEvents="none"
+              />
             )}
           </g>
 
@@ -655,40 +723,39 @@ export default function CabinVisualizer({
           <polygon
             points="0,0 160,90 160,380 0,500"
             fill={
-              selectedWallId === "homelift-kinh" ? "url(#grad-sky-view)" :
+              selectedWallId === "kinh-cuong-luc" ? "url(#grad-glass-clear-sky)" :
+              selectedWallId === "kinh-mau-tra" ? "url(#grad-glass-bronze)" :
               selectedWallId === "inox-guong-vang" ? "url(#grad-gold-left)" :
-              selectedWallId === "wood-luxury" ? "url(#grad-wood-panel)" :
+              selectedWallId === "wood-luxury" ? "url(#grad-wood-walnut)" :
               "url(#grad-inox-left)"
             }
             onClick={() => setActiveTab("walls")}
             style={{ cursor: "pointer" }}
           />
-          {selectedWallId === "homelift-kinh" && (
-            <polygon points="0,0 160,90 160,380 0,500" fill="rgba(255,255,255,0.18)" />
+          {(selectedWallId === "kinh-cuong-luc" || selectedWallId === "kinh-mau-tra") && (
+            <polygon points="0,0 160,90 160,380 0,500" fill="rgba(255,255,255,0.18)" pointerEvents="none" />
           )}
 
           {/* 3. VÁCH PHẢI (Right Wall) */}
           <polygon
             points="800,0 640,90 640,380 800,500"
             fill={
-              selectedWallId === "homelift-kinh" ? "url(#grad-sky-view)" :
+              selectedWallId === "kinh-cuong-luc" ? "url(#grad-glass-clear-sky)" :
+              selectedWallId === "kinh-mau-tra" ? "url(#grad-glass-bronze)" :
               selectedWallId === "inox-guong-vang" ? "url(#grad-gold-right)" :
-              selectedWallId === "wood-luxury" ? "url(#grad-wood-panel)" :
+              selectedWallId === "wood-luxury" ? "url(#grad-wood-walnut)" :
               "url(#grad-inox-right)"
             }
             onClick={() => setActiveTab("walls")}
             style={{ cursor: "pointer" }}
           />
-          {selectedWallId === "homelift-kinh" && (
-            <polygon points="800,0 640,90 640,380 800,500" fill="rgba(255,255,255,0.18)" />
+          {(selectedWallId === "kinh-cuong-luc" || selectedWallId === "kinh-mau-tra") && (
+            <polygon points="800,0 640,90 640,380 800,500" fill="rgba(255,255,255,0.18)" pointerEvents="none" />
           )}
 
-          {/* BẢNG ĐIỀU KHIỂN CABIN COP (Car Operating Panel) GẮN TRÊN VÁCH PHẢI */}
-          <g id="layer-cop-panel" filter="url(#shadow-filter)">
-            {/* Cột kính đen acrylic */}
+          {/* BẢNG ĐIỀU KHIỂN CABIN COP GẮN TRÊN VÁCH PHẢI */}
+          <g id="layer-cop-panel" filter="url(#soft-shadow)">
             <polygon points="680,120 740,140 740,430 680,400" fill="#09090b" stroke="#334155" strokeWidth="1.5" />
-            
-            {/* Màn hình LCD hiển thị tầng hiện tại */}
             <polygon points="690,145 730,158 730,195 690,182" fill="#020617" stroke="#0284c7" strokeWidth="1" />
             <text x="702" y="172" fill="#38bdf8" fontSize="13" fontWeight="800" fontFamily="monospace">
               {currentFloor}
@@ -697,7 +764,6 @@ export default function CabinVisualizer({
               {moveDirection === "up" ? "▲" : moveDirection === "down" ? "▼" : "●"}
             </text>
 
-            {/* Các phím gọi tầng tương tác thật (Click trực tiếp vào COP để đi tầng đó) */}
             {floorList.slice(0, 5).map((fNum, idx) => {
               const yPos = 220 + idx * 22;
               const isCurrent = currentFloor === fNum;
@@ -731,8 +797,6 @@ export default function CabinVisualizer({
                 </g>
               );
             })}
-
-            {/* Nút chuông cứu hộ khẩn cấp */}
             <ellipse cx="710" cy="340" rx="7" ry="5" fill="#ef4444" stroke="#fca5a5" strokeWidth="1" />
           </g>
 
@@ -741,8 +805,8 @@ export default function CabinVisualizer({
             {selectedFloorId === "floor-royal" && (
               <>
                 <polygon points="160,380 640,380 800,500 0,500" fill="#09090b" />
-                <polygon points="175,385 625,385 770,490 30,490" fill="none" stroke="#d4af37" strokeWidth="3" opacity="0.75" />
-                <ellipse cx="400" cy="440" rx="160" ry="42" fill="url(#grad-royal-medallion)" stroke="#facc15" strokeWidth="2.5" />
+                <polygon points="175,385 625,385 770,490 30,490" fill="none" stroke="#d4af37" strokeWidth="3" opacity="0.8" />
+                <ellipse cx="400" cy="440" rx="160" ry="42" fill="url(#grad-royal-cnc-center)" stroke="#facc15" strokeWidth="2.5" />
                 <ellipse cx="400" cy="440" rx="90" ry="24" fill="none" stroke="#fef08a" strokeWidth="2" strokeDasharray="6,4" />
                 <path d="M 400 422 L 407 437 L 435 440 L 407 443 L 400 458 L 393 443 L 365 440 L 393 437 Z" fill="#facc15" />
               </>
@@ -750,23 +814,23 @@ export default function CabinVisualizer({
 
             {selectedFloorId === "floor-galaxy" && (
               <>
-                <polygon points="160,380 640,380 800,500 0,500" fill="url(#grad-floor-galaxy)" />
+                <polygon points="160,380 640,380 800,500 0,500" fill="url(#grad-granite-galaxy)" />
                 <line x1="320" y1="380" x2="260" y2="500" stroke="#334155" strokeWidth="1" opacity="0.6" />
                 <line x1="480" y1="380" x2="540" y2="500" stroke="#334155" strokeWidth="1" opacity="0.6" />
                 <line x1="160" y1="440" x2="640" y2="440" stroke="#334155" strokeWidth="1" opacity="0.6" />
-                <circle cx="340" cy="420" r="1.5" fill="#facc15" />
-                <circle cx="450" cy="450" r="2" fill="#ffffff" />
+                <circle cx="340" cy="420" r="1.8" fill="#facc15" />
+                <circle cx="450" cy="450" r="2.2" fill="#ffffff" />
                 <circle cx="280" cy="460" r="1.8" fill="#facc15" />
                 <circle cx="520" cy="430" r="1.5" fill="#ffffff" />
                 <circle cx="380" cy="470" r="2" fill="#fde047" />
-                <circle cx="420" cy="410" r="1.2" fill="#ffffff" />
-                <circle cx="490" cy="480" r="1.6" fill="#facc15" />
+                <circle cx="420" cy="410" r="1.5" fill="#ffffff" />
+                <circle cx="490" cy="480" r="1.8" fill="#facc15" />
               </>
             )}
 
             {selectedFloorId === "floor-carrara" && (
               <>
-                <polygon points="160,380 640,380 800,500 0,500" fill="url(#grad-floor-carrara)" />
+                <polygon points="160,380 640,380 800,500 0,500" fill="url(#grad-carrara-base)" />
                 <path d="M 200 400 Q 280 430 360 410 T 540 450" fill="none" stroke="#94a3b8" strokeWidth="2.5" opacity="0.6" />
                 <path d="M 320 460 Q 420 440 500 480" fill="none" stroke="#94a3b8" strokeWidth="2" opacity="0.5" />
                 <path d="M 160 440 Q 240 460 300 490" fill="none" stroke="#cbd5e1" strokeWidth="2" opacity="0.7" />
@@ -775,14 +839,18 @@ export default function CabinVisualizer({
               </>
             )}
 
-            {/* VỆT SÁNG PHẢN CHIẾU ĐÈN TRẦN TRÊN MẶT SÀN ĐÁ BÓNG KHI BẬT ĐÈN */}
+            {/* VỆT PHẢN CHIẾU ÁNH ĐÈN TRẦN ĐẶC TRƯNG TỪNG LOẠI ĐÈN TRÊN SÀN */}
             {isLightOn && (
               <ellipse
                 cx="400"
                 cy="435"
-                rx="150"
+                rx={selectedCeilingId === "ceil-minimal" ? "120" : "155"}
                 ry="32"
-                fill="url(#grad-floor-specular)"
+                fill={
+                  selectedCeilingId === "ceil-minimal" ? "url(#grad-floor-specular-cool)" :
+                  selectedCeilingId === "ceil-diamond" ? "url(#grad-floor-specular-diamond)" :
+                  "url(#grad-floor-specular-warm)"
+                }
                 pointerEvents="none"
               />
             )}
@@ -792,7 +860,7 @@ export default function CabinVisualizer({
           <polygon points="0,500 800,500 800,520 0,520" fill="#334155" stroke="#475569" strokeWidth="1" />
 
           {/* 5. TAY VỊN CABIN (Handrail) */}
-          <g id="layer-handrail" filter="url(#shadow-filter)" onClick={() => setActiveTab("handrail")} style={{ cursor: "pointer" }}>
+          <g id="layer-handrail" filter="url(#soft-shadow)" onClick={() => setActiveTab("handrail")} style={{ cursor: "pointer" }}>
             <rect
               x="200"
               y="260"
@@ -800,9 +868,9 @@ export default function CabinVisualizer({
               height="14"
               rx="7"
               fill={
-                selectedHandrailId === "rail-gold" ? "url(#grad-rail-gold)" :
-                selectedHandrailId === "rail-wood" ? "url(#grad-rail-wood)" :
-                "url(#grad-rail-silver)"
+                selectedHandrailId === "rail-gold" ? "url(#grad-rail-gold-pvd)" :
+                selectedHandrailId === "rail-wood" ? "url(#grad-rail-wood-walnut)" :
+                "url(#grad-rail-silver-hairline)"
               }
               stroke={selectedHandrailId === "rail-gold" ? "#fef08a" : "#cbd5e1"}
               strokeWidth="1"
@@ -810,34 +878,31 @@ export default function CabinVisualizer({
             <rect x="250" y="274" width="14" height="14" fill="#334155" />
             <rect x="536" y="274" width="14" height="14" fill="#334155" />
 
-            {/* Uốn tay vịn bên trái */}
             <polygon
               points="0,310 200,260 200,274 0,324"
               fill={
-                selectedHandrailId === "rail-gold" ? "url(#grad-rail-gold)" :
-                selectedHandrailId === "rail-wood" ? "url(#grad-rail-wood)" :
-                "url(#grad-rail-silver)"
+                selectedHandrailId === "rail-gold" ? "url(#grad-rail-gold-pvd)" :
+                selectedHandrailId === "rail-wood" ? "url(#grad-rail-wood-walnut)" :
+                "url(#grad-rail-silver-hairline)"
               }
               opacity="0.9"
             />
-            {/* Uốn tay vịn bên phải */}
             <polygon
               points="600,260 800,310 800,324 600,274"
               fill={
-                selectedHandrailId === "rail-gold" ? "url(#grad-rail-gold)" :
-                selectedHandrailId === "rail-wood" ? "url(#grad-rail-wood)" :
-                "url(#grad-rail-silver)"
+                selectedHandrailId === "rail-gold" ? "url(#grad-rail-gold-pvd)" :
+                selectedHandrailId === "rail-wood" ? "url(#grad-rail-wood-walnut)" :
+                "url(#grad-rail-silver-hairline)"
               }
               opacity="0.9"
             />
           </g>
 
-          {/* 6. TRẦN CABIN & HỆ THỐNG ĐÈN CHIẾU SÁNG THỰC */}
+          {/* 6. TRẦN CABIN & ĐÈN CHIẾU SÁNG RIÊNG BIỆT */}
           <g id="layer-ceiling" onClick={() => setActiveTab("ceiling")} style={{ cursor: "pointer" }}>
-            {/* Khung trần đế */}
             <polygon points="0,0 800,0 640,90 160,90" fill="#0f172a" />
 
-            {/* Kiểu trần 1: Trần Vòm Âm LED Gián Tiếp */}
+            {/* Kiểu trần 1: Trần Vòm Âm LED Gián Tiếp (Ánh sáng Vàng Ấm 3000K) */}
             {selectedCeilingId === "ceil-dome" && (
               <>
                 <ellipse
@@ -845,17 +910,17 @@ export default function CabinVisualizer({
                   cy="45"
                   rx="170"
                   ry="26"
-                  fill={isLightOn ? "url(#grad-dome-glow)" : "#1e293b"}
+                  fill={isLightOn ? "url(#grad-dome-3000k-bulb)" : "#1e293b"}
                   stroke={isLightOn ? "#facc15" : "#475569"}
                   strokeWidth="2"
                 />
                 {isLightOn && (
-                  <ellipse cx="400" cy="45" rx="140" ry="20" fill="#ffffff" opacity="0.8" />
+                  <ellipse cx="400" cy="45" rx="140" ry="20" fill="#ffffff" opacity="0.85" />
                 )}
               </>
             )}
 
-            {/* Kiểu trần 2: Trần Cắt Laser Kim Cương */}
+            {/* Kiểu trần 2: Trần Cắt Laser Kim Cương (Ánh sáng Đa Chiều 4000K) */}
             {selectedCeilingId === "ceil-diamond" && (
               <>
                 <polygon
@@ -864,33 +929,37 @@ export default function CabinVisualizer({
                   stroke={isLightOn ? "#cbd5e1" : "#334155"}
                   strokeWidth="2"
                 />
-                <path d="M 300 20 L 280 75 M 400 20 L 400 75 M 500 20 L 520 75" stroke={isLightOn ? "#facc15" : "#475569"} strokeWidth="2" />
-                <path d="M 230 45 L 570 45" stroke={isLightOn ? "#facc15" : "#475569"} strokeWidth="2" />
+                <path d="M 300 20 L 280 75 M 400 20 L 400 75 M 500 20 L 520 75" stroke={isLightOn ? "#fef08a" : "#475569"} strokeWidth="2" />
+                <path d="M 230 45 L 570 45" stroke={isLightOn ? "#fef08a" : "#475569"} strokeWidth="2" />
                 {isLightOn && (
-                  <ellipse cx="400" cy="45" rx="150" ry="22" fill="url(#grad-dome-glow)" opacity="0.6" />
+                  <ellipse cx="400" cy="45" rx="150" ry="22" fill="url(#grad-diamond-4000k-bulb)" opacity="0.75" />
                 )}
               </>
             )}
 
-            {/* Kiểu trần 3: Trần Linear Tối Giản Bắc Âu */}
+            {/* Kiểu trần 3: Trần Linear Scandinavian (Ánh sáng Trắng Tinh Khiết 6000K) */}
             {selectedCeilingId === "ceil-minimal" && (
               <>
                 <polygon points="270,10 285,10 255,80 240,80" fill={isLightOn ? "#ffffff" : "#334155"} />
                 <polygon points="515,10 530,10 560,80 545,80" fill={isLightOn ? "#ffffff" : "#334155"} />
                 {isLightOn && (
                   <>
-                    <polygon points="260,10 295,10 265,80 230,80" fill="url(#grad-minimal-glow)" opacity="0.75" />
-                    <polygon points="505,10 540,10 570,80 535,80" fill="url(#grad-minimal-glow)" opacity="0.75" />
+                    <polygon points="260,10 295,10 265,80 230,80" fill="url(#grad-linear-6000k-bulb)" opacity="0.85" />
+                    <polygon points="505,10 540,10 570,80 535,80" fill="url(#grad-linear-6000k-bulb)" opacity="0.85" />
                   </>
                 )}
               </>
             )}
 
-            {/* CHÙM SÁNG CHIẾU RỌI TỪ TRẦN XUỐNG SÀN KHI BẬT ĐÈN (Volumetric Downlight Beam) */}
+            {/* CHÙM SÁNG CHIẾU RỌI XUỐNG SÀN RIÊNG BIỆT KHI BẬT ĐÈN */}
             {isLightOn && (
               <polygon
                 points="240,65 560,65 670,410 130,410"
-                fill="url(#grad-light-cone)"
+                fill={
+                  selectedCeilingId === "ceil-minimal" ? "url(#grad-cone-cool)" :
+                  selectedCeilingId === "ceil-diamond" ? "url(#grad-cone-diamond)" :
+                  "url(#grad-cone-warm)"
+                }
                 pointerEvents="none"
                 style={{ mixBlendMode: "screen" }}
               />
@@ -925,13 +994,13 @@ export default function CabinVisualizer({
               y="0"
               width="400"
               height="520"
-              fill={selectedWallId === "inox-guong-vang" ? "url(#grad-gold-back)" : "url(#grad-inox-back)"}
+              fill={selectedWallId === "inox-guong-vang" ? "url(#grad-gold-pvd-back)" : "url(#grad-inox-hairline)"}
               stroke="#1e293b"
               strokeWidth="3"
             />
             <rect x="394" y="0" width="6" height="520" fill="#09090b" />
-            {selectedWallId === "homelift-kinh" && (
-              <rect x="60" y="80" width="280" height="360" fill="url(#grad-glass-reflection)" stroke="#0284c7" strokeWidth="2" rx="4" />
+            {(selectedWallId === "kinh-cuong-luc" || selectedWallId === "kinh-mau-tra") && (
+              <rect x="60" y="80" width="280" height="360" fill="url(#grad-glass-clear-reflect)" stroke="#0284c7" strokeWidth="2" rx="4" />
             )}
           </g>
 
@@ -948,13 +1017,13 @@ export default function CabinVisualizer({
               y="0"
               width="400"
               height="520"
-              fill={selectedWallId === "inox-guong-vang" ? "url(#grad-gold-back)" : "url(#grad-inox-back)"}
+              fill={selectedWallId === "inox-guong-vang" ? "url(#grad-gold-pvd-back)" : "url(#grad-inox-hairline)"}
               stroke="#1e293b"
               strokeWidth="3"
             />
             <rect x="400" y="0" width="6" height="520" fill="#09090b" />
-            {selectedWallId === "homelift-kinh" && (
-              <rect x="460" y="80" width="280" height="360" fill="url(#grad-glass-reflection)" stroke="#0284c7" strokeWidth="2" rx="4" />
+            {(selectedWallId === "kinh-cuong-luc" || selectedWallId === "kinh-mau-tra") && (
+              <rect x="460" y="80" width="280" height="360" fill="url(#grad-glass-clear-reflect)" stroke="#0284c7" strokeWidth="2" rx="4" />
             )}
           </g>
 
@@ -963,31 +1032,31 @@ export default function CabinVisualizer({
             <line x1="400" y1="20" x2="400" y2="500" stroke="#ef4444" strokeWidth="1.5" strokeDasharray="4,4" opacity="0.75" />
           )}
 
-          {/* 9. CÁC NÚT GHIM TƯƠNG TÁC (HOTSPOTS) */}
+          {/* 9. CÁC NÚT GHIM TƯƠNG TÁC (HOTSPOTS) - ĐÃ ĐỒNG BỘ 100% VỚI SỐ THỨ TỰ TAB CHỨC NĂNG */}
           {isDoorsOpen && (
             <>
-              {/* Điểm 1: Trần */}
-              <g onClick={() => setActiveTab("ceiling")} style={{ cursor: "pointer" }} title="Bấm đổi mẫu Trần">
-                <circle cx="400" cy="55" r="14" fill="#facc15" stroke="#ffffff" strokeWidth="2" />
-                <text x="400" y="60" textAnchor="middle" fill="#0f172a" fontSize="12" fontWeight="900">1</text>
-              </g>
-
-              {/* Điểm 2: Vách */}
-              <g onClick={() => setActiveTab("walls")} style={{ cursor: "pointer" }} title="Bấm đổi mẫu Vách">
+              {/* GHIM SỐ 1: VÁCH CABIN (Ứng với Tab 1: Vách Cabin) */}
+              <g onClick={() => setActiveTab("walls")} style={{ cursor: "pointer" }} title="Bấm đổi mẫu Vách Cabin (Số 1)">
                 <circle cx="270" cy="210" r="14" fill="#facc15" stroke="#ffffff" strokeWidth="2" />
-                <text x="270" y="215" textAnchor="middle" fill="#0f172a" fontSize="12" fontWeight="900">2</text>
+                <text x="270" y="215" textAnchor="middle" fill="#0f172a" fontSize="12" fontWeight="900">1</text>
               </g>
 
-              {/* Điểm 3: Tay vịn */}
-              <g onClick={() => setActiveTab("handrail")} style={{ cursor: "pointer" }} title="Bấm đổi mẫu Tay vịn">
-                <circle cx="560" cy="265" r="14" fill="#facc15" stroke="#ffffff" strokeWidth="2" />
-                <text x="560" y="270" textAnchor="middle" fill="#0f172a" fontSize="12" fontWeight="900">3</text>
-              </g>
-
-              {/* Điểm 4: Sàn đá */}
-              <g onClick={() => setActiveTab("flooring")} style={{ cursor: "pointer" }} title="Bấm đổi mẫu Sàn đá">
+              {/* GHIM SỐ 2: SÀN ĐÁ (Ứng với Tab 2: Sàn Đá) */}
+              <g onClick={() => setActiveTab("flooring")} style={{ cursor: "pointer" }} title="Bấm đổi mẫu Sàn Đá (Số 2)">
                 <circle cx="400" cy="450" r="14" fill="#facc15" stroke="#ffffff" strokeWidth="2" />
-                <text x="400" y="455" textAnchor="middle" fill="#0f172a" fontSize="12" fontWeight="900">4</text>
+                <text x="400" y="455" textAnchor="middle" fill="#0f172a" fontSize="12" fontWeight="900">2</text>
+              </g>
+
+              {/* GHIM SỐ 3: TRẦN ĐÈN LED (Ứng với Tab 3: Trần LED) */}
+              <g onClick={() => setActiveTab("ceiling")} style={{ cursor: "pointer" }} title="Bấm đổi mẫu Trần LED (Số 3)">
+                <circle cx="400" cy="55" r="14" fill="#facc15" stroke="#ffffff" strokeWidth="2" />
+                <text x="400" y="60" textAnchor="middle" fill="#0f172a" fontSize="12" fontWeight="900">3</text>
+              </g>
+
+              {/* GHIM SỐ 4: TAY VỊN (Ứng với Tab 4: Tay Vịn) */}
+              <g onClick={() => setActiveTab("handrail")} style={{ cursor: "pointer" }} title="Bấm đổi mẫu Tay Vịn (Số 4)">
+                <circle cx="560" cy="265" r="14" fill="#facc15" stroke="#ffffff" strokeWidth="2" />
+                <text x="560" y="270" textAnchor="middle" fill="#0f172a" fontSize="12" fontWeight="900">4</text>
               </g>
             </>
           )}
@@ -1004,7 +1073,7 @@ export default function CabinVisualizer({
         </div>
       </div>
 
-      {/* 3. BẢNG GỌI TẦNG THỰC TẾ (BẤM TẦNG NÀO TỰ ĐÓNG VÀ MỞ CỬA TẠI TẦNG ĐÓ) */}
+      {/* 3. BẢNG GỌI TẦNG THỰC TẾ (BẤM TẦNG THANG TỰ ĐỘNG CHẠY) */}
       <div className="cabin-floor-call-station">
         <div className="floor-station-header">
           <span className="station-title">
@@ -1058,7 +1127,7 @@ export default function CabinVisualizer({
         </div>
       </div>
 
-      {/* 4. BỘ CHỌN VẬT LIỆU TƯƠNG TÁC (TABS & THẺ SWATCH) */}
+      {/* 4. BỘ CHỌN VẬT LIỆU TƯƠNG TÁC (TABS & THẺ SWATCH) - ĐÃ ĐỒNG BỘ 100% SỐ THỨ TỰ */}
       <div className="cabin-cfg-controls">
         <div className="cabin-tabs-nav">
           <button
@@ -1095,7 +1164,7 @@ export default function CabinVisualizer({
           </button>
         </div>
 
-        {/* Tab 1: Vách */}
+        {/* Tab 1: Vách Cabin */}
         {activeTab === "walls" && (
           <div className="cabin-cards-grid">
             {WALL_OPTIONS.map((item) => {
@@ -1125,7 +1194,7 @@ export default function CabinVisualizer({
           </div>
         )}
 
-        {/* Tab 2: Sàn */}
+        {/* Tab 2: Sàn Đá */}
         {activeTab === "flooring" && (
           <div className="cabin-cards-grid">
             {FLOOR_OPTIONS.map((item) => {
@@ -1155,7 +1224,7 @@ export default function CabinVisualizer({
           </div>
         )}
 
-        {/* Tab 3: Trần */}
+        {/* Tab 3: Trần LED */}
         {activeTab === "ceiling" && (
           <div className="cabin-cards-grid">
             {CEILING_OPTIONS.map((item) => {
@@ -1220,16 +1289,16 @@ export default function CabinVisualizer({
       <div className="cabin-viz-footer">
         <div className="cabin-selected-badges">
           <span className="badge-item">
-            Vách: <strong>{curWallObj.name}</strong>
+            1. Vách: <strong>{curWallObj.name}</strong>
           </span>
           <span className="badge-item">
-            Sàn: <strong>{curFloorObj.name}</strong>
+            2. Sàn: <strong>{curFloorObj.name}</strong>
           </span>
           <span className="badge-item">
-            Trần: <strong>{curCeilObj.name}</strong>
+            3. Trần: <strong>{curCeilObj.name}</strong>
           </span>
           <span className="badge-item">
-            Tay vịn: <strong>{curRailObj.name}</strong>
+            4. Tay vịn: <strong>{curRailObj.name}</strong>
           </span>
         </div>
 
