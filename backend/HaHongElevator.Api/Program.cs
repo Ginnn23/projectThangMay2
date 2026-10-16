@@ -39,6 +39,8 @@ builder.Services.AddScoped<ElevatorEstimatorService>();
 builder.Services.AddSingleton<IEmailService, EmailService>();
 builder.Services.AddHttpClient<AiConsultantService>();
 builder.Services.AddHttpClient<ITelegramBotService, TelegramBotService>();
+builder.Services.AddHttpClient<ITelegramLiveChatService, TelegramLiveChatService>();
+builder.Services.AddHostedService<TelegramPollingBackgroundService>();
 
 var jwtKey = builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException("JWT key is not configured.");
 if (!builder.Environment.IsDevelopment() && jwtKey.Contains("REPLACE_WITH", StringComparison.OrdinalIgnoreCase))

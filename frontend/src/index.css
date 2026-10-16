@@ -4958,3 +4958,128 @@ a {
   }
 }
 
+/* ============================================================
+   LIVE CHAT 2-WAY TELEGRAM BRIDGE STYLES
+   ============================================================ */
+.live-chat-mode-tabs {
+  display: flex;
+  background: #f1f5f9;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 4px;
+  gap: 4px;
+}
+
+.live-chat-tab-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 7px 10px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #64748b;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.live-chat-tab-btn:hover {
+  color: #0f172a;
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.live-chat-tab-btn.active {
+  color: #0f172a;
+  background: #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.live-tag {
+  background: #ef4444;
+  color: #ffffff;
+  font-size: 9px;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 10px;
+  margin-left: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.live-chat-status-bar {
+  background: #f0fdf4;
+  border-bottom: 1px solid #bbf7d0;
+  padding: 8px 14px;
+  font-size: 11.5px;
+  color: #166534;
+}
+
+.live-status-pill {
+  font-size: 11px;
+  font-weight: 600;
+  color: #86efac;
+}
+
+.live-dot-pulse {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 10px;
+  height: 10px;
+  background-color: #22c55e;
+  border-radius: 50%;
+  border: 2px solid #ffffff;
+  animation: livePulse 2s infinite;
+}
+
+@keyframes livePulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 6px rgba(34, 197, 94, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
+  }
+}
+
+.live-engineer-bubble {
+  background: #ffffff !important;
+  border: 1.5px solid #fde047 !important;
+  box-shadow: 0 2px 8px rgba(234, 179, 8, 0.12) !important;
+  border-top-left-radius: 2px !important;
+}
+
+.live-engineer-badge {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 5px;
+  padding-bottom: 5px;
+  border-bottom: 1px dashed #e2e8f0;
+  font-size: 11.5px;
+  color: #854d0e;
+}
+
+.live-badge-tele {
+  font-size: 9.5px;
+  background: #0284c7;
+  color: #ffffff;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-weight: 600;
+  margin-left: auto;
+}
+
+.live-msg-time {
+  font-size: 10px;
+  color: #94a3b8;
+  text-align: right;
+  margin-top: 4px;
+}
+
+
