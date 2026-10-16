@@ -26,15 +26,18 @@ public class EstimatesController : ControllerBase
     private readonly ApplicationDbContext _dbContext;
     private readonly ElevatorEstimatorService _estimatorService;
     private readonly IEmailService _emailService;
+    private readonly ITelegramBotService _telegramService;
 
     public EstimatesController(
         ApplicationDbContext dbContext,
         ElevatorEstimatorService estimatorService,
-        IEmailService emailService)
+        IEmailService emailService,
+        ITelegramBotService telegramService)
     {
         _dbContext = dbContext;
         _estimatorService = estimatorService;
         _emailService = emailService;
+        _telegramService = telegramService;
     }
 
     /// <summary>
@@ -104,6 +107,20 @@ public class EstimatesController : ControllerBase
 
         _dbContext.ElevatorEstimates.Add(estimate);
         await _dbContext.SaveChangesAsync(cancellationToken);
+
+        // Tự động gửi thông báo Telegram trong nền cho đội ngũ kinh doanh
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(8));
+                await _telegramService.SendEstimateLeadNotificationAsync(estimate, cts.Token);
+            }
+            catch
+            {
+                // logged inside telegram service
+            }
+        });
 
         // Tự động gửi email trong nền (background Task) để trả lời khách hàng tức thì không bị nghẽn
         if (!string.IsNullOrWhiteSpace(estimate.Email))
@@ -325,4 +342,20 @@ public class EstimatesController : ControllerBase
         CreatedAt = x.CreatedAt,
         UpdatedAt = x.UpdatedAt
     };
+
+    /// <summary>
+    /// Kiểm tra kết nối Telegram Bot từ trang quản trị Admin.
+    /// </summary>
+    [HttpPost("admin/test-telegram")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> TestTelegramNotification(CancellationToken cancellationToken)
+    {
+        var (success, message) = await _telegramService.SendTestNotificationAsync(cancellationToken: cancellationToken);
+        if (!success)
+        {
+            return BadRequest(new { success = false, message });
+        }
+
+        return Ok(new { success = true, message });
+    }
 }

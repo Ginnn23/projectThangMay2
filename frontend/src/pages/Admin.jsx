@@ -341,6 +341,19 @@ function DuToanAdmin({ onShowToast, onUpdateCount }) {
   const [statusFilter, setStatusFilter] = useState("all");
   const [selectedEstimate, setSelectedEstimate] = useState(null);
   const [sendingEmailId, setSendingEmailId] = useState(null);
+  const [testingTelegram, setTestingTelegram] = useState(false);
+
+  const handleTestTelegram = async () => {
+    setTestingTelegram(true);
+    try {
+      const res = await apiClient.post("/estimates/admin/test-telegram");
+      onShowToast?.(res?.data?.message || "Đã gửi thông báo thử nghiệm thành công tới Telegram!");
+    } catch (err) {
+      onShowToast?.(err.response?.data?.message || "Không thể kết nối Telegram Bot. Vui lòng kiểm tra TELEGRAM_BOT_TOKEN và TELEGRAM_CHAT_ID.", "error");
+    } finally {
+      setTestingTelegram(false);
+    }
+  };
 
   const fetchEstimates = async () => {
     setLoading(true);
@@ -443,9 +456,20 @@ function DuToanAdmin({ onShowToast, onUpdateCount }) {
           <h2>Dự toán báo giá thang máy</h2>
           <p>Danh sách khách hàng đã cấu hình và yêu cầu báo giá từ công cụ trực tuyến.</p>
         </div>
-        <button type="button" className="btn btn-outline-primary btn-sm" onClick={fetchEstimates} disabled={loading}>
-          <i className="bi bi-arrow-repeat me-1"></i> {loading ? "Đang tải..." : "Làm mới"}
-        </button>
+        <div className="d-flex gap-2">
+          <button
+            type="button"
+            className="btn btn-outline-info btn-sm"
+            onClick={handleTestTelegram}
+            disabled={testingTelegram}
+            title="Gửi tin nhắn mẫu kiểm tra kết nối Bot Telegram"
+          >
+            <i className="bi bi-telegram me-1"></i> {testingTelegram ? "Đang gửi..." : "Test Bot Telegram"}
+          </button>
+          <button type="button" className="btn btn-outline-primary btn-sm" onClick={fetchEstimates} disabled={loading}>
+            <i className="bi bi-arrow-repeat me-1"></i> {loading ? "Đang tải..." : "Làm mới"}
+          </button>
+        </div>
       </div>
 
       {error && <div className="alert alert-danger">{error}</div>}

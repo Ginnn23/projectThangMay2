@@ -38,6 +38,7 @@ builder.Services.AddScoped<JwtTokenService>();
 builder.Services.AddScoped<ElevatorEstimatorService>();
 builder.Services.AddSingleton<IEmailService, EmailService>();
 builder.Services.AddHttpClient<AiConsultantService>();
+builder.Services.AddHttpClient<ITelegramBotService, TelegramBotService>();
 
 var jwtKey = builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException("JWT key is not configured.");
 if (!builder.Environment.IsDevelopment() && jwtKey.Contains("REPLACE_WITH", StringComparison.OrdinalIgnoreCase))

@@ -1,6 +1,7 @@
 using HaHongElevator.Api.Data;
 using HaHongElevator.Api.DTOs.Contacts;
 using HaHongElevator.Api.Models;
+using HaHongElevator.Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
@@ -21,10 +22,14 @@ public class ContactsController : ControllerBase
     };
 
     private readonly ApplicationDbContext _dbContext;
+    private readonly ITelegramBotService _telegramService;
 
-    public ContactsController(ApplicationDbContext dbContext)
+    public ContactsController(
+        ApplicationDbContext dbContext,
+        ITelegramBotService telegramService)
     {
         _dbContext = dbContext;
+        _telegramService = telegramService;
     }
 
     [HttpPost]
@@ -73,6 +78,20 @@ public class ContactsController : ControllerBase
 
         _dbContext.ContactRequests.Add(contact);
         await _dbContext.SaveChangesAsync(cancellationToken);
+
+        // Tự động gửi thông báo Telegram trong nền cho đội ngũ kinh doanh
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(8));
+                await _telegramService.SendContactLeadNotificationAsync(contact, cts.Token);
+            }
+            catch
+            {
+                // logged inside telegram service
+            }
+        });
 
         return CreatedAtAction(nameof(GetContact), new { id = contact.Id }, ToDto(contact));
     }
