@@ -1,125 +1,187 @@
 import { useState, useEffect, useRef } from "react";
 import "./CabinVisualizer.css";
 
-// 1. VÁCH CABIN (5 TÙY CHỌN - BỔ SUNG KÍNH CƯỜNG LỰC)
+// =============================================================================
+// DỮ LIỆU CẤU HÌNH VẬT LIỆU CHUẨN KIẾN TRÚC THANG MÁY CAO CẤP
+// (Dựa trên ảnh thực tế: Inox xước Hairline, PVD Gold, Gỗ Óc Chó, Đá Chevron nẹp đồng,
+//  Đá Marble tia chớp Nero Marquina, Sàn gỗ ghép thanh, Terrazzo cát mịn)
+// =============================================================================
+
+// 1. VÁCH CABIN (6 TÙY CHỌN CHÂN THỰC)
 export const WALL_OPTIONS = [
   {
-    id: "kinh-cuong-luc",
-    name: "Kính Cường Lực Trong Suốt Panorama",
-    desc: "Kính an toàn 10mm siêu trong, ngắm cảnh 4 mặt, lấy sáng tự nhiên tối đa",
-    badge: "Bán chạy nhất",
-    syncValue: "homelift-kinh",
-    colorPreview: "linear-gradient(135deg, #0284c7 0%, #38bdf8 50%, #bae6fd 100%)"
-  },
-  {
-    id: "kinh-mau-tra",
-    name: "Kính Cường Lực Màu Trà Hoàng Gia",
-    desc: "Kính cường lực màu trà Bronze luxury, chống chói, riêng tư và quý phái",
-    badge: "Biệt thự cao cấp",
-    syncValue: "homelift-kinh",
-    colorPreview: "linear-gradient(135deg, #78350f 0%, #b45309 50%, #d97706 100%)"
-  },
-  {
-    id: "inox-guong-vang",
-    name: "Inox Gương Vàng PVD Hoàng Gia",
-    desc: "Mạ titan PVD vàng Champagne bóng loáng, hoa văn chìm sang trọng",
-    badge: "Sang trọng đẳng cấp",
+    id: "wood-walnut-mirror",
+    code: "HAHONG-W01",
+    name: "Gỗ Óc Chó Phối Gương Soi & Nẹp Inox",
+    spec: "Gỗ Walnut 15mm • Gương bỉ 5mm • Nẹp titan",
+    desc: "Vách gỗ óc chó tự nhiên phối gương soi trung tâm & nẹp kim loại sang trọng",
+    badge: "Biệt thự 5★",
     syncValue: "inox-guong-vang",
-    colorPreview: "linear-gradient(135deg, #78350f 0%, #facc15 50%, #ca8a04 100%)"
+    type: "wood-mirror"
   },
   {
     id: "inox-tieu-chuan",
+    code: "HAHONG-W02",
     name: "Inox 304 Sọc Nhuyễn Hairline",
-    desc: "Vân xước satin chống bám vân tay, bền bỉ cơ học vĩnh cửu theo thời gian",
-    badge: "Bền bỉ kinh tế",
+    spec: "SUS 304 dày 1.5mm • Vân xước satin mịn",
+    desc: "Bề mặt chải xước kim loại satin chống bám vân tay, bền bỉ cơ học vĩnh cửu",
+    badge: "Tiêu chuẩn bền bỉ",
     syncValue: "inox-tieu-chuan",
-    colorPreview: "linear-gradient(135deg, #475569 0%, #cbd5e1 50%, #94a3b8 100%)"
+    type: "hairline"
   },
   {
-    id: "wood-luxury",
-    name: "Gỗ Tự Nhiên & Inox Gương",
-    desc: "Ốp gỗ óc chó Walnut tự nhiên phối gương soi trung tâm tân cổ điển",
-    badge: "Tân cổ điển",
+    id: "inox-guong-vang",
+    code: "HAHONG-W03",
+    name: "Inox Gương Vàng PVD Hoàng Gia",
+    spec: "Mạ PVD Champagne Gold 8K • Titan chống xước",
+    desc: "Mạ titan PVD vàng Champagne kim loại quý phái, phản chiếu ánh sáng tự nhiên",
+    badge: "Sang trọng PVD",
     syncValue: "inox-guong-vang",
-    colorPreview: "linear-gradient(135deg, #451a03 0%, #92400e 50%, #d4af37 100%)"
+    type: "gold-pvd"
+  },
+  {
+    id: "inox-guong-bac",
+    code: "HAHONG-W04",
+    name: "Inox Gương Bạc Phản Chiếu 8K",
+    spec: "SUS 304 đánh bóng gương 8K • Mở rộng không gian",
+    desc: "Độ phản chiếu quang học trong trẻo, tạo chiều sâu vô tận cho cabin",
+    badge: "Gương 8K mở rộng",
+    syncValue: "inox-tieu-chuan",
+    type: "silver-mirror"
+  },
+  {
+    id: "wood-oak-scandi",
+    code: "HAHONG-W05",
+    name: "Gỗ Sồi Tự Nhiên Nẹp Chỉ Đen Bắc Âu",
+    spec: "Gỗ Oak sáng màu • Nẹp chỉ kim loại đen mờ",
+    desc: "Gỗ sồi phong cách Scandinavian chia mảng nẹp chỉ đen thanh lịch, ấm áp",
+    badge: "Bắc Âu Tinh Tế",
+    syncValue: "inox-tieu-chuan",
+    type: "oak-scandi"
+  },
+  {
+    id: "kinh-cuong-luc",
+    code: "HAHONG-W06",
+    name: "Kính Cường Lực Trong Suốt Panorama",
+    spec: "Kính an toàn 10mm siêu trong • Mài vát cạnh",
+    desc: "Kính an toàn lấy sáng tự nhiên tối đa, ngắm cảnh quan 4 mặt cho thang Homelift",
+    badge: "Homelift Panorama",
+    syncValue: "homelift-kinh",
+    type: "glass"
   }
 ];
 
-// 2. SÀN ĐÁ CABIN (3 TÙY CHỌN CHÂN THỰC)
+// 2. SÀN ĐÁ & GỖ CABIN (5 TÙY CHỌN TỪ ẢNH CHỤP THỰC TẾ)
 export const FLOOR_OPTIONS = [
   {
-    id: "floor-royal",
-    name: "Đá Thảm CNC Hoàng Gia",
-    desc: "Cẩm thạch đen Nero Marquina cắt hoa văn Mandala tròn đối xứng vàng đen",
-    badge: "Cao cấp CNC",
-    colorPreview: "radial-gradient(circle, #facc15 15%, #ca8a04 35%, #1e1b18 65%, #0b0f19 90%)"
+    id: "floor-chevron-brass",
+    code: "HAHONG-F01",
+    name: "Đá Cẩm Thạch Nẹp Chỉ Đồng Xương Cá",
+    spec: "Đá sáng mài bóng • Nẹp chỉ đồng vàng Chevron",
+    desc: "Nền đá tự nhiên nẹp các đường chỉ kim loại đồng vàng hình xương cá Chevron độc đáo",
+    badge: "Chỉ đồng nghệ thuật",
+    type: "chevron"
   },
   {
-    id: "floor-galaxy",
-    name: "Đá Granite Kim Sa Đen",
-    desc: "Nền đá đen tuyền huyền bí ánh kim sa vàng & bạc lấp lánh chống trầy xước",
-    badge: "Bền màu vĩnh cửu",
-    colorPreview: "radial-gradient(circle, #fde047 1.5px, transparent 1.5px), #09090b"
+    id: "floor-wood-plank",
+    code: "HAHONG-F02",
+    name: "Sàn Gỗ Tự Nhiên Ghép Thanh Chống Trượt",
+    spec: "Gỗ Walnut tự nhiên • Xử lý chịu lực công nghiệp",
+    desc: "Các thanh ván gỗ tự nhiên màu nâu ấm ghép dọc theo chiều sâu cabin ấm cúng",
+    badge: "Gỗ tự nhiên",
+    type: "wood"
   },
   {
-    id: "floor-carrara",
-    name: "Đá Marble Trắng Ý Carrara",
-    desc: "Trắng ngọc vân mây xám Calacatta thanh lịch, mở rộng không gian cabin",
-    badge: "Thanh lịch Ý",
-    colorPreview: "linear-gradient(135deg, #ffffff 0%, #cbd5e1 50%, #94a3b8 100%)"
+    id: "floor-marquina-black",
+    code: "HAHONG-F03",
+    name: "Đá Marble Đen Tia Chớp Nero Marquina",
+    spec: "Cẩm thạch đen Tây Ban Nha • Vân tia chớp trắng",
+    desc: "Nền đá đen tuyền huyền bí với các đường vân tia chớp trắng phản chiếu ánh sáng kiêu sa",
+    badge: "Cẩm thạch Ý",
+    type: "marquina"
+  },
+  {
+    id: "floor-terrazzo-sand",
+    code: "HAHONG-F04",
+    name: "Đá Terrazzo Hạt Nhỏ Cát Be Tinh Tế",
+    spec: "Đá mài Terrazzo hạt thạch anh mịn • Chống trơn",
+    desc: "Hạt đá ngọc trai li ti màu kem cát nhã nhặn, chống trầy xước và chống trơn trượt tối đa",
+    badge: "Hiện đại tối giản",
+    type: "terrazzo"
+  },
+  {
+    id: "floor-royal-cnc",
+    code: "HAHONG-F05",
+    name: "Đá Thảm CNC Mandala Hoàng Gia",
+    spec: "Cắt CNC hoa văn Mandala • Viền đá granite đen",
+    desc: "Cẩm thạch tự nhiên cắt CNC hoa văn tròn đối xứng vàng đen sang trọng chuẩn biệt thự",
+    badge: "Tân cổ điển đẳng cấp",
+    type: "royal-cnc"
   }
 ];
 
-// 3. TRẦN ĐÈN LED (3 KIỂU VỚI ÁNH SÁNG KHÁC BIỆT HOÀN TOÀN)
+// 3. TRẦN ĐÈN LED (3 KIỂU CHIẾU SÁNG KIẾN TRÚC THỰC TẾ)
 export const CEILING_OPTIONS = [
   {
-    id: "ceil-dome",
-    name: "Trần Vòm Âm LED Gián Tiếp",
-    desc: "Vòm trần elip hắt ánh sáng vàng ấm 3000K Champagne dịu mắt, chống chói thị giác",
-    badge: "Ánh sáng vàng 3000K",
-    lightType: "warm-gold",
-    colorPreview: "radial-gradient(ellipse at center, #fef08a 20%, #eab308 55%, #1e293b 85%)"
+    id: "ceil-cove-warm",
+    code: "HAHONG-C01",
+    name: "Trần Gián Tiếp Hắt Khe LED (3000K Vàng Ấm)",
+    spec: "LED âm gián tiếp 3000K • Mặt trần phẳng viền titan",
+    desc: "Hệ trần giật cấp hắt ánh sáng LED âm gián tiếp màu vàng ấm 3000K dịu mắt, chống chói",
+    badge: "Vàng ấm 3000K",
+    lightType: "warm-cove",
+    lightColor: "rgba(254, 240, 138, 0.45)"
   },
   {
-    id: "ceil-diamond",
-    name: "Trần Cắt Laser Kim Cương",
-    desc: "Hoa văn kim cương tán xạ tia sáng đa chiều 4000K lấp lánh như pha lê",
-    badge: "Tán xạ kim cương",
-    lightType: "sparkle-diamond",
-    colorPreview: "linear-gradient(45deg, #1e293b 25%, #475569 50%, #facc15 75%)"
+    id: "ceil-coffered-linear",
+    code: "HAHONG-C02",
+    name: "Trần Inox Gương Chia Ô & Thanh LED (4000K)",
+    spec: "Trần inox chia ô vuông • 2 dải LED dài âm trần",
+    desc: "Mặt trần inox gương chia ô kiến trúc kết hợp dải thanh LED âm màu trung tính hiện đại",
+    badge: "Trung tính 4000K",
+    lightType: "neutral-linear",
+    lightColor: "rgba(241, 245, 249, 0.55)"
   },
   {
-    id: "ceil-minimal",
-    name: "Trần Linear Scandinavian",
-    desc: "2 dải thanh LED song song ánh sáng trắng 6000K hiện đại chuẩn Bắc Âu",
-    badge: "Ánh sáng trắng 6000K",
-    lightType: "cool-linear",
-    colorPreview: "repeating-linear-gradient(90deg, #38bdf8 0 3px, #0f172a 3px 20px)"
+    id: "ceil-spotlight-frame",
+    code: "HAHONG-C03",
+    name: "Trần Nẹp Khung Đen & Đèn Downlight (5000K)",
+    spec: "Khung nẹp nhôm đen mờ • 4 đèn rọi spotlight",
+    desc: "Trần phẳng nẹp viền đen thanh lịch kết hợp đèn downlight rọi điểm sắc sảo chuẩn showroom",
+    badge: "Ánh sáng trắng 5000K",
+    lightType: "cool-spotlight",
+    lightColor: "rgba(224, 242, 254, 0.6)"
   }
 ];
 
-// 4. TAY VỊN CABIN (3 TÙY CHỌN)
+// 4. TAY VỊN CABIN (3 TÙY CHỌN TỪ ẢNH THỰC TẾ)
 export const HANDRAIL_OPTIONS = [
   {
-    id: "rail-gold",
-    name: "Tay Vịn Tròn Inox Mạ Vàng PVD",
-    desc: "Inox 304 phi 38 mạ PVD vàng Champagne đồng bộ vách gương sang trọng",
+    id: "rail-wood-brass",
+    code: "HAHONG-R01",
+    name: "Tay Vịn Gỗ Tự Nhiên Đầu Bọc Nẹp Kim Loại",
+    spec: "Thân gỗ tròn phi 38 • Đầu bọc nẹp PVD vàng đồng",
+    desc: "Thân gỗ tròn ấm tay, hai đầu bọc nẹp kim loại mạ PVD chống oxy hóa (Như Ảnh 1 & 3)",
+    badge: "Gỗ & Nẹp Kim Loại",
+    type: "wood-brass"
+  },
+  {
+    id: "rail-flat-satin",
+    code: "HAHONG-R02",
+    name: "Tay Vịn Bản Dẹp Inox 304 Xước Satin",
+    spec: "Inox 304 bản dẹp 40x10mm • Bát bắt tường giấu vít",
+    desc: "Bản dẹp 40mm chống trơn trượt, góc bo cạnh satin cao cấp công thái học (Như Ảnh 2)",
+    badge: "Inox dẹp công thái học",
+    type: "flat-satin"
+  },
+  {
+    id: "rail-round-pvd",
+    code: "HAHONG-R03",
+    name: "Tay Vịn Tròn Inox Gương Vàng PVD Champagne",
+    spec: "Inox 304 phi 38mm mạ PVD • Bo cong hai đầu",
+    desc: "Inox bóng bẩy mạ PVD vàng Champagne đồng bộ vách gương sang trọng (Như Ảnh 4)",
     badge: "Hoàng Gia PVD",
-    colorPreview: "linear-gradient(180deg, #fef08a, #eab308, #713f12)"
-  },
-  {
-    id: "rail-silver",
-    name: "Tay Vịn Dẹp Inox 304 Xước Mờ",
-    desc: "Bản dẹp 40mm chống trơn trượt, góc bo cạnh satin cao cấp",
-    badge: "Tiêu chuẩn",
-    colorPreview: "linear-gradient(180deg, #ffffff, #94a3b8, #334155)"
-  },
-  {
-    id: "rail-wood",
-    name: "Tay Vịn Gỗ Tự Nhiên Phối Kim Loại",
-    desc: "Thân gỗ sồi/óc chó tự nhiên ấm cúng kết hợp chân đế mạ vàng PVD chắc chắn",
-    badge: "Gỗ Walnut sang trọng",
-    colorPreview: "linear-gradient(180deg, #92400e, #78350f, #d4af37)"
+    type: "round-pvd"
   }
 ];
 
@@ -135,21 +197,21 @@ export default function CabinVisualizer({
   // Tabs: 'walls' (1) | 'flooring' (2) | 'ceiling' (3) | 'handrail' (4)
   const [activeTab, setActiveTab] = useState("walls");
 
-  // State các tùy chọn vật liệu
+  // State các tùy chọn vật liệu (Mặc định chọn mẫu cao cấp nhất từ ảnh thực tế của khách)
   const [selectedWallId, setSelectedWallId] = useState(
     elevatorType === "inox-guong-vang" ? "inox-guong-vang" :
-    elevatorType === "inox-tieu-chuan" ? "inox-tieu-chuan" : "kinh-cuong-luc"
+    elevatorType === "inox-tieu-chuan" ? "inox-tieu-chuan" : "wood-walnut-mirror"
   );
-  const [selectedFloorId, setSelectedFloorId] = useState("floor-royal");
-  const [selectedCeilingId, setSelectedCeilingId] = useState("ceil-dome");
-  const [selectedHandrailId, setSelectedHandrailId] = useState("rail-gold");
+  const [selectedFloorId, setSelectedFloorId] = useState("floor-chevron-brass");
+  const [selectedCeilingId, setSelectedCeilingId] = useState("ceil-cove-warm");
+  const [selectedHandrailId, setSelectedHandrailId] = useState("rail-wood-brass");
 
   // State điều khiển Cửa & Đèn
   const [isDoorsOpen, setIsDoorsOpen] = useState(true);
   const [isLightOn, setIsLightOn] = useState(true);
   const [toastMsg, setToastMsg] = useState("");
 
-  // State MÔ PHỎNG THANG MÁY CHẠY TẦNG (Tự động đóng cửa, chạy tầng, mở cửa)
+  // State MÔ PHỎNG THANG MÁY CHẠY TẦNG (Tự động đóng cửa, chạy tầng, chuông Ding, mở cửa)
   const [currentFloor, setCurrentFloor] = useState(1);
   const [targetFloor, setTargetFloor] = useState(1);
   const [elevatorStatus, setElevatorStatus] = useState("idle"); // 'idle' | 'closing' | 'moving' | 'opening'
@@ -314,10 +376,10 @@ export default function CabinVisualizer({
   };
 
   const handleReset = () => {
-    setSelectedWallId("kinh-cuong-luc");
-    setSelectedFloorId("floor-royal");
-    setSelectedCeilingId("ceil-dome");
-    setSelectedHandrailId("rail-gold");
+    setSelectedWallId("wood-walnut-mirror");
+    setSelectedFloorId("floor-chevron-brass");
+    setSelectedCeilingId("ceil-cove-warm");
+    setSelectedHandrailId("rail-wood-brass");
     setIsDoorsOpen(true);
     setIsLightOn(true);
     setCurrentFloor(1);
@@ -327,12 +389,12 @@ export default function CabinVisualizer({
     if (onChangeElevatorType) {
       onChangeElevatorType("homelift-kinh");
     }
-    triggerToast("Đã khôi phục cấu hình tiêu chuẩn");
+    triggerToast("Đã khôi phục cấu hình nội thất cao cấp tiêu chuẩn");
     notifyParent({
-      wallId: "kinh-cuong-luc",
-      floorId: "floor-royal",
-      ceilingId: "ceil-dome",
-      handrailId: "rail-gold"
+      wallId: "wood-walnut-mirror",
+      floorId: "floor-chevron-brass",
+      ceilingId: "ceil-cove-warm",
+      handrailId: "rail-wood-brass"
     });
   };
 
@@ -364,16 +426,127 @@ export default function CabinVisualizer({
 
   return (
     <div className="cabin-visualizer-container">
+      {/* =====================================================================
+          SVG ARCHITECTURAL DEFINITIONS & TEXTURE SHADERS
+          (Định nghĩa bề mặt kim loại xước Hairline, vàng PVD, đá nẹp chỉ đồng,
+           vân gỗ tự nhiên, đá marble đen tia chớp, đá terrazzo cát mịn)
+         ===================================================================== */}
+      <svg className="cabin-defs-container" aria-hidden="true" style={{ position: "absolute", width: 0, height: 0, overflow: "hidden" }}>
+        <defs>
+          {/* 1. Inox 304 Sọc Nhuyễn Hairline Pattern */}
+          <pattern id="pat-hairline-fine" width="60" height="60" patternUnits="userSpaceOnUse">
+            <rect width="60" height="60" fill="#94a3b8" />
+            <line x1="0" y1="2" x2="60" y2="2" stroke="#cbd5e1" strokeWidth="1" opacity="0.6" />
+            <line x1="0" y1="5" x2="60" y2="5" stroke="#64748b" strokeWidth="0.8" opacity="0.4" />
+            <line x1="0" y1="9" x2="60" y2="9" stroke="#f1f5f9" strokeWidth="0.75" opacity="0.7" />
+            <line x1="0" y1="14" x2="60" y2="14" stroke="#475569" strokeWidth="0.9" opacity="0.5" />
+            <line x1="0" y1="18" x2="60" y2="18" stroke="#cbd5e1" strokeWidth="0.75" opacity="0.5" />
+            <line x1="0" y1="23" x2="60" y2="23" stroke="#f8fafc" strokeWidth="1" opacity="0.8" />
+            <line x1="0" y1="28" x2="60" y2="28" stroke="#64748b" strokeWidth="0.8" opacity="0.4" />
+            <line x1="0" y1="34" x2="60" y2="34" stroke="#cbd5e1" strokeWidth="0.75" opacity="0.6" />
+            <line x1="0" y1="39" x2="60" y2="39" stroke="#334155" strokeWidth="0.9" opacity="0.3" />
+            <line x1="0" y1="44" x2="60" y2="44" stroke="#f1f5f9" strokeWidth="0.8" opacity="0.7" />
+            <line x1="0" y1="50" x2="60" y2="50" stroke="#64748b" strokeWidth="0.8" opacity="0.5" />
+            <line x1="0" y1="56" x2="60" y2="56" stroke="#cbd5e1" strokeWidth="0.75" opacity="0.6" />
+          </pattern>
+
+          {/* 2. Sàn Đá Nẹp Chỉ Đồng Xương Cá (Chevron Brass Inlay Pattern - Như Ảnh 2) */}
+          <pattern id="pat-chevron-brass-inlay" width="100" height="50" patternUnits="userSpaceOnUse">
+            <rect width="100" height="50" fill="#e2e8f0" />
+            {/* Hạt đá ngọc trai li ti */}
+            <circle cx="15" cy="12" r="1.2" fill="#94a3b8" opacity="0.6" />
+            <circle cx="35" cy="38" r="1" fill="#64748b" opacity="0.5" />
+            <circle cx="68" cy="18" r="1.4" fill="#cbd5e1" opacity="0.7" />
+            <circle cx="85" cy="42" r="1.1" fill="#94a3b8" opacity="0.6" />
+            {/* Đường chỉ đồng trục giữa */}
+            <line x1="50" y1="0" x2="50" y2="50" stroke="#ca8a04" strokeWidth="2.5" />
+            <line x1="50" y1="0" x2="50" y2="50" stroke="#facc15" strokeWidth="1" />
+            {/* Các nhánh xương cá nẹp chỉ đồng đối xứng */}
+            <line x1="50" y1="10" x2="10" y2="45" stroke="#ca8a04" strokeWidth="2" />
+            <line x1="50" y1="10" x2="10" y2="45" stroke="#fef08a" strokeWidth="0.75" />
+            <line x1="50" y1="10" x2="90" y2="45" stroke="#ca8a04" strokeWidth="2" />
+            <line x1="50" y1="10" x2="90" y2="45" stroke="#fef08a" strokeWidth="0.75" />
+
+            <line x1="50" y1="-15" x2="10" y2="20" stroke="#475569" strokeWidth="1.8" />
+            <line x1="50" y1="-15" x2="90" y2="20" stroke="#475569" strokeWidth="1.8" />
+
+            <line x1="50" y1="35" x2="10" y2="70" stroke="#475569" strokeWidth="1.8" />
+            <line x1="50" y1="35" x2="90" y2="70" stroke="#475569" strokeWidth="1.8" />
+          </pattern>
+
+          {/* 3. Gỗ Óc Chó Walnut Tự Nhiên (Như Ảnh 1 & 4) */}
+          <pattern id="pat-wood-walnut-texture" width="80" height="120" patternUnits="userSpaceOnUse">
+            <rect width="80" height="120" fill="#451a03" />
+            <path d="M0 0 Q 20 60 0 120" stroke="#78350f" strokeWidth="2" fill="none" opacity="0.7" />
+            <path d="M25 0 Q 35 70 25 120" stroke="#2e1001" strokeWidth="2.5" fill="none" opacity="0.6" />
+            <path d="M50 0 Q 60 50 50 120" stroke="#92400e" strokeWidth="2" fill="none" opacity="0.5" />
+            <path d="M75 0 Q 70 80 75 120" stroke="#78350f" strokeWidth="2.5" fill="none" opacity="0.7" />
+            <line x1="79" y1="0" x2="79" y2="120" stroke="#1c0a00" strokeWidth="1.5" opacity="0.8" />
+          </pattern>
+
+          {/* 4. Đá Marble Đen Tia Chớp Nero Marquina (Như Ảnh 4) */}
+          <pattern id="pat-marquina-black-texture" width="120" height="100" patternUnits="userSpaceOnUse">
+            <rect width="120" height="100" fill="#09090b" />
+            {/* Vân tia chớp trắng cẩm thạch sắc sảo */}
+            <path d="M5 15 L 28 32 L 40 28 L 65 55 L 85 50 L 115 88" stroke="#ffffff" strokeWidth="1.6" fill="none" opacity="0.8" />
+            <path d="M40 28 L 52 12 L 75 18" stroke="#ffffff" strokeWidth="0.9" fill="none" opacity="0.6" />
+            <path d="M65 55 L 75 75 L 98 80" stroke="#cbd5e1" strokeWidth="1" fill="none" opacity="0.5" />
+            <path d="M10 85 L 30 70 L 45 78 L 70 98" stroke="#f1f5f9" strokeWidth="1.1" fill="none" opacity="0.65" />
+          </pattern>
+
+          {/* 5. Đá Terrazzo Cát Mịn (Như Ảnh 3) */}
+          <pattern id="pat-terrazzo-sand-texture" width="50" height="50" patternUnits="userSpaceOnUse">
+            <rect width="50" height="50" fill="#f1f5f9" />
+            <circle cx="8" cy="12" r="1.5" fill="#ca8a04" opacity="0.4" />
+            <circle cx="22" cy="7" r="1.2" fill="#64748b" opacity="0.4" />
+            <circle cx="38" cy="18" r="2" fill="#cbd5e1" opacity="0.7" />
+            <circle cx="16" cy="34" r="1.8" fill="#94a3b8" opacity="0.5" />
+            <circle cx="42" cy="40" r="1.2" fill="#78350f" opacity="0.35" />
+            <circle cx="28" cy="24" r="1" fill="#475569" opacity="0.5" />
+          </pattern>
+
+          {/* Gradient Inox Gương Vàng PVD (Champagne Gold 8K) */}
+          <linearGradient id="grad-pvd-champagne" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#78350f" />
+            <stop offset="18%" stopColor="#ca8a04" />
+            <stop offset="35%" stopColor="#fef08a" />
+            <stop offset="50%" stopColor="#eab308" />
+            <stop offset="70%" stopColor="#ca8a04" />
+            <stop offset="88%" stopColor="#fef08a" />
+            <stop offset="100%" stopColor="#854d0e" />
+          </linearGradient>
+
+          {/* Gradient Inox Gương Bạc 8K */}
+          <linearGradient id="grad-mirror-silver-8k" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#334155" />
+            <stop offset="25%" stopColor="#94a3b8" />
+            <stop offset="48%" stopColor="#ffffff" />
+            <stop offset="65%" stopColor="#cbd5e1" />
+            <stop offset="85%" stopColor="#f8fafc" />
+            <stop offset="100%" stopColor="#475569" />
+          </linearGradient>
+
+          {/* Rãnh ngưỡng cửa hợp kim nhôm định hình */}
+          <pattern id="pat-door-sill-grooves" width="20" height="20" patternUnits="userSpaceOnUse">
+            <rect width="20" height="20" fill="#475569" />
+            <line x1="0" y1="5" x2="20" y2="5" stroke="#1e293b" strokeWidth="2.5" />
+            <line x1="0" y1="6" x2="20" y2="6" stroke="#94a3b8" strokeWidth="1" />
+            <line x1="0" y1="14" x2="20" y2="14" stroke="#1e293b" strokeWidth="2.5" />
+            <line x1="0" y1="15" x2="20" y2="15" stroke="#94a3b8" strokeWidth="1" />
+          </pattern>
+        </defs>
+      </svg>
+
       {/* 1. Header Toolbar */}
       <div className="cabin-viz-header">
         <div className="cabin-viz-title">
-          <i className="bi bi-box text-warning fs-5"></i>
+          <i className="bi bi-shield-check text-warning fs-5"></i>
           <div>
-            <span className="d-block fw-bold" style={{ fontSize: "14px" }}>
-              PHỐI CẢNH CABIN TRỰC QUAN 2.5D
+            <span className="d-block fw-bold" style={{ fontSize: "14px", letterSpacing: "0.5px" }}>
+              PHỐI CẢNH CABIN KIẾN TRÚC CAO CẤP 2.5D
             </span>
             <small className="text-secondary" style={{ fontSize: "11px" }}>
-              Mô hình 3D chuẩn kiến trúc • Tự động chạy tầng
+              Tiêu chuẩn sản xuất thực tế • Chi tiết nẹp kim loại & sàn đá độc bản
             </small>
           </div>
         </div>
@@ -404,7 +577,7 @@ export default function CabinVisualizer({
         </div>
       </div>
 
-      {/* 2. Sân khấu 3D Perspective Box (Đẹp, gọn gàng, đúng mô hình gốc lúc đầu) */}
+      {/* 2. Sân khấu 3D Perspective Box (Chuẩn kiến trúc cabin thực tế) */}
       <div className="cabin-stage">
         {/* Chỉ báo tầng & tải trọng trên nóc thang */}
         <div className="cabin-landing-indicator">
@@ -427,10 +600,14 @@ export default function CabinVisualizer({
           </div>
         )}
 
-        {/* Bao cảnh sảnh tầng bên ngoài */}
-        <div className="cabin-landing-surround"></div>
+        {/* Khung bao sảnh tầng bên ngoài (Lobby Inox Frame) */}
+        <div className="cabin-landing-surround">
+          <div className="lobby-jamb jamb-top"></div>
+          <div className="lobby-jamb jamb-left"></div>
+          <div className="lobby-jamb jamb-right"></div>
+        </div>
 
-        {/* Khối hộp 3D Cabin (Elevator Car 3D Box) */}
+        {/* KHỐI HỘP 3D CABIN KIẾN TRÚC THỰC TẾ (Elevator Car 3D Architectural Box) */}
         <div className={`cabin-car-box ${isDoorsOpen ? "doors-open" : ""} ${!isLightOn ? "light-off" : ""}`}>
           
           {/* TRẦN CABIN & ĐÈN CHIẾU SÁNG (Kiểu đèn 3: Ứng với Tab 3) */}
@@ -439,7 +616,29 @@ export default function CabinVisualizer({
             onClick={() => setActiveTab("ceiling")}
             title="Bấm để chọn mẫu Trần Đèn LED (Số 3)"
           >
-            <div className="cabin-ceiling-lamp">
+            {/* Hệ thống đèn trần kiến trúc */}
+            <div className="cabin-ceiling-frame">
+              {selectedCeilingId === "ceil-cove-warm" && (
+                <div className="cove-led-perimeter">
+                  <div className="cove-inner-panel"></div>
+                </div>
+              )}
+              {selectedCeilingId === "ceil-coffered-linear" && (
+                <div className="coffered-mirror-grid">
+                  <span className="grid-bar"></span>
+                  <span className="grid-bar"></span>
+                  <span className="grid-bar"></span>
+                </div>
+              )}
+              {selectedCeilingId === "ceil-spotlight-frame" && (
+                <div className="spotlight-frame-array">
+                  <span className="spot-lens"></span>
+                  <span className="spot-lens"></span>
+                  <span className="spot-lens"></span>
+                  <span className="spot-lens"></span>
+                </div>
+              )}
+
               {/* Điểm ghim Số 3: Trần LED */}
               {isDoorsOpen && (
                 <div className="cabin-hotspot-pin pin-ceiling" title="Ghim số 3: Trần LED">
@@ -449,57 +648,38 @@ export default function CabinVisualizer({
             </div>
           </div>
 
-          {/* CHÙM SÁNG CHIẾU RỌI TỪNG LOẠI ĐÈN (Volumetric Downlight Cones) */}
+          {/* CHÙM SÁNG CHIẾU RỌI TỰ NHIÊN (Natural Architectural Downlight) */}
           {isLightOn && (
             <div className={`cabin-ambient-light light-effect-${selectedCeilingId}`}></div>
           )}
 
-          {/* VÁCH CABIN (Kiểu vách 1: Ứng với Tab 1) */}
-          <div
-            className={`cabin-back-wall wall-${selectedWallId}`}
-            onClick={() => setActiveTab("walls")}
-            title="Bấm để chọn mẫu Vách Cabin (Số 1)"
-          >
-            {/* Cảnh quan bên ngoài di chuyển khi đi thang kính Homelift */}
-            {(selectedWallId === "kinh-cuong-luc" || selectedWallId === "kinh-mau-tra") && (
-              <div
-                className="cabin-scenery-backdrop"
-                style={{ transform: `translateY(${(currentFloor - 1) * -18}px)` }}
-              ></div>
-            )}
+          {/* VÁCH HÔNG TRÁI (LEFT WALL) - GÓC NGHIÊNG PHỐI CẢNH 3D */}
+          <div className={`cabin-wall-side wall-side-left wall-${selectedWallId}`}>
+            <div className="side-wall-panel"></div>
+            {/* Nẹp chân tường Inox kickplate vách trái */}
+            <div className="wall-kickplate kickplate-left"></div>
+            {/* Tay vịn hông trái */}
+            <div className={`side-handrail rail-${selectedHandrailId}`}></div>
+          </div>
 
-            {/* Điểm ghim Số 1: Vách Cabin */}
-            {isDoorsOpen && (
-              <div className="cabin-hotspot-pin pin-wall" title="Ghim số 1: Vách Cabin">
-                1
-              </div>
-            )}
+          {/* VÁCH HÔNG PHẢI (RIGHT WALL) - GÓC NGHIÊNG PHỐI CẢNH 3D VỚI BẢNG ĐIỀU KHIỂN COP */}
+          <div className={`cabin-wall-side wall-side-right wall-${selectedWallId}`}>
+            <div className="side-wall-panel"></div>
+            {/* Nẹp chân tường Inox kickplate vách phải */}
+            <div className="wall-kickplate kickplate-right"></div>
+            {/* Tay vịn hông phải */}
+            <div className={`side-handrail rail-${selectedHandrailId}`}></div>
 
-            {/* TAY VỊN TRONG CABIN (Kiểu tay vịn 4: Ứng với Tab 4) */}
-            <div
-              className={`cabin-handrail rail-${selectedHandrailId}`}
-              onClick={(e) => {
-                e.stopPropagation();
-                setActiveTab("handrail");
-              }}
-              title="Bấm để chọn mẫu Tay Vịn (Số 4)"
-            >
-              {/* Điểm ghim Số 4: Tay Vịn */}
-              {isDoorsOpen && (
-                <div className="cabin-hotspot-pin pin-handrail" title="Ghim số 4: Tay Vịn">
-                  4
-                </div>
-              )}
-            </div>
-
-            {/* BẢNG ĐIỀU KHIỂN CABIN (COP PANEL) */}
+            {/* BẢNG ĐIỀU KHIỂN CABIN CHÂN THỰC (CAR OPERATING PANEL - COP) */}
             <div className="cabin-cop-panel">
+              {/* Màn hình hiển thị LCD/LED */}
               <div className="cabin-cop-screen">
                 <span className="cop-floor">{currentFloor}</span>
-                <span className="cop-arrow">{moveDirection === "up" ? "▲" : moveDirection === "down" ? "▼" : ""}</span>
+                <span className="cop-arrow">{moveDirection === "up" ? "▲" : moveDirection === "down" ? "▼" : "●"}</span>
               </div>
+              {/* Hàng nút bấm inox tròn viền đèn Halo Ring */}
               <div className="cabin-cop-buttons">
-                {floorList.slice(0, 4).map((fNum) => (
+                {floorList.slice(0, 5).map((fNum) => (
                   <div
                     key={fNum}
                     className={`cop-dot ${currentFloor === fNum ? "active" : ""} ${targetFloor === fNum && elevatorStatus !== "idle" ? "calling" : ""}`}
@@ -516,28 +696,118 @@ export default function CabinVisualizer({
             </div>
           </div>
 
-          {/* SÀN ĐÁ CABIN (Kiểu sàn 2: Ứng với Tab 2) */}
+          {/* VÁCH SAU CABIN (BACK WALL) - CHIA MẢNG PANEL KIẾN TRÚC & GƯƠNG SOI TRUNG TÂM */}
+          <div
+            className={`cabin-back-wall wall-${selectedWallId}`}
+            onClick={() => setActiveTab("walls")}
+            title="Bấm để chọn mẫu Vách Cabin (Số 1)"
+          >
+            {/* Trường hợp Vách Kính Panorama: Hiện cảnh quan bên ngoài */}
+            {selectedWallId === "kinh-cuong-luc" && (
+              <div
+                className="cabin-scenery-backdrop"
+                style={{ transform: `translateY(${(currentFloor - 1) * -20}px)` }}
+              >
+                <div className="glass-reflection-glare"></div>
+              </div>
+            )}
+
+            {/* Mảng Panel Kiến Trúc Vách Sau (3 Phân Mảng Chuẩn Khách Sạn & Căn Hộ) */}
+            <div className="back-wall-layout">
+              {/* Tấm vách trái */}
+              <div className="back-panel panel-sub-left"></div>
+
+              {/* Tấm trung tâm (Gương soi 8K / Inox hoa văn / Kính) */}
+              <div className="back-panel panel-center-feature">
+                {selectedWallId === "wood-walnut-mirror" && (
+                  <div className="feature-mirror-glass">
+                    <span className="mirror-bevel-edge"></span>
+                    <span className="mirror-brand-tag">HÀ HỒNG LUXURY</span>
+                  </div>
+                )}
+                {selectedWallId === "inox-guong-vang" && (
+                  <div className="feature-gold-motif">
+                    <span className="motif-border"></span>
+                    <span className="motif-brand-text">👑 HÀ HỒNG GOLD PVD</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Tấm vách phải */}
+              <div className="back-panel panel-sub-right"></div>
+            </div>
+
+            {/* Điểm ghim Số 1: Vách Cabin */}
+            {isDoorsOpen && (
+              <div className="cabin-hotspot-pin pin-wall" title="Ghim số 1: Vách Cabin">
+                1
+              </div>
+            )}
+
+            {/* TAY VỊN TRONG CABIN CHẠY NGANG (Kiểu tay vịn 4: Ứng với Tab 4) */}
+            <div
+              className={`cabin-handrail rail-${selectedHandrailId}`}
+              onClick={(e) => {
+                e.stopPropagation();
+                setActiveTab("handrail");
+              }}
+              title="Bấm để chọn mẫu Tay Vịn (Số 4)"
+            >
+              <span className="handrail-bar"></span>
+              <span className="handrail-bracket bracket-left"></span>
+              <span className="handrail-bracket bracket-right"></span>
+
+              {/* Điểm ghim Số 4: Tay Vịn */}
+              {isDoorsOpen && (
+                <div className="cabin-hotspot-pin pin-handrail" title="Ghim số 4: Tay Vịn">
+                  4
+                </div>
+              )}
+            </div>
+
+            {/* Nẹp chân tường Inox kickplate vách sau */}
+            <div className="wall-kickplate kickplate-back"></div>
+
+            {/* DẢI ĐÈN LED ÂM CHÂN TƯỜNG (KICKPLATE COVE LIGHT - NHƯ ẢNH 4) */}
+            {isLightOn && (
+              <div className="kickplate-cove-led-wash"></div>
+            )}
+          </div>
+
+          {/* SÀN ĐÁ & GỖ CABIN (FLOORING - GÓC NGHIÊNG 3D 25 DEG CHUẨN KIẾN TRÚC) */}
           <div
             className={`cabin-floor floor-${selectedFloorId}`}
             onClick={() => setActiveTab("flooring")}
-            title="Bấm để chọn mẫu Sàn Đá (Số 2)"
+            title="Bấm để chọn mẫu Sàn Cabin (Số 2)"
           >
-            {/* Vệt phản chiếu ánh đèn rực rỡ trên mặt sàn đá bóng */}
+            {/* Mặt texture sàn theo đúng chất liệu thực tế */}
+            <div className={`floor-surface-layer surface-${selectedFloorId}`}></div>
+
+            {/* Vệt phản chiếu ánh sáng tự nhiên mờ nhẹ trên mặt sàn bóng */}
             {isLightOn && (
               <div className={`floor-specular-glow glow-${selectedCeilingId}`}></div>
             )}
 
-            {/* Điểm ghim Số 2: Sàn Đá */}
+            {/* Điểm ghim Số 2: Sàn Đá / Gỗ */}
             {isDoorsOpen && (
-              <div className="cabin-hotspot-pin pin-floor" title="Ghim số 2: Sàn Đá">
+              <div className="cabin-hotspot-pin pin-floor" title="Ghim số 2: Sàn Cabin">
                 2
               </div>
             )}
           </div>
 
+          {/* NGƯỠNG CỬA HỢP KIM NHÔM (DOOR SILL GUIDE GROOVES) */}
+          <div className="cabin-door-sill-bar"></div>
+
           {/* CỬA TẦNG TỰ ĐỘNG SLIDING DOORS (TRƯỢT MỞ/ĐÓNG THẬT) */}
-          <div className={`cabin-door door-left door-wall-${selectedWallId}`}></div>
-          <div className={`cabin-door door-right door-wall-${selectedWallId}`}></div>
+          <div className={`cabin-door door-left door-wall-${selectedWallId}`}>
+            <span className="door-panel-texture"></span>
+            <span className="door-edge-trim"></span>
+          </div>
+          <div className={`cabin-door door-right door-wall-${selectedWallId}`}>
+            <span className="door-panel-texture"></span>
+            <span className="door-edge-trim"></span>
+          </div>
 
           {/* Tia cảm biến an toàn Photocell */}
           <div className="cabin-door-gap-indicator"></div>
@@ -608,7 +878,7 @@ export default function CabinVisualizer({
         </div>
       </div>
 
-      {/* 4. BỘ CHỌN VẬT LIỆU (TABS & THẺ SWATCH - ĐỒNG BỘ 100% SỐ THỨ TỰ 1-4) */}
+      {/* 4. BỘ CHỌN VẬT LIỆU CAO CẤP (TABS & THẺ SWATCH THIẾT KẾ ĐẸP MẮT) */}
       <div className="cabin-cfg-controls">
         <div className="cabin-tabs-nav">
           <button
@@ -625,7 +895,7 @@ export default function CabinVisualizer({
             onClick={() => setActiveTab("flooring")}
           >
             <i className="bi bi-grid-3x3"></i>
-            2. Sàn Đá ({FLOOR_OPTIONS.length})
+            2. Sàn Đá / Gỗ ({FLOOR_OPTIONS.length})
           </button>
           <button
             type="button"
@@ -657,7 +927,8 @@ export default function CabinVisualizer({
                   className={`cabin-material-card ${isSelected ? "active" : ""}`}
                   onClick={() => handleSelectWall(item)}
                 >
-                  <div className="swatch-preview-box" style={{ background: item.colorPreview }}>
+                  <div className={`swatch-preview-box swatch-wall-${item.id}`}>
+                    <span className="swatch-code-tag">{item.code}</span>
                     {isSelected && (
                       <div className="swatch-check-icon">
                         <i className="bi bi-check-lg"></i>
@@ -666,6 +937,7 @@ export default function CabinVisualizer({
                   </div>
                   <div className="swatch-content">
                     <span className="swatch-name">{item.name}</span>
+                    <span className="swatch-spec">{item.spec}</span>
                     <span className="swatch-desc">{item.desc}</span>
                     <span className="swatch-badge">{item.badge}</span>
                   </div>
@@ -675,7 +947,7 @@ export default function CabinVisualizer({
           </div>
         )}
 
-        {/* Tab 2: Sàn Đá */}
+        {/* Tab 2: Sàn Đá & Gỗ */}
         {activeTab === "flooring" && (
           <div className="cabin-cards-grid">
             {FLOOR_OPTIONS.map((item) => {
@@ -687,7 +959,8 @@ export default function CabinVisualizer({
                   className={`cabin-material-card ${isSelected ? "active" : ""}`}
                   onClick={() => handleSelectFloor(item)}
                 >
-                  <div className="swatch-preview-box" style={{ background: item.colorPreview }}>
+                  <div className={`swatch-preview-box swatch-floor-${item.id}`}>
+                    <span className="swatch-code-tag">{item.code}</span>
                     {isSelected && (
                       <div className="swatch-check-icon">
                         <i className="bi bi-check-lg"></i>
@@ -696,6 +969,7 @@ export default function CabinVisualizer({
                   </div>
                   <div className="swatch-content">
                     <span className="swatch-name">{item.name}</span>
+                    <span className="swatch-spec">{item.spec}</span>
                     <span className="swatch-desc">{item.desc}</span>
                     <span className="swatch-badge">{item.badge}</span>
                   </div>
@@ -717,7 +991,8 @@ export default function CabinVisualizer({
                   className={`cabin-material-card ${isSelected ? "active" : ""}`}
                   onClick={() => handleSelectCeiling(item)}
                 >
-                  <div className="swatch-preview-box" style={{ background: item.colorPreview }}>
+                  <div className={`swatch-preview-box swatch-ceil-${item.id}`}>
+                    <span className="swatch-code-tag">{item.code}</span>
                     {isSelected && (
                       <div className="swatch-check-icon">
                         <i className="bi bi-check-lg"></i>
@@ -726,6 +1001,7 @@ export default function CabinVisualizer({
                   </div>
                   <div className="swatch-content">
                     <span className="swatch-name">{item.name}</span>
+                    <span className="swatch-spec">{item.spec}</span>
                     <span className="swatch-desc">{item.desc}</span>
                     <span className="swatch-badge">{item.badge}</span>
                   </div>
@@ -747,7 +1023,8 @@ export default function CabinVisualizer({
                   className={`cabin-material-card ${isSelected ? "active" : ""}`}
                   onClick={() => handleSelectHandrail(item)}
                 >
-                  <div className="swatch-preview-box" style={{ background: item.colorPreview }}>
+                  <div className={`swatch-preview-box swatch-rail-${item.id}`}>
+                    <span className="swatch-code-tag">{item.code}</span>
                     {isSelected && (
                       <div className="swatch-check-icon">
                         <i className="bi bi-check-lg"></i>
@@ -756,6 +1033,7 @@ export default function CabinVisualizer({
                   </div>
                   <div className="swatch-content">
                     <span className="swatch-name">{item.name}</span>
+                    <span className="swatch-spec">{item.spec}</span>
                     <span className="swatch-desc">{item.desc}</span>
                     <span className="swatch-badge">{item.badge}</span>
                   </div>
