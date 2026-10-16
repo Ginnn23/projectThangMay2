@@ -15,8 +15,10 @@ public class TelegramLiveChatService : ITelegramLiveChatService
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly ILogger<TelegramLiveChatService> _logger;
 
-    // Fast in-memory cache for mapping Telegram MessageId -> SessionId
+    // Fast in-memory cache for mapping Telegram MessageId -> Web SessionId
     private static readonly ConcurrentDictionary<long, string> MsgToSessionCache = new();
+    // Fast in-memory cache for mapping Admin Forwarded MessageId -> Customer's Telegram ChatId
+    private static readonly ConcurrentDictionary<long, string> MsgToCustomerChatMap = new();
     private static string? _lastActiveSessionId;
 
     public TelegramLiveChatService(
@@ -93,7 +95,7 @@ public class TelegramLiveChatService : ITelegramLiveChatService
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Could not verify live_chat database tables. Live chat may use in-memory fallback.");
+            _logger.LogWarning(ex, "Could not verify live_chat database tables.");
         }
     }
 
@@ -156,7 +158,7 @@ public class TelegramLiveChatService : ITelegramLiveChatService
             savedId = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
         }
 
-        // 2. Forward to Telegram
+        // 2. Forward to Telegram for Admin
         var (botToken, chatId, enabled) = GetTelegramConfig();
         if (enabled && !string.IsNullOrWhiteSpace(botToken) && !string.IsNullOrWhiteSpace(chatId))
         {
@@ -176,21 +178,20 @@ public class TelegramLiveChatService : ITelegramLiveChatService
                         : "";
 
                     var text =
-$@"💬 <b>TIN NHẮN MỚI TỪ KHÁCH HÀNG</b>
+$@"💬 <b>TIN NHẮN TỪ KHÁCH TRÊN WEBSITE:</b>
 ━━━━━━━━━━━━━━━━━━━
 👤 <b>Khách:</b> {EscapeHtml(senderName)} (Mã: <code>#{GetShortId(sessionId)}</code>){phoneLine}{pageLine}
 ⏰ <b>Thời gian:</b> {vnTime:HH:mm:ss}
 💭 <b>Nội dung:</b>
 <blockquote>{EscapeHtml(messageText)}</blockquote>
 ━━━━━━━━━━━━━━━━━━━
-👉 <i>Bấm <b>Reply (Trả lời)</b> tin nhắn này trên Telegram để gửi câu trả lời về website cho khách!</i>";
+👉 <i>Bấm <b>Reply (Trả lời)</b> tin nhắn này để gửi câu trả lời về website cho khách!</i>";
 
                     var sentMsgId = await PostTelegramMessageAsync(botToken, chatId, text, cts.Token);
                     if (sentMsgId.HasValue)
                     {
                         MsgToSessionCache[sentMsgId.Value] = sessionId;
 
-                        // Save mapping to DB
                         try
                         {
                             using var mapScope = _scopeFactory.CreateScope();
@@ -396,135 +397,121 @@ $@"💬 <b>TIN NHẮN MỚI TỪ KHÁCH HÀNG</b>
 
     public async Task ProcessIncomingUpdateAsync(TelegramUpdateItem update, CancellationToken cancellationToken = default)
     {
-        if (update.Message == null || string.IsNullOrWhiteSpace(update.Message.Text)) return;
-
-        var (botToken, configuredChatId, _) = GetTelegramConfig();
-        if (string.IsNullOrWhiteSpace(botToken)) return;
-
+        if (update.Message == null) return;
         var msg = update.Message;
-        var incomingChatId = msg.Chat?.Id.ToString();
 
-        // Optional security: only respond if from configured chat or group
-        if (!string.IsNullOrWhiteSpace(configuredChatId) && incomingChatId != configuredChatId)
-        {
-            _logger.LogWarning("Received Telegram message from unauthorized chatId {ChatId}.", incomingChatId);
-            return;
-        }
+        // 1. NEVER PROCESS MESSAGES SENT BY BOTS (Prevents all self-loops!)
+        if (msg.From?.IsBot == true) return;
+        if (string.IsNullOrWhiteSpace(msg.Text)) return;
 
+        var (botToken, configuredChatId, enabled) = GetTelegramConfig();
+        if (!enabled || string.IsNullOrWhiteSpace(botToken)) return;
+
+        var senderChatId = msg.Chat?.Id.ToString();
+        var senderUserId = msg.From?.Id.ToString() ?? senderChatId;
         var text = msg.Text.Trim();
 
-        // Check if this is a reply to a previous customer notification
-        string? targetSessionId = null;
+        // 2. CHECK SENDER: IS IT THE ADMIN (YOU) OR A CUSTOMER?
+        bool isAdmin = !string.IsNullOrWhiteSpace(configuredChatId) &&
+                       (senderChatId == configuredChatId || senderUserId == configuredChatId);
 
-        if (msg.ReplyToMessage != null)
+        if (isAdmin)
         {
-            var replyToId = msg.ReplyToMessage.MessageId;
+            // ==========================================
+            // TIN NHẮN TỪ ADMIN (BẠN)
+            // ==========================================
+            if (msg.ReplyToMessage != null)
+            {
+                var replyToId = msg.ReplyToMessage.MessageId;
 
-            // Check cache
-            if (MsgToSessionCache.TryGetValue(replyToId, out var cachedSession))
-            {
-                targetSessionId = cachedSession;
-            }
-            else
-            {
-                // Check DB
-                try
+                // A. Nếu đang trả lời Khách hàng chat qua Telegram
+                if (MsgToCustomerChatMap.TryGetValue(replyToId, out var customerChatId))
                 {
-                    using var scope = _scopeFactory.CreateScope();
-                    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-                    var conn = dbContext.Database.GetDbConnection();
-                    if (conn.State != System.Data.ConnectionState.Open) await conn.OpenAsync(cancellationToken);
-                    using var cmd = conn.CreateCommand();
-                    cmd.CommandText = "SELECT session_id FROM live_chat_telegram_maps WHERE telegram_message_id = @id LIMIT 1;";
-                    cmd.Parameters.Add(new NpgsqlParameter("id", replyToId));
-                    var dbRes = await cmd.ExecuteScalarAsync(cancellationToken);
-                    if (dbRes != null)
-                    {
-                        targetSessionId = dbRes.ToString();
-                        if (!string.IsNullOrWhiteSpace(targetSessionId))
-                        {
-                            MsgToSessionCache[replyToId] = targetSessionId;
-                        }
-                    }
+                    var customerNotice = $"👨‍🔧 <b>Kỹ sư Thang Máy Hà Hồng:</b>\n\n{EscapeHtml(text)}";
+                    await PostTelegramMessageAsync(botToken, customerChatId, customerNotice, cancellationToken);
+                    await SendTelegramReplyAsync(botToken, configuredChatId!, "✅ <i>Đã gửi câu trả lời đến khách hàng trên Telegram!</i>", msg.MessageId, cancellationToken);
+                    return;
                 }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Error querying live_chat_telegram_maps for reply ID {ReplyId}", replyToId);
-                }
-            }
-        }
 
-        // Fallback: Check if message text starts with session code e.g. #3849
-        if (string.IsNullOrWhiteSpace(targetSessionId) && text.StartsWith('#') && text.Length > 5)
-        {
-            var parts = text.Split(' ', 2);
-            var code = parts[0].Trim('#');
-            if (parts.Length > 1)
-            {
-                targetSessionId = await FindSessionByCodeAsync(code, cancellationToken);
-                if (!string.IsNullOrWhiteSpace(targetSessionId))
+                // B. Nếu đang trả lời Khách hàng chat trên Website
+                string? targetWebSession = null;
+                if (MsgToSessionCache.TryGetValue(replyToId, out var cachedSession))
                 {
-                    text = parts[1].Trim();
+                    targetWebSession = cachedSession;
+                }
+                else
+                {
+                    targetWebSession = await FindSessionByMsgIdDbAsync(replyToId, cancellationToken);
+                }
+
+                if (!string.IsNullOrWhiteSpace(targetWebSession))
+                {
+                    await SaveAgentReplyAsync(targetWebSession, text, cancellationToken);
+                    await SendTelegramReplyAsync(botToken, configuredChatId!, $"✅ <i>Đã gửi câu trả lời về website cho Khách #{GetShortId(targetWebSession)}!</i>", msg.MessageId, cancellationToken);
+                    return;
                 }
             }
-        }
 
-        // Fallback: Route to last active session
-        if (string.IsNullOrWhiteSpace(targetSessionId))
-        {
-            targetSessionId = _lastActiveSessionId;
-        }
-
-        if (string.IsNullOrWhiteSpace(targetSessionId))
-        {
-            await SendTelegramReplyAsync(botToken, incomingChatId ?? configuredChatId!,
-                "⚠️ Không tìm thấy phiên chat tương ứng.\n👉 Hãy bấm <b>Reply (Trả lời)</b> đúng tin nhắn của khách hàng để gửi phản hồi.",
-                msg.MessageId, cancellationToken);
+            // Nếu Admin gửi tin nhắn nhưng không bấm Reply: KHÔNG LÀM GÌ CẢ (Tuyệt đối không spam lỗi!)
             return;
         }
-
-        // Save Agent Reply to Database
-        var now = DateTime.UtcNow;
-        var agentName = !string.IsNullOrWhiteSpace(msg.From?.FirstName)
-            ? $"Kỹ sư {msg.From.FirstName}"
-            : "Kỹ sư Thang Máy Hà Hồng";
-
-        try
+        else
         {
-            using var scope = _scopeFactory.CreateScope();
-            var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-            var conn = dbContext.Database.GetDbConnection();
-            if (conn.State != System.Data.ConnectionState.Open) await conn.OpenAsync(cancellationToken);
+            // ==========================================
+            // TIN NHẮN TỪ KHÁCH HÀNG (CUSTOMER)
+            // ==========================================
+            if (string.IsNullOrWhiteSpace(configuredChatId) || string.IsNullOrWhiteSpace(senderChatId)) return;
 
-            using var cmd = conn.CreateCommand();
-            cmd.CommandText = @"
-                INSERT INTO live_chat_messages (session_id, sender, sender_name, message, created_at, is_read)
-                VALUES (@session_id, 'agent', @sender_name, @message, @created_at, false);
+            // Nếu khách bấm /start lần đầu
+            if (text.Equals("/start", StringComparison.OrdinalIgnoreCase))
+            {
+                var welcomeCustomer =
+@"🏢 <b>CHÀO MỪNG BẠN ĐẾN VỚI THANG MÁY HÀ HỒNG!</b>
+━━━━━━━━━━━━━━━━━━━
+Dạ em là trợ lý kết nối của <b>Thang Máy Hà Hồng</b>.
+Anh/chị đang cần tư vấn:
+• 📊 Báo giá thang máy gia đình, homelift kính
+• 📐 Kích thước hố thang & hố PIT
+• 🛠️ Bảo trì, sửa chữa thang máy 24/7
 
-                UPDATE live_chat_sessions
-                SET last_active_at = @created_at
-                WHERE session_id = @session_id;
-            ";
-            cmd.Parameters.Add(new NpgsqlParameter("session_id", targetSessionId));
-            cmd.Parameters.Add(new NpgsqlParameter("sender_name", agentName));
-            cmd.Parameters.Add(new NpgsqlParameter("message", text));
-            cmd.Parameters.Add(new NpgsqlParameter("created_at", now));
+Anh/chị hãy nhắn tin nội dung hoặc câu hỏi tại đây, Kỹ sư của Hà Hồng sẽ phản hồi trực tiếp ngay ạ! 📞";
 
-            await cmd.ExecuteNonQueryAsync(cancellationToken);
+                await PostTelegramMessageAsync(botToken, senderChatId, welcomeCustomer, cancellationToken);
+                return;
+            }
 
-            // Send confirmation back to Telegram
-            var confirmText = $"✅ <b>Đã gửi phản hồi đến Khách #{GetShortId(targetSessionId)} trên website:</b>\n<i>\"{EscapeHtml(text)}\"</i>";
-            await SendTelegramReplyAsync(botToken, incomingChatId ?? configuredChatId!, confirmText, msg.MessageId, cancellationToken);
-            _logger.LogInformation("Agent reply sent to customer session {SessionId}.", targetSessionId);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Failed to save agent message for session {SessionId}.", targetSessionId);
-            await SendTelegramReplyAsync(botToken, incomingChatId ?? configuredChatId!, "❌ Không thể lưu tin nhắn do lỗi hệ thống.", msg.MessageId, cancellationToken);
+            var customerName = $"{msg.From?.FirstName} {msg.From?.LastName}".Trim();
+            if (string.IsNullOrWhiteSpace(customerName)) customerName = "Khách hàng Telegram";
+            var username = !string.IsNullOrWhiteSpace(msg.From?.Username) ? $"@{msg.From.Username}" : "Chưa đặt username";
+
+            var now = DateTime.UtcNow;
+            var vnTime = ToVietnamTime(now);
+
+            // Chuyển tiếp tin nhắn của khách hàng về cho ADMIN (Bạn)
+            var forwardToAdmin =
+$@"💬 <b>CÓ KHÁCH HÀNG CHAT QUA TELEGRAM!</b>
+━━━━━━━━━━━━━━━━━━━
+👤 <b>Khách:</b> {EscapeHtml(customerName)} ({username})
+🆔 <b>Chat ID:</b> <code>{senderChatId}</code>
+⏰ <b>Thời gian:</b> {vnTime:HH:mm:ss dd/MM}
+💭 <b>Nội dung tin nhắn:</b>
+<blockquote>{EscapeHtml(text)}</blockquote>
+━━━━━━━━━━━━━━━━━━━
+👉 <i>Bấm <b>Reply (Trả lời)</b> tin nhắn này để chat trực tiếp lại với khách!</i>";
+
+            var adminMsgId = await PostTelegramMessageAsync(botToken, configuredChatId, forwardToAdmin, cancellationToken);
+            if (adminMsgId.HasValue)
+            {
+                MsgToCustomerChatMap[adminMsgId.Value] = senderChatId;
+            }
+
+            // Gửi xác nhận cho khách hàng biết tin nhắn đã được chuyển tới kỹ sư
+            var ackToCustomer = "Dạ em đã chuyển tin nhắn của anh/chị đến Kỹ sư Thang Máy Hà Hồng. Kỹ sư sẽ phản hồi anh/chị ngay tại đây trong giây lát ạ! 👨‍🔧";
+            await PostTelegramMessageAsync(botToken, senderChatId, ackToCustomer, cancellationToken);
         }
     }
 
-    private async Task<string?> FindSessionByCodeAsync(string code, CancellationToken cancellationToken)
+    private async Task<string?> FindSessionByMsgIdDbAsync(long replyToId, CancellationToken cancellationToken)
     {
         try
         {
@@ -532,17 +519,41 @@ $@"💬 <b>TIN NHẮN MỚI TỪ KHÁCH HÀNG</b>
             var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
             var conn = dbContext.Database.GetDbConnection();
             if (conn.State != System.Data.ConnectionState.Open) await conn.OpenAsync(cancellationToken);
-
             using var cmd = conn.CreateCommand();
-            cmd.CommandText = "SELECT session_id FROM live_chat_sessions WHERE session_id LIKE @pattern ORDER BY last_active_at DESC LIMIT 1;";
-            cmd.Parameters.Add(new NpgsqlParameter("pattern", $"%{code}%"));
-            var res = await cmd.ExecuteScalarAsync(cancellationToken);
-            return res?.ToString();
+            cmd.CommandText = "SELECT session_id FROM live_chat_telegram_maps WHERE telegram_message_id = @id LIMIT 1;";
+            cmd.Parameters.Add(new NpgsqlParameter("id", replyToId));
+            var dbRes = await cmd.ExecuteScalarAsync(cancellationToken);
+            return dbRes?.ToString();
         }
-        catch
+        catch (Exception ex)
         {
+            _logger.LogError(ex, "Error querying live_chat_telegram_maps for reply ID {ReplyId}", replyToId);
             return null;
         }
+    }
+
+    private async Task SaveAgentReplyAsync(string targetSessionId, string text, CancellationToken cancellationToken)
+    {
+        var now = DateTime.UtcNow;
+        using var scope = _scopeFactory.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        var conn = dbContext.Database.GetDbConnection();
+        if (conn.State != System.Data.ConnectionState.Open) await conn.OpenAsync(cancellationToken);
+
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = @"
+            INSERT INTO live_chat_messages (session_id, sender, sender_name, message, created_at, is_read)
+            VALUES (@session_id, 'agent', 'Kỹ sư Thang Máy Hà Hồng', @message, @created_at, false);
+
+            UPDATE live_chat_sessions
+            SET last_active_at = @created_at
+            WHERE session_id = @session_id;
+        ";
+        cmd.Parameters.Add(new NpgsqlParameter("session_id", targetSessionId));
+        cmd.Parameters.Add(new NpgsqlParameter("message", text));
+        cmd.Parameters.Add(new NpgsqlParameter("created_at", now));
+
+        await cmd.ExecuteNonQueryAsync(cancellationToken);
     }
 
     private async Task<long?> PostTelegramMessageAsync(string botToken, string chatId, string messageText, CancellationToken cancellationToken)
@@ -556,13 +567,20 @@ $@"💬 <b>TIN NHẮN MỚI TỪ KHÁCH HÀNG</b>
             disable_web_page_preview = true
         };
 
-        using var response = await _httpClient.PostAsJsonAsync(url, payload, cancellationToken);
-        if (!response.IsSuccessStatusCode) return null;
-
-        var json = await response.Content.ReadFromJsonAsync<JsonElement>(cancellationToken: cancellationToken);
-        if (json.TryGetProperty("result", out var result) && result.TryGetProperty("message_id", out var msgId))
+        try
         {
-            return msgId.GetInt64();
+            using var response = await _httpClient.PostAsJsonAsync(url, payload, cancellationToken);
+            if (!response.IsSuccessStatusCode) return null;
+
+            var json = await response.Content.ReadFromJsonAsync<JsonElement>(cancellationToken: cancellationToken);
+            if (json.TryGetProperty("result", out var result) && result.TryGetProperty("message_id", out var msgId))
+            {
+                return msgId.GetInt64();
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning("Failed to post message to Telegram: {Message}", ex.Message);
         }
 
         return null;
