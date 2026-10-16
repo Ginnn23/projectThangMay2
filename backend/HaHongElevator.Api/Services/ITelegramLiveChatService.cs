@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using HaHongElevator.Api.DTOs.LiveChat;
 
 namespace HaHongElevator.Api.Services;
@@ -15,38 +16,70 @@ public interface ITelegramLiveChatService
 
 public class TelegramUpdateResponse
 {
+    [JsonPropertyName("ok")]
     public bool Ok { get; set; }
+
+    [JsonPropertyName("result")]
     public List<TelegramUpdateItem>? Result { get; set; }
 }
 
 public class TelegramUpdateItem
 {
+    [JsonPropertyName("update_id")]
     public long UpdateId { get; set; }
+
+    [JsonPropertyName("message")]
     public TelegramMessageItem? Message { get; set; }
 }
 
 public class TelegramMessageItem
 {
+    [JsonPropertyName("message_id")]
     public long MessageId { get; set; }
+
+    [JsonPropertyName("from")]
     public TelegramUserItem? From { get; set; }
+
+    [JsonPropertyName("chat")]
     public TelegramChatItem? Chat { get; set; }
+
+    [JsonPropertyName("date")]
     public long Date { get; set; }
+
+    [JsonPropertyName("text")]
     public string? Text { get; set; }
+
+    [JsonPropertyName("reply_to_message")]
     public TelegramMessageItem? ReplyToMessage { get; set; }
 }
 
 public class TelegramUserItem
 {
+    [JsonPropertyName("id")]
     public long Id { get; set; }
+
+    [JsonPropertyName("is_bot")]
     public bool IsBot { get; set; }
+
+    [JsonPropertyName("first_name")]
     public string? FirstName { get; set; }
+
+    [JsonPropertyName("last_name")]
     public string? LastName { get; set; }
+
+    [JsonPropertyName("username")]
     public string? Username { get; set; }
 }
 
 public class TelegramChatItem
 {
+    [JsonPropertyName("id")]
     public long Id { get; set; }
+
+    [JsonPropertyName("type")]
     public string? Type { get; set; }
+
+    [JsonPropertyName("title")]
     public string? Title { get; set; }
 }
+

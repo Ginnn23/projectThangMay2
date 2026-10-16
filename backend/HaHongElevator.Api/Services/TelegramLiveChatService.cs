@@ -77,8 +77,10 @@ public class TelegramLiveChatService : ITelegramLiveChatService
                 CREATE TABLE IF NOT EXISTS live_chat_telegram_maps (
                     telegram_message_id BIGINT PRIMARY KEY,
                     session_id VARCHAR(100) NOT NULL,
+                    customer_chat_id VARCHAR(100),
                     created_at TIMESTAMP WITH TIME ZONE DEFAULT (NOW() AT TIME ZONE 'UTC')
                 );
+                ALTER TABLE live_chat_telegram_maps ADD COLUMN IF NOT EXISTS customer_chat_id VARCHAR(100);
                 CREATE INDEX IF NOT EXISTS ix_live_chat_maps_session ON live_chat_telegram_maps(session_id);
 
                 CREATE TABLE IF NOT EXISTS live_chat_sessions (
@@ -373,6 +375,11 @@ $@"💬 <b>TIN NHẮN TỪ KHÁCH TRÊN WEBSITE:</b>
         return list;
     }
 
+    private static readonly JsonSerializerOptions TelegramJsonOpts = new()
+    {
+        PropertyNameCaseInsensitive = true
+    };
+
     public async Task<List<TelegramUpdateItem>?> FetchUpdatesAsync(long offset, CancellationToken cancellationToken = default)
     {
         var (botToken, _, enabled) = GetTelegramConfig();
@@ -381,7 +388,7 @@ $@"💬 <b>TIN NHẮN TỪ KHÁCH TRÊN WEBSITE:</b>
         var url = $"https://api.telegram.org/bot{botToken}/getUpdates?offset={offset}&timeout=20";
         try
         {
-            var res = await _httpClient.GetFromJsonAsync<TelegramUpdateResponse>(url, cancellationToken);
+            var res = await _httpClient.GetFromJsonAsync<TelegramUpdateResponse>(url, TelegramJsonOpts, cancellationToken);
             return res?.Ok == true ? res.Result : null;
         }
         catch (OperationCanceledException)
@@ -425,7 +432,17 @@ $@"💬 <b>TIN NHẮN TỪ KHÁCH TRÊN WEBSITE:</b>
                 var replyToId = msg.ReplyToMessage.MessageId;
 
                 // A. Nếu đang trả lời Khách hàng chat qua Telegram
-                if (MsgToCustomerChatMap.TryGetValue(replyToId, out var customerChatId))
+                string? customerChatId = null;
+                if (MsgToCustomerChatMap.TryGetValue(replyToId, out var cachedCustChat))
+                {
+                    customerChatId = cachedCustChat;
+                }
+                else
+                {
+                    customerChatId = await FindCustomerChatIdByMsgIdDbAsync(replyToId, cancellationToken);
+                }
+
+                if (!string.IsNullOrWhiteSpace(customerChatId))
                 {
                     var customerNotice = $"👨‍🔧 <b>Kỹ sư Thang Máy Hà Hồng:</b>\n\n{EscapeHtml(text)}";
                     await PostTelegramMessageAsync(botToken, customerChatId, customerNotice, cancellationToken);
@@ -451,8 +468,26 @@ $@"💬 <b>TIN NHẮN TỪ KHÁCH TRÊN WEBSITE:</b>
                     return;
                 }
             }
+            else
+            {
+                // Admin gửi tin nhắn nhưng không bấm Reply: Hướng dẫn Admin cách sử dụng
+                var adminGuide =
+@"👋 <b>Xin chào Kỹ sư / Admin Thang Máy Hà Hồng!</b>
+━━━━━━━━━━━━━━━━━━━
+✅ Bot trung gian 2 chiều đang hoạt động hoàn toàn bình thường!
 
-            // Nếu Admin gửi tin nhắn nhưng không bấm Reply: KHÔNG LÀM GÌ CẢ (Tuyệt đối không spam lỗi!)
+💡 <b>Cách trả lời tin nhắn của khách:</b>
+Khi có tin nhắn từ khách (trên Website hoặc Telegram) gửi về đây:
+1. Bạn hãy <b>chuột phải</b> (trên máy tính) hoặc <b>vuốt/nhấn giữ</b> (trên điện thoại) vào tin nhắn của khách
+2. Chọn <b>Reply (Trả lời)</b>
+3. Nhập câu trả lời rồi gửi đi.
+
+Bot sẽ tự động chuyển tiếp câu trả lời về đúng khách hàng đó ngay lập tức! ✨";
+
+                await PostTelegramMessageAsync(botToken, configuredChatId!, adminGuide, cancellationToken);
+                return;
+            }
+
             return;
         }
         else
@@ -503,11 +538,57 @@ $@"💬 <b>CÓ KHÁCH HÀNG CHAT QUA TELEGRAM!</b>
             if (adminMsgId.HasValue)
             {
                 MsgToCustomerChatMap[adminMsgId.Value] = senderChatId;
+                await SaveCustomerChatMapDbAsync(adminMsgId.Value, senderChatId, cancellationToken);
             }
 
             // Gửi xác nhận cho khách hàng biết tin nhắn đã được chuyển tới kỹ sư
             var ackToCustomer = "Dạ em đã chuyển tin nhắn của anh/chị đến Kỹ sư Thang Máy Hà Hồng. Kỹ sư sẽ phản hồi anh/chị ngay tại đây trong giây lát ạ! 👨‍🔧";
             await PostTelegramMessageAsync(botToken, senderChatId, ackToCustomer, cancellationToken);
+        }
+    }
+
+    private async Task SaveCustomerChatMapDbAsync(long telegramMessageId, string customerChatId, CancellationToken cancellationToken)
+    {
+        try
+        {
+            using var scope = _scopeFactory.CreateScope();
+            var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            var conn = dbContext.Database.GetDbConnection();
+            if (conn.State != System.Data.ConnectionState.Open) await conn.OpenAsync(cancellationToken);
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = @"
+                INSERT INTO live_chat_telegram_maps (telegram_message_id, session_id, customer_chat_id, created_at)
+                VALUES (@msg_id, '', @customer_chat_id, NOW() AT TIME ZONE 'UTC')
+                ON CONFLICT (telegram_message_id) DO UPDATE SET customer_chat_id = EXCLUDED.customer_chat_id;
+            ";
+            cmd.Parameters.Add(new NpgsqlParameter("msg_id", telegramMessageId));
+            cmd.Parameters.Add(new NpgsqlParameter("customer_chat_id", customerChatId));
+            await cmd.ExecuteNonQueryAsync(cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to persist customer telegram chat map for message {MsgId}.", telegramMessageId);
+        }
+    }
+
+    private async Task<string?> FindCustomerChatIdByMsgIdDbAsync(long replyToId, CancellationToken cancellationToken)
+    {
+        try
+        {
+            using var scope = _scopeFactory.CreateScope();
+            var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            var conn = dbContext.Database.GetDbConnection();
+            if (conn.State != System.Data.ConnectionState.Open) await conn.OpenAsync(cancellationToken);
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = "SELECT customer_chat_id FROM live_chat_telegram_maps WHERE telegram_message_id = @id AND customer_chat_id IS NOT NULL AND customer_chat_id <> '' LIMIT 1;";
+            cmd.Parameters.Add(new NpgsqlParameter("id", replyToId));
+            var dbRes = await cmd.ExecuteScalarAsync(cancellationToken);
+            return dbRes?.ToString();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error querying live_chat_telegram_maps for customer chat ID {ReplyId}", replyToId);
+            return null;
         }
     }
 

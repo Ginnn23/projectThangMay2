@@ -48,9 +48,16 @@ public class TelegramPollingBackgroundService : BackgroundService
                 {
                     foreach (var update in updates)
                     {
-                        offset = Math.Max(offset, update.UpdateId + 1);
+                        if (update.UpdateId >= offset)
+                        {
+                            offset = update.UpdateId + 1;
+                        }
                         await liveChatService.ProcessIncomingUpdateAsync(update, stoppingToken);
                     }
+                }
+                else
+                {
+                    await Task.Delay(1000, stoppingToken);
                 }
             }
             catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
