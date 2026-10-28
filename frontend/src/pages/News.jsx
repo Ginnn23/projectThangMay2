@@ -184,6 +184,62 @@ export default function News() {
       .filter((a) => a.id !== currentArticle.id)
       .slice(0, 3);
 
+    const articleSchema = {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      headline: currentArticle.title,
+      description: currentArticle.summary,
+      image: [
+        currentArticle.image.startsWith("http")
+          ? currentArticle.image
+          : `https://thangmayhahong.xyz${currentArticle.image}`
+      ],
+      datePublished: "2026-01-15T08:00:00+07:00",
+      dateModified: "2026-03-25T10:00:00+07:00",
+      author: {
+        "@type": "Person",
+        name: currentArticle.author || "Kỹ sư Thang Máy Hà Hồng",
+        url: "https://thangmayhahong.xyz/gioi-thieu"
+      },
+      publisher: {
+        "@type": "Organization",
+        name: "Công Ty TNHH Thang Máy Hà Hồng",
+        logo: {
+          "@type": "ImageObject",
+          url: "https://thangmayhahong.xyz/logo-ha-hong.jpg"
+        }
+      },
+      mainEntityOfPage: {
+        "@type": "WebPage",
+        "@id": `https://thangmayhahong.xyz/tin-tuc/${currentArticle.slug}`
+      }
+    };
+
+    const breadcrumbSchema = {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        {
+          "@type": "ListItem",
+          position: 1,
+          name: "Trang chủ",
+          item: "https://thangmayhahong.xyz/"
+        },
+        {
+          "@type": "ListItem",
+          position: 2,
+          name: "Tin tức & Cẩm nang",
+          item: "https://thangmayhahong.xyz/tin-tuc"
+        },
+        {
+          "@type": "ListItem",
+          position: 3,
+          name: currentArticle.title,
+          item: `https://thangmayhahong.xyz/tin-tuc/${currentArticle.slug}`
+        }
+      ]
+    };
+
     return (
       <div className="news-page">
         <SeoHead
@@ -191,6 +247,8 @@ export default function News() {
           description={currentArticle.summary}
           keywords={currentArticle.tags.join(", ")}
           ogImage={currentArticle.image}
+          canonical={`https://thangmayhahong.xyz/tin-tuc/${currentArticle.slug}`}
+          jsonLd={[articleSchema, breadcrumbSchema]}
         />
 
         <div className="article-detail-wrap">
@@ -363,12 +421,58 @@ export default function News() {
   }
 
   // Danh sách bài viết (/tin-tuc)
+  const collectionSchema = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: "Tin Tức & Cẩm Nang Thang Máy Gia Đình Mới Nhất | Thang Máy Hà Hồng",
+    description:
+      "Tổng hợp tin tức, cẩm nang chọn thang máy homelift kính, báo giá mới nhất 2026, giải pháp cải tạo nhà phố và nâng tầm đẳng cấp không gian sống.",
+    url: "https://thangmayhahong.xyz/tin-tuc",
+    publisher: {
+      "@type": "Organization",
+      name: "Công Ty TNHH Thang Máy Hà Hồng",
+      url: "https://thangmayhahong.xyz",
+      logo: "https://thangmayhahong.xyz/logo-ha-hong.jpg"
+    },
+    mainEntity: {
+      "@type": "ItemList",
+      itemListElement: newsArticles.map((art, index) => ({
+        "@type": "ListItem",
+        position: index + 1,
+        name: art.title,
+        description: art.summary,
+        url: `https://thangmayhahong.xyz/tin-tuc/${art.slug}`
+      }))
+    }
+  };
+
+  const listBreadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Trang chủ",
+        item: "https://thangmayhahong.xyz/"
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Tin tức & Cẩm nang",
+        item: "https://thangmayhahong.xyz/tin-tuc"
+      }
+    ]
+  };
+
   return (
     <div className="news-page">
       <SeoHead
         title="Tin Tức & Cẩm Nang Thang Máy Gia Đình Mới Nhất | Thang Máy Hà Hồng"
         description="Tổng hợp tin tức, cẩm nang chọn thang máy homelift kính, báo giá mới nhất 2026, giải pháp cải tạo nhà phố và nâng tầm đẳng cấp không gian sống."
         keywords="tin tức thang máy, cẩm nang thang máy, thang máy homelift kính, báo giá thang máy 2026, nâng tầm đời sống bằng thang máy, thang máy hà hồng"
+        canonical="https://thangmayhahong.xyz/tin-tuc"
+        jsonLd={[collectionSchema, listBreadcrumbSchema]}
       />
 
       {/* Hero Header Section (Đồng bộ chuẩn About-Banner như Dự Án) */}

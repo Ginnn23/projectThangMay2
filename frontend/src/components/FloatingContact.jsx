@@ -79,56 +79,58 @@ function FloatingContact() {
   return (
     <>
       <div className="floating-contact" aria-label="Liên hệ nhanh">
-        <div className={`floating-activity ${hienThongBao ? "is-visible" : ""}`} aria-live="polite" title="Rê chuột để xem chi tiết">
-          {/* Chế độ thu gọn (mặc định) */}
-          <div className="floating-activity-collapsed">
-            <span className="live-pulse-dot"></span>
-            <i className={`bi ${thongBao.icon} text-success`}></i>
-            <span className="collapsed-text text-truncate">
-              <strong>{thongBao.ten}</strong> vừa yêu cầu...
-            </span>
-            <i className="bi bi-chevron-right text-muted ms-auto" style={{ fontSize: "11px" }}></i>
-          </div>
-
-          {/* Chế độ mở rộng (xổ ra khi rê chuột vào) */}
-          <div className="floating-activity-expanded">
-            <span className="floating-activity-icon">
-              <i className={`bi ${thongBao.icon}`}></i>
-            </span>
-            <div className="activity-expanded-info">
-              <div className="d-flex align-items-center justify-content-between mb-1">
-                <strong>{thongBao.ten}</strong>
-                <small>{thongBao.thoiGian}</small>
-              </div>
-              <span className="activity-sub">vừa yêu cầu <mark>{thongBao.dichVu}</mark></span>
+        {/* Thông báo khách hàng vừa yêu cầu (Hiển thị to rõ ràng phía trên icon liên hệ) */}
+        <div className={`floating-activity ${hienThongBao ? "is-visible" : ""}`} aria-live="polite">
+          <span className="floating-activity-icon">
+            <i className={`bi ${thongBao.icon}`}></i>
+          </span>
+          <div className="activity-info">
+            <div className="d-flex align-items-center justify-content-between mb-1">
+              <strong>{thongBao.ten}</strong>
+              <small>{thongBao.thoiGian}</small>
             </div>
+            <span className="activity-service">
+              vừa yêu cầu <mark>{thongBao.dichVu}</mark>
+            </span>
           </div>
         </div>
 
-        <a className="floating-contact-item floating-phone" href={`tel:${soDienThoaiLienKet}`} aria-label={`Gọi ${soDienThoaiCongTy}`}>
-          <span className="floating-contact-icon">
-            <i className="bi bi-telephone-fill"></i>
-          </span>
-          <span className="floating-contact-text">{soDienThoaiCongTy}</span>
-        </a>
+        {/* Cụm 3 Icon liên hệ hình tròn gọn gàng, không che khuất chữ trên website */}
+        <div className="floating-buttons-stack">
+          <a
+            className="floating-contact-item floating-phone"
+            href={`tel:${soDienThoaiLienKet}`}
+            aria-label={`Gọi ngay ${soDienThoaiCongTy}`}
+            title={`Hotline: ${soDienThoaiCongTy}`}
+          >
+            <i className="bi bi-telephone-fill fs-5"></i>
+            <span className="floating-tooltip">Gọi: {soDienThoaiCongTy}</span>
+          </a>
 
-        <a className="floating-contact-item floating-zalo" href={zaloUrl} target="_blank" rel="noopener noreferrer" aria-label="Chat Zalo với Hà Hồng">
-          <span className="floating-contact-icon floating-zalo-icon">Zalo</span>
-          <span className="floating-contact-text">Chat Zalo</span>
-        </a>
+          <a
+            className="floating-contact-item floating-zalo"
+            href={zaloUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Chat Zalo với Hà Hồng"
+            title="Chat Zalo tư vấn 24/7"
+          >
+            <span className="floating-zalo-text">Zalo</span>
+            <span className="floating-tooltip">Chat Zalo 24/7</span>
+          </a>
 
-        <button
-          type="button"
-          className="floating-contact-item floating-telegram"
-          onClick={handleTelegramClick}
-          aria-label="Chat Telegram với Hà Hồng"
-          style={{ border: "none", cursor: "pointer", textAlign: "left" }}
-        >
-          <span className="floating-contact-icon floating-telegram-icon">
-            <i className="bi bi-telegram"></i>
-          </span>
-          <span className="floating-contact-text">Chat Telegram</span>
-        </button>
+          <button
+            type="button"
+            className="floating-contact-item floating-telegram"
+            onClick={handleTelegramClick}
+            aria-label="Chat Telegram với Hà Hồng"
+            title="Chat Telegram"
+            style={{ border: "none", cursor: "pointer" }}
+          >
+            <i className="bi bi-telegram fs-5"></i>
+            <span className="floating-tooltip">Chat Telegram</span>
+          </button>
+        </div>
       </div>
 
       {/* Telegram Contact Modal (Giải pháp triệt để cho iPhone & mọi thiết bị) */}

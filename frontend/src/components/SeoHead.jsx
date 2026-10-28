@@ -7,6 +7,7 @@ export default function SeoHead({
   keywords,
   canonical,
   ogImage = "https://thangmayhahong.xyz/og-image.jpg",
+  jsonLd,
 }) {
   const location = useLocation();
 
@@ -72,7 +73,21 @@ export default function SeoHead({
       let ogImgEl = document.querySelector('meta[property="og:image"]');
       if (ogImgEl) ogImgEl.setAttribute("content", ogImage);
     }
-  }, [title, description, keywords, canonical, ogImage, location.pathname]);
+
+    // Update JSON-LD structured data
+    let jsonLdEl = document.querySelector('script[type="application/ld+json"]#page-schema');
+    if (jsonLd) {
+      if (!jsonLdEl) {
+        jsonLdEl = document.createElement("script");
+        jsonLdEl.setAttribute("type", "application/ld+json");
+        jsonLdEl.setAttribute("id", "page-schema");
+        document.head.appendChild(jsonLdEl);
+      }
+      jsonLdEl.textContent = JSON.stringify(jsonLd);
+    } else if (jsonLdEl) {
+      jsonLdEl.remove();
+    }
+  }, [title, description, keywords, canonical, ogImage, jsonLd, location.pathname]);
 
   return null;
 }

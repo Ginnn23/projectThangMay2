@@ -59,6 +59,17 @@ function AiConsultant() {
   const messagesEndRef = useRef(null);
   const fileInputRef = useRef(null);
 
+  useEffect(() => {
+    if (isOpen) {
+      document.body.classList.add("ai-chat-open");
+    } else {
+      document.body.classList.remove("ai-chat-open");
+    }
+    return () => {
+      document.body.classList.remove("ai-chat-open");
+    };
+  }, [isOpen]);
+
   const handleImageUpload = async (file) => {
     if (!file || loading) return;
     if (file.size > 15 * 1024 * 1024) {
@@ -221,7 +232,7 @@ function AiConsultant() {
   };
 
   return (
-    <aside className="ai-consultant-root" aria-label="AI Tư vấn Thang Máy">
+    <aside className={`ai-consultant-root ${isOpen ? "is-open" : ""}`} aria-label="AI Tư vấn Thang Máy">
       {/* Nút bấm mở chat nổi ở góc phải màn hình */}
       {!isOpen && (
         <button
@@ -261,6 +272,16 @@ function AiConsultant() {
               </div>
             </div>
             <div className="ai-chat-header-actions">
+              <a
+                href="https://zalo.me/0909933358"
+                target="_blank"
+                rel="noreferrer"
+                className="ai-chat-zalo-btn"
+                title="Nhắn Zalo 0909 9333 58"
+                aria-label="Nhắn Zalo 24/7"
+              >
+                Zalo
+              </a>
               <a
                 href={`tel:${soDienThoaiLienKet}`}
                 className="ai-chat-call-btn"
@@ -383,7 +404,12 @@ function AiConsultant() {
               </button>
             </div>
             <div className="ai-chat-quick-note">
-              <span>Hotline kỹ thuật: <a href={`tel:${soDienThoaiLienKet}`}>{soDienThoaiCongTy}</a></span>
+              <span>
+                Hotline: <a href={`tel:${soDienThoaiLienKet}`}>{soDienThoaiCongTy}</a> |{" "}
+                <a href="https://zalo.me/0909933358" target="_blank" rel="noreferrer">
+                  Zalo 24/7
+                </a>
+              </span>
             </div>
           </div>
         </div>
