@@ -532,9 +532,167 @@ export default function DuToanThangMay() {
                   })}
                 </div>
               </div>
+
+              {/* Bước 5: Thông tin khách hàng & Nhận báo giá kỹ thuật (Đưa sang bên trái theo yêu cầu) */}
+              <div className="estimator-step-card quote-submit-card" id="quote-form-section">
+                <div className="estimator-step-header mb-3">
+                  <div className="step-badge-wrap">
+                    <span className="step-badge-num">05</span>
+                    <div>
+                      <h2 className="step-title-text mb-0">Nhận Báo Giá Chi Tiết &amp; Đặt Lịch Đo Laser</h2>
+                      <small className="text-muted" style={{ fontSize: "12px" }}>
+                        Hệ thống tự động xuất file PDF báo giá kỹ thuật gửi về Gmail và kỹ sư sẽ liên hệ tư vấn khảo sát miễn phí.
+                      </small>
+                    </div>
+                  </div>
+                </div>
+
+                {submitSuccess ? (
+                  <div className="quote-success-card">
+                    <i className="bi bi-check-circle-fill quote-success-icon"></i>
+                    <div className="quote-success-title">Gửi Yêu Cầu &amp; Lưu Dự Toán Thành Công!</div>
+                    <p className="quote-success-desc">
+                      Bảng dự toán kỹ thuật chi tiết đã được gửi tự động tới Gmail <strong>{email}</strong>.
+                      Kỹ sư Thang Máy Hà Hồng sẽ liên hệ qua SĐT <strong>{phoneNumber}</strong> trong vòng 15 phút.
+                    </p>
+                    <button
+                      type="button"
+                      className="btn-download-pdf-success"
+                      onClick={handleDownloadPdf}
+                    >
+                      <i className="bi bi-download"></i>
+                      Tải Ngay Bảng Báo Giá PDF Kỹ Thuật (Có Dấu &amp; Chữ Ký)
+                    </button>
+                  </div>
+                ) : (
+                  <form onSubmit={handleFormSubmit}>
+                    {errorMsg && (
+                      <div className="alert alert-danger py-2 mb-3" style={{ fontSize: "12.5px" }}>
+                        <i className="bi bi-exclamation-circle-fill me-1"></i> {errorMsg}
+                      </div>
+                    )}
+
+                    <div className="row g-3">
+                      {/* Họ và tên */}
+                      <div className="col-12 col-sm-6 form-input-box mb-0">
+                        <label className="form-input-label">
+                          Họ và tên <span className="text-danger">*</span>
+                        </label>
+                        <div className="form-input-inner">
+                          <i className="bi bi-person-fill form-input-icon"></i>
+                          <input
+                            type="text"
+                            className="form-input-field"
+                            placeholder="Họ và tên của bạn"
+                            value={customerName}
+                            onChange={(e) => setCustomerName(e.target.value)}
+                            required
+                            maxLength={100}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Số điện thoại */}
+                      <div className="col-12 col-sm-6 form-input-box mb-0">
+                        <label className="form-input-label">
+                          Số điện thoại (10 số) <span className="text-danger">*</span>
+                        </label>
+                        <div className="form-input-inner">
+                          <i className="bi bi-telephone-fill form-input-icon"></i>
+                          <input
+                            type="tel"
+                            className="form-input-field"
+                            placeholder="0912345678"
+                            value={phoneNumber}
+                            onChange={handlePhoneChange}
+                            maxLength={10}
+                            inputMode="numeric"
+                            pattern="[0-9]*"
+                            required
+                          />
+                        </div>
+                      </div>
+
+                      {/* Địa chỉ Gmail */}
+                      <div className="col-12 col-sm-6 form-input-box mb-0">
+                        <label className="form-input-label">
+                          Địa chỉ Gmail <span className="text-danger">*</span>
+                        </label>
+                        <div className="form-input-inner">
+                          <i className="bi bi-envelope-fill form-input-icon"></i>
+                          <input
+                            type="email"
+                            className="form-input-field"
+                            placeholder="yourname@gmail.com"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            maxLength={150}
+                            required
+                          />
+                        </div>
+                      </div>
+
+                      {/* Địa chỉ công trình */}
+                      <div className="col-12 col-sm-6 form-input-box mb-0">
+                        <label className="form-input-label">Địa chỉ công trình</label>
+                        <div className="form-input-inner">
+                          <i className="bi bi-geo-alt-fill form-input-icon"></i>
+                          <input
+                            type="text"
+                            className="form-input-field"
+                            placeholder="Quận/Huyện, Tỉnh thành"
+                            value={address}
+                            onChange={(e) => setAddress(e.target.value)}
+                            maxLength={250}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Ghi chú */}
+                      <div className="col-12 form-input-box mb-0">
+                        <label className="form-input-label d-flex justify-content-between align-items-center">
+                          <span>Ghi chú cấu hình &amp; Yêu cầu riêng</span>
+                          <span className="badge bg-primary-subtle text-primary" style={{ fontSize: "10px" }}>Đồng bộ Studio</span>
+                        </label>
+                        <textarea
+                          className="form-input-field"
+                          style={{ paddingLeft: "0.85rem", minHeight: "65px" }}
+                          rows={2}
+                          placeholder="Ghi chú thêm về hiện trạng nhà, phong thủy hoặc mong muốn..."
+                          value={customerNotes}
+                          onChange={(e) => setCustomerNotes(e.target.value)}
+                          maxLength={500}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Nút gửi & xem trước in ấn */}
+                    <div className="d-flex flex-column flex-sm-row gap-2 mt-3">
+                      <button
+                        type="submit"
+                        className="btn-quote-submit flex-grow-1"
+                        disabled={submitting}
+                      >
+                        <i className="bi bi-send-fill"></i>
+                        <span>{submitting ? "Đang xử lý..." : "LƯU & NHẬN BÁO GIÁ KỸ THUẬT"}</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        className="btn-quote-preview m-0"
+                        style={{ minWidth: "170px" }}
+                        onClick={handlePrint}
+                      >
+                        <i className="bi bi-printer me-1"></i>
+                        Xem trước &amp; In
+                      </button>
+                    </div>
+                  </form>
+                )}
+              </div>
             </div>
 
-            {/* CỘT BÊN PHẢI: CABIN Ở TRÊN CÙNG, TIẾP ĐẾN BẢNG GIÁ, TIẾP ĐẾN FORM GỬI */}
+            {/* CỘT BÊN PHẢI: CABIN Ở TRÊN CÙNG, TIẾP ĐẾN BẢNG GIÁ DỰ TOÁN & HOTLINE */}
             <div className="col-lg-5">
               <div className="estimator-sticky-sidebar">
 
@@ -636,162 +794,23 @@ export default function DuToanThangMay() {
                             </tbody>
                           </table>
                         </div>
+
+                        {/* Nút hành động nhanh: Chuyển sang form điền thông tin */}
+                        <button
+                          type="button"
+                          className="btn btn-warning w-100 fw-bold text-dark py-2 shadow-sm d-flex align-items-center justify-content-center gap-2 mt-3"
+                          style={{ borderRadius: "10px" }}
+                          onClick={() => {
+                            const el = document.getElementById("quote-form-section");
+                            if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+                          }}
+                        >
+                          <i className="bi bi-pencil-square"></i>
+                          <span>Điền Thông Tin Nhận Báo Giá Này</span>
+                        </button>
                       </>
                     )}
                   </div>
-                </div>
-
-                {/* 3. FORM GỬI YÊU CẦU BÁO GIÁ (ĐẶC TẢ TÁCH BIỆT, RÕ RÀNG, DỄ NHẬP) */}
-                <div className="quote-submit-card quote-form-card" id="quote-form-section">
-                  <div className="quote-submit-header">
-                    <div className="quote-submit-title">
-                      <i className="bi bi-file-earmark-pdf-fill text-warning fs-4"></i>
-                      <span>Nhận Báo Giá Chi Tiết &amp; Đặt Lịch Đo Laser</span>
-                    </div>
-                    <p className="quote-submit-subtitle">
-                      Hệ thống tự động xuất file PDF báo giá kỹ thuật đóng dấu gửi về Gmail của bạn và kỹ sư sẽ đến đo đạc laser miễn phí.
-                    </p>
-                  </div>
-
-                  {submitSuccess ? (
-                    <div className="quote-success-card">
-                      <i className="bi bi-check-circle-fill quote-success-icon"></i>
-                      <div className="quote-success-title">Gửi Yêu Cầu &amp; Lưu Dự Toán Thành Công!</div>
-                      <p className="quote-success-desc">
-                        Bảng dự toán kỹ thuật chi tiết đã được gửi tự động tới Gmail <strong>{email}</strong>.
-                        Kỹ sư Thang Máy Hà Hồng sẽ liên hệ qua SĐT <strong>{phoneNumber}</strong> trong vòng 15 phút.
-                      </p>
-                      <button
-                        type="button"
-                        className="btn-download-pdf-success"
-                        onClick={handleDownloadPdf}
-                      >
-                        <i className="bi bi-download"></i>
-                        Tải Ngay Bảng Báo Giá PDF Kỹ Thuật (Có Dấu &amp; Chữ Ký)
-                      </button>
-                    </div>
-                  ) : (
-                    <form onSubmit={handleFormSubmit}>
-                      {errorMsg && (
-                        <div className="alert alert-danger py-2 mb-3" style={{ fontSize: "12.5px" }}>
-                          <i className="bi bi-exclamation-circle-fill me-1"></i> {errorMsg}
-                        </div>
-                      )}
-
-                      <div className="row g-2">
-                        {/* Họ và tên */}
-                        <div className="col-12 col-sm-6 form-input-box">
-                          <label className="form-input-label">
-                            Họ và tên <span className="text-danger">*</span>
-                          </label>
-                          <div className="form-input-inner">
-                            <i className="bi bi-person-fill form-input-icon"></i>
-                            <input
-                              type="text"
-                              className="form-input-field"
-                              placeholder="Họ và tên của bạn"
-                              value={customerName}
-                              onChange={(e) => setCustomerName(e.target.value)}
-                              required
-                              maxLength={100}
-                            />
-                          </div>
-                        </div>
-
-                        {/* Số điện thoại */}
-                        <div className="col-12 col-sm-6 form-input-box">
-                          <label className="form-input-label">
-                            Số điện thoại (10 số) <span className="text-danger">*</span>
-                          </label>
-                          <div className="form-input-inner">
-                            <i className="bi bi-telephone-fill form-input-icon"></i>
-                            <input
-                              type="tel"
-                              className="form-input-field"
-                              placeholder="0912345678"
-                              value={phoneNumber}
-                              onChange={handlePhoneChange}
-                              maxLength={10}
-                              inputMode="numeric"
-                              pattern="[0-9]*"
-                              required
-                            />
-                          </div>
-                        </div>
-
-                        {/* Địa chỉ Gmail */}
-                        <div className="col-12 col-sm-6 form-input-box">
-                          <label className="form-input-label">
-                            Địa chỉ Gmail <span className="text-danger">*</span>
-                          </label>
-                          <div className="form-input-inner">
-                            <i className="bi bi-envelope-fill form-input-icon"></i>
-                            <input
-                              type="email"
-                              className="form-input-field"
-                              placeholder="yourname@gmail.com"
-                              value={email}
-                              onChange={(e) => setEmail(e.target.value)}
-                              maxLength={150}
-                              required
-                            />
-                          </div>
-                        </div>
-
-                        {/* Địa chỉ công trình */}
-                        <div className="col-12 col-sm-6 form-input-box">
-                          <label className="form-input-label">Địa chỉ công trình</label>
-                          <div className="form-input-inner">
-                            <i className="bi bi-geo-alt-fill form-input-icon"></i>
-                            <input
-                              type="text"
-                              className="form-input-field"
-                              placeholder="Quận/Huyện, Tỉnh thành"
-                              value={address}
-                              onChange={(e) => setAddress(e.target.value)}
-                              maxLength={250}
-                            />
-                          </div>
-                        </div>
-
-                        {/* Ghi chú */}
-                        <div className="col-12 form-input-box">
-                          <label className="form-input-label d-flex justify-content-between align-items-center">
-                            <span>Ghi chú cấu hình &amp; Yêu cầu riêng</span>
-                            <span className="badge bg-primary-subtle text-primary" style={{ fontSize: "10px" }}>Đồng bộ Studio</span>
-                          </label>
-                          <textarea
-                            className="form-input-field"
-                            style={{ paddingLeft: "0.85rem", minHeight: "65px" }}
-                            rows={2}
-                            placeholder="Ghi chú thêm về hiện trạng nhà, phong thủy hoặc mong muốn..."
-                            value={customerNotes}
-                            onChange={(e) => setCustomerNotes(e.target.value)}
-                            maxLength={500}
-                          />
-                        </div>
-                      </div>
-
-                      {/* Nút gửi */}
-                      <button
-                        type="submit"
-                        className="btn-quote-submit mt-2"
-                        disabled={submitting}
-                      >
-                        <i className="bi bi-send-fill"></i>
-                        <span>{submitting ? "Đang xử lý..." : "LƯU & NHẬN BÁO GIÁ KỸ THUẬT"}</span>
-                      </button>
-
-                      <button
-                        type="button"
-                        className="btn-quote-preview"
-                        onClick={handlePrint}
-                      >
-                        <i className="bi bi-printer me-1"></i>
-                        Xem trước &amp; In báo giá
-                      </button>
-                    </form>
-                  )}
                 </div>
 
                 {/* Hotline hỗ trợ */}
