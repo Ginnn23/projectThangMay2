@@ -331,14 +331,14 @@ export default function DuToanThangMay() {
       <section
         className="about-banner estimator-banner"
         style={{
-          backgroundImage: `linear-gradient(135deg, rgba(7, 22, 46, 0.94) 0%, rgba(12, 40, 80, 0.9) 100%), url(${heroImage})`,
+          backgroundImage: `linear-gradient(90deg, rgba(5, 14, 28, 0.95), rgba(5, 14, 28, 0.68)), url(${heroImage})`,
           backgroundPosition: "center",
           backgroundSize: "cover",
         }}
       >
         <div className="site-container">
           <nav className="about-breadcrumb" aria-label="breadcrumb">
-            <a href="/">Trang chủ</a>
+            <Link to="/">Trang chủ</Link>
             <span>/</span>
             <span>Dự toán &amp; Cấu hình thang máy</span>
           </nav>

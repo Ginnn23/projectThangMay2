@@ -376,8 +376,7 @@
   border: 1px solid rgba(217, 164, 65, 0.35);
   box-shadow: 0 10px 30px rgba(7, 25, 47, 0.2);
   margin-bottom: 2rem;
-  position: sticky;
-  top: 90px;
+  position: static;
 }
 
 .article-sidebar-cta h5 {

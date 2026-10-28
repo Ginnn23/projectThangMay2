@@ -3,6 +3,7 @@ import { Link, useParams, useNavigate } from "react-router-dom";
 import SeoHead from "../components/SeoHead";
 import { categories, newsArticles } from "../data/newsData";
 import { soDienThoaiCongTy, soDienThoaiLienKet } from "../data/contactInfo";
+import heroImage from "../assets/images/hero-elevator.jpg";
 import "./News.css";
 
 // Helper renderer cho markdown đơn giản trong bài viết
@@ -370,48 +371,53 @@ export default function News() {
         keywords="tin tức thang máy, cẩm nang thang máy, thang máy homelift kính, báo giá thang máy 2026, nâng tầm đời sống bằng thang máy, thang máy hà hồng"
       />
 
-      {/* Hero Header Section */}
-      <section className="news-hero-section">
+      {/* Hero Header Section (Đồng bộ chuẩn About-Banner như Dự Án) */}
+      <section
+        className="about-banner news-banner"
+        style={{
+          backgroundImage: `linear-gradient(90deg, rgba(5, 14, 28, 0.95), rgba(5, 14, 28, 0.68)), url(${heroImage})`,
+          backgroundPosition: "center",
+          backgroundSize: "cover",
+        }}
+      >
         <div className="site-container">
-          <div className="row align-items-center justify-content-between g-4">
-            <div className="col-lg-7">
-              <span className="badge bg-warning text-dark fw-bold px-3 py-1.5 mb-2" style={{ fontSize: "12px" }}>
-                <i className="bi bi-newspaper me-1"></i> KIẾN THỨC &amp; XU HƯỚNG
-              </span>
-              <h1 className="display-6 fw-bold text-white mb-2">
-                Tin Tức &amp; Cẩm Nang Thang Máy Hà Hồng
-              </h1>
-              <p className="text-light opacity-75 mb-0" style={{ fontSize: "1.05rem" }}>
-                Khám phá các giải pháp thang máy hiện đại, kinh nghiệm chọn kích thước hố thang, báo giá trọn gói và bí quyết nâng tầm không gian sống cho gia đình bạn.
-              </p>
+          <nav className="about-breadcrumb" aria-label="breadcrumb">
+            <Link to="/">Trang chủ</Link>
+            <span>/</span>
+            <span>Tin tức &amp; Cẩm nang</span>
+          </nav>
+          <span className="section-eyebrow">KIẾN THỨC &amp; XU HƯỚNG</span>
+          <h1>Tin Tức &amp; Cẩm Nang Thang Máy</h1>
+          <p>
+            Khám phá các giải pháp thang máy hiện đại, kinh nghiệm chọn kích thước hố thang, báo giá trọn gói và bí quyết nâng tầm không gian sống cho gia đình bạn.
+          </p>
+
+          <div className="d-flex align-items-center justify-content-between flex-wrap gap-3 mt-4 pt-2">
+            {/* Category Filter Pills */}
+            <div className="news-category-pills m-0">
+              {categories.map((cat) => (
+                <button
+                  key={cat}
+                  type="button"
+                  className={`news-category-pill ${selectedCategory === cat ? "active" : ""}`}
+                  onClick={() => setSelectedCategory(cat)}
+                >
+                  {cat}
+                </button>
+              ))}
             </div>
 
-            <div className="col-lg-5 text-lg-end">
-              <div className="news-search-bar ms-lg-auto">
-                <i className="bi bi-search news-search-icon"></i>
-                <input
-                  type="text"
-                  className="news-search-input"
-                  placeholder="Tìm kiếm bài viết, từ khóa..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
+            {/* Search Bar */}
+            <div className="news-search-bar m-0">
+              <i className="bi bi-search news-search-icon"></i>
+              <input
+                type="text"
+                className="news-search-input"
+                placeholder="Tìm kiếm bài viết..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
             </div>
-          </div>
-
-          {/* Category Filter Pills */}
-          <div className="news-category-pills">
-            {categories.map((cat) => (
-              <button
-                key={cat}
-                type="button"
-                className={`news-category-pill ${selectedCategory === cat ? "active" : ""}`}
-                onClick={() => setSelectedCategory(cat)}
-              >
-                {cat}
-              </button>
-            ))}
           </div>
         </div>
       </section>

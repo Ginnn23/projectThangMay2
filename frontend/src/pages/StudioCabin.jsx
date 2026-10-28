@@ -4,6 +4,7 @@ import SeoHead from "../components/SeoHead";
 import CabinVisualizer from "../components/CabinVisualizer";
 import { soDienThoaiCongTy, soDienThoaiLienKet } from "../data/contactInfo";
 import { apiClient } from "../api/client";
+import heroImage from "../assets/images/hero-elevator.jpg";
 import "./StudioCabin.css";
 
 // BỘ SƯU TẬP PHONG CÁCH CABIN ĐƯỢC ƯA CHUỘNG NHẤT
@@ -170,37 +171,27 @@ export default function StudioCabin() {
         description="Trải nghiệm phòng thiết kế cabin thang máy gia đình, homelift kính trực tuyến. Tự tay phối màu vách Inox gương vàng, kính Panorama, đá hoa cương tự nhiên nẹp đồng."
       />
 
-      {/* 1. HERO HEADER */}
-      <section className="studio-hero-section">
+      {/* 1. HERO HEADER (CHUẨN ABOUT-BANNER NHƯ TRANG DỰ ÁN) */}
+      <section
+        className="about-banner studio-banner"
+        style={{
+          backgroundImage: `linear-gradient(90deg, rgba(5, 14, 28, 0.95), rgba(5, 14, 28, 0.68)), url(${heroImage})`,
+          backgroundPosition: "center",
+          backgroundSize: "cover",
+        }}
+      >
         <div className="site-container">
-          <div className="studio-hero-content text-center">
-            <span className="studio-badge">
-              <i className="bi bi-stars me-1 text-warning"></i>
-              HÀ HỒNG ELEVATOR • 2.5D BESPOKE STUDIO
-            </span>
-            <h1 className="studio-hero-title">
-              Studio Phối Cảnh &amp; Thiết Kế Cabin Thang Máy
-            </h1>
-            <p className="studio-hero-subtitle">
-              Thỏa sức cá nhân hóa không gian nội thất thang máy theo phong cách kiến trúc ngôi nhà bạn. 
-              Xem trước trực quan 2.5D với hiệu ứng ánh sáng đèn LED, mô phỏng đóng mở cửa và chuyển động tầng thực tế.
-            </p>
-
-            <div className="studio-quick-stats">
-              <div className="stat-pill">
-                <i className="bi bi-shield-check text-warning"></i>
-                <span>Inox SUS 304 Dày 1.5mm</span>
-              </div>
-              <div className="stat-pill">
-                <i className="bi bi-gem text-info"></i>
-                <span>Kính Cường Lực 10mm Siêu Trong</span>
-              </div>
-              <div className="stat-pill">
-                <i className="bi bi-layers text-success"></i>
-                <span>Đá Tự Nhiên Cắt CNC Chuẩn Xác</span>
-              </div>
-            </div>
-          </div>
+          <nav className="about-breadcrumb" aria-label="breadcrumb">
+            <Link to="/">Trang chủ</Link>
+            <span>/</span>
+            <span>Thiết kế Cabin</span>
+          </nav>
+          <span className="section-eyebrow">HÀ HỒNG ELEVATOR • 2.5D BESPOKE STUDIO</span>
+          <h1>Studio Phối Cảnh &amp; Thiết Kế Cabin Thang Máy</h1>
+          <p>
+            Thỏa sức cá nhân hóa không gian nội thất thang máy theo phong cách kiến trúc ngôi nhà bạn. 
+            Xem trước trực quan 2.5D với hiệu ứng ánh sáng đèn LED, mô phỏng đóng mở cửa và chuyển động tầng thực tế.
+          </p>
         </div>
       </section>
 
