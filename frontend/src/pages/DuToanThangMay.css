@@ -1,0 +1,578 @@
+/* =============================================================================
+   DU TOAN THANG MAY (ESTIMATOR) - THIẾT KẾ MỚI TINH TẾ & GỌN GÀNG
+   Tone màu chủ đạo: Gold (#D9A441) & Navy (#0B1F3A)
+   ============================================================================= */
+
+.estimator-page {
+  background-color: #f8fafc;
+  color: #1e293b;
+  min-height: 100vh;
+}
+
+/* =============================================================================
+   1. CHỖ CHỌN BÊN TRÁI (LEFT CONFIGURATION CARDS)
+   ============================================================================= */
+
+.estimator-step-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.04);
+  transition: all 0.25s ease;
+}
+
+.estimator-step-card:hover {
+  box-shadow: 0 8px 24px rgba(11, 31, 58, 0.08);
+}
+
+.estimator-step-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.step-badge-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.step-badge-num {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #0b2246 0%, #07192f 100%);
+  color: #ffd875;
+  border: 1px solid rgba(217, 164, 65, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 0.85rem;
+  box-shadow: 0 2px 8px rgba(7, 25, 47, 0.2);
+}
+
+.step-title-text {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #0b2246;
+  margin: 0;
+}
+
+/* Thẻ tùy chọn (Building type, Capacity, Elevator style, Motor) */
+.estimator-choice-card {
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1rem;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  text-align: left;
+  position: relative;
+  user-select: none;
+  width: 100%;
+}
+
+.estimator-choice-card:hover {
+  border-color: #d9a441;
+  background: #fdfcf7;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(217, 164, 65, 0.15);
+}
+
+.estimator-choice-card.active {
+  border-color: #d9a441;
+  background: rgba(217, 164, 65, 0.08);
+  box-shadow: 0 0 0 2px rgba(217, 164, 65, 0.35);
+}
+
+.choice-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.choice-icon-wrap {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: rgba(11, 34, 70, 0.06);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #0b2246;
+  font-size: 1.15rem;
+}
+
+.estimator-choice-card.active .choice-icon-wrap {
+  background: #0b2246;
+  color: #ffd875;
+}
+
+.choice-check {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #d9a441;
+  color: #07192f;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 800;
+  box-shadow: 0 2px 6px rgba(217, 164, 65, 0.4);
+}
+
+.choice-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #0b2246;
+  margin-bottom: 0.25rem;
+}
+
+.choice-desc {
+  font-size: 0.8rem;
+  color: #64748b;
+  line-height: 1.4;
+  margin: 0;
+}
+
+/* Floor buttons selector */
+.floor-pills-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.floor-pill-btn {
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  color: #334155;
+  font-weight: 600;
+  font-size: 0.85rem;
+  padding: 0.5rem 1rem;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.floor-pill-btn:hover {
+  border-color: #d9a441;
+  color: #0b2246;
+}
+
+.floor-pill-btn.active {
+  background: linear-gradient(135deg, #0b2246 0%, #07192f 100%);
+  color: #ffd875;
+  border-color: #d9a441;
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(11, 34, 70, 0.25);
+}
+
+/* Door type buttons */
+.door-toggle-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+/* =============================================================================
+   2. LAYOUT CỦA GIÁ TIỀN (PRICE & QUOTATION CARD)
+   ============================================================================= */
+
+.estimator-price-card {
+  background: #ffffff;
+  border: 1px solid rgba(217, 164, 65, 0.35);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  margin-bottom: 1.5rem;
+}
+
+.estimator-price-header {
+  background: linear-gradient(135deg, #07192f 0%, #0b2246 100%);
+  color: #ffffff;
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  border-bottom: 2px solid #d9a441;
+}
+
+.estimator-price-header .header-badge {
+  background: rgba(217, 164, 65, 0.2);
+  border: 1px solid rgba(217, 164, 65, 0.5);
+  color: #ffd875;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.estimator-price-body {
+  padding: 1.5rem;
+}
+
+/* Khung giá nổi bật */
+.price-showcase-box {
+  background: linear-gradient(145deg, #fdfbf7 0%, #f7f3e8 100%);
+  border: 1.5px solid rgba(217, 164, 65, 0.45);
+  border-radius: 14px;
+  padding: 1.25rem 1rem;
+  text-align: center;
+  margin-bottom: 1.5rem;
+  box-shadow: inset 0 0 15px rgba(217, 164, 65, 0.08);
+}
+
+.price-showcase-label {
+  font-size: 0.8rem;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.price-showcase-val {
+  font-size: clamp(1.4rem, 2.5vw, 1.85rem);
+  font-weight: 800;
+  color: #0b2246;
+  line-height: 1.25;
+  margin-bottom: 0.35rem;
+}
+
+.price-showcase-val .currency {
+  color: #d9a441;
+  font-size: 0.9em;
+}
+
+.price-showcase-note {
+  font-size: 0.78rem;
+  color: #10b981;
+  font-weight: 600;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+}
+
+/* Bóc tách chi phí dạng thẻ mini */
+.cost-breakdown-wrap {
+  margin-bottom: 1.25rem;
+}
+
+.breakdown-title-bar {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #0b2246;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  margin-bottom: 0.65rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.breakdown-items-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.breakdown-item-row {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 0.65rem 0.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  transition: all 0.15s ease;
+}
+
+.breakdown-item-row:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+}
+
+.breakdown-item-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.breakdown-item-name {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #0b2246;
+  line-height: 1.3;
+}
+
+.breakdown-item-sub {
+  font-size: 0.72rem;
+  color: #64748b;
+}
+
+.breakdown-item-price {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #b88528;
+  background: rgba(217, 164, 65, 0.12);
+  border: 1px solid rgba(217, 164, 65, 0.3);
+  padding: 0.2rem 0.6rem;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+/* Bảng thông số giếng thang */
+.specs-summary-box {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.specs-summary-table {
+  width: 100%;
+  font-size: 0.82rem;
+  border-collapse: collapse;
+}
+
+.specs-summary-table tr {
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.specs-summary-table tr:last-child {
+  border-bottom: none;
+}
+
+.specs-summary-table td {
+  padding: 0.5rem 0.25rem;
+}
+
+.specs-summary-table td:first-child {
+  color: #64748b;
+}
+
+.specs-summary-table td:last-child {
+  text-align: right;
+  font-weight: 700;
+  color: #0b2246;
+}
+
+/* =============================================================================
+   3. FORM GỬI YÊU CẦU BÁO GIÁ (QUOTE SUBMISSION FORM)
+   ============================================================================= */
+
+.quote-submit-card {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.07);
+  margin-bottom: 1.5rem;
+}
+
+.quote-submit-header {
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.quote-submit-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #0b2246;
+  margin-bottom: 0.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.quote-submit-subtitle {
+  font-size: 0.82rem;
+  color: #64748b;
+  margin: 0;
+  line-height: 1.45;
+}
+
+/* Custom Input Groups */
+.form-input-box {
+  margin-bottom: 0.85rem;
+}
+
+.form-input-label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #334155;
+  margin-bottom: 0.35rem;
+}
+
+.form-input-inner {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.form-input-icon {
+  position: absolute;
+  left: 0.85rem;
+  color: #94a3b8;
+  font-size: 0.95rem;
+  pointer-events: none;
+}
+
+.form-input-field {
+  width: 100%;
+  padding: 0.6rem 0.85rem 0.6rem 2.4rem;
+  font-size: 0.875rem;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #1e293b;
+  transition: all 0.2s ease;
+}
+
+.form-input-field:focus {
+  border-color: #d9a441;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(217, 164, 65, 0.2);
+}
+
+.form-input-field::placeholder {
+  color: #94a3b8;
+  font-size: 0.82rem;
+}
+
+.form-input-hint {
+  font-size: 0.72rem;
+  color: #64748b;
+  margin-top: 0.25rem;
+  display: block;
+}
+
+/* Nút Submit Form */
+.btn-quote-submit {
+  background: linear-gradient(135deg, #d9a441 0%, #b88528 100%);
+  color: #07192f;
+  font-weight: 800;
+  font-size: 0.95rem;
+  border: none;
+  padding: 0.85rem 1.5rem;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 18px rgba(217, 164, 65, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  letter-spacing: 0.3px;
+}
+
+.btn-quote-submit:hover:not(:disabled) {
+  background: linear-gradient(135deg, #eed07d 0%, #d9a441 100%);
+  box-shadow: 0 6px 24px rgba(217, 164, 65, 0.5);
+  transform: translateY(-2px);
+  color: #07192f;
+}
+
+.btn-quote-submit:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.btn-quote-preview {
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  color: #475569;
+  font-weight: 600;
+  font-size: 0.85rem;
+  padding: 0.55rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
+.btn-quote-preview:hover {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+  color: #0b2246;
+}
+
+/* Success Card */
+.quote-success-card {
+  background: linear-gradient(145deg, #f0fdf4 0%, #e0f2fe 100%);
+  border: 1.5px solid #86efac;
+  border-radius: 14px;
+  padding: 1.5rem 1.25rem;
+  text-align: center;
+}
+
+.quote-success-icon {
+  font-size: 2.2rem;
+  color: #10b981;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.quote-success-title {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #065f46;
+  margin-bottom: 0.5rem;
+}
+
+.quote-success-desc {
+  font-size: 0.85rem;
+  color: #1f2937;
+  line-height: 1.5;
+  margin-bottom: 1rem;
+}
+
+.btn-download-pdf-success {
+  background: #10b981;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 0.88rem;
+  border: none;
+  padding: 0.75rem 1.25rem;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  justify-content: center;
+}
+
+.btn-download-pdf-success:hover {
+  background: #059669;
+  box-shadow: 0 6px 18px rgba(16, 185, 129, 0.5);
+  transform: translateY(-1px);
+}

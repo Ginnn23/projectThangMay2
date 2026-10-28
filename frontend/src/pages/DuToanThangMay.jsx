@@ -6,6 +6,7 @@ import CabinVisualizer from "../components/CabinVisualizer";
 import AiVisionScanner from "../components/AiVisionScanner";
 import logoHaHong from "../assets/images/logo-ha-hong.jpg";
 import heroImage from "../assets/images/hero-elevator.jpg";
+import "./DuToanThangMay.css";
 
 export default function DuToanThangMay() {
   // Config state
@@ -37,7 +38,7 @@ export default function DuToanThangMay() {
       const noteText = `Khách hàng quan tâm cấu hình Cabin: Vách: ${specs.wall}, Sàn: ${specs.floor}, Trần: ${specs.ceiling}, Tay vịn: ${specs.handrail}.`;
       setCustomerNotes(noteText);
     }
-    const formElement = document.querySelector(".quote-form-card");
+    const formElement = document.querySelector(".quote-submit-card") || document.querySelector(".quote-form-card");
     if (formElement) {
       formElement.scrollIntoView({ behavior: "smooth" });
     }
@@ -73,7 +74,7 @@ export default function DuToanThangMay() {
     );
     setTimeout(() => setVisionToast(""), 8000);
 
-    const calcCard = document.querySelector(".estimator-card");
+    const calcCard = document.querySelector(".estimator-step-card") || document.querySelector(".estimator-card");
     if (calcCard) {
       calcCard.scrollIntoView({ behavior: "smooth" });
     }
@@ -198,7 +199,6 @@ export default function DuToanThangMay() {
   };
 
   const handlePhoneChange = (e) => {
-    // Chỉ cho phép nhập số, lọc bỏ chữ cái và ký tự đặc biệt
     const digitsOnly = e.target.value.replace(/\D/g, "");
     if (digitsOnly.length <= 10) {
       setPhoneNumber(digitsOnly);
@@ -307,10 +307,10 @@ export default function DuToanThangMay() {
           <nav className="about-breadcrumb" aria-label="breadcrumb">
             <a href="/">Trang chủ</a>
             <span>/</span>
-            <span>Dự toán & Cấu hình thang máy</span>
+            <span>Dự toán &amp; Cấu hình thang máy</span>
           </nav>
           <span className="section-eyebrow">CÔNG CỤ KỸ THUẬT TRỰC TUYẾN</span>
-          <h1>Dự Toán Chi Phí & Kích Thước Thang Máy</h1>
+          <h1>Dự Toán Chi Phí &amp; Kích Thước Thang Máy</h1>
           <p>
             Tùy biến cấu hình thang máy theo hiện trạng công trình của bạn. Hệ thống tự động bóc tách vật tư, tính toán kích thước hố thang và xuất bảng báo giá kỹ thuật PDF tức thì.
           </p>
@@ -333,55 +333,72 @@ export default function DuToanThangMay() {
           )}
 
           <div className="row g-4">
-            {/* Left Column: Interactive Wizard Controls */}
+            {/* CỘT BÊN TRÁI: BỘ CHỌN CẤU HÌNH (ĐẸP MẮT, GỌN GÀNG, CHUẨN THƯƠNG HIỆU) */}
             <div className="col-lg-7">
-              <div className="estimator-card p-4 bg-white rounded-3 shadow-sm border mb-4">
-                <h2 className="estimator-step-title mb-4">
-                  <span className="step-num me-2">1</span>
-                  Loại công trình của bạn
-                </h2>
+              {/* Bước 1: Loại công trình */}
+              <div className="estimator-step-card estimator-card">
+                <div className="estimator-step-header">
+                  <div className="step-badge-wrap">
+                    <span className="step-badge-num">01</span>
+                    <h2 className="step-title-text">Loại công trình của bạn</h2>
+                  </div>
+                </div>
                 <div className="row g-3">
                   {[
                     { id: "nha-pho-xay-moi", icon: "bi-house-add", label: "Nhà phố xây mới", desc: "Hố bê tông hoặc khung thép chuẩn" },
                     { id: "nha-pho-cai-tao", icon: "bi-house-gear", label: "Nhà phố cải tạo", desc: "Pit nông, tối ưu giếng thang hẹp" },
                     { id: "biet-thu", icon: "bi-buildings", label: "Biệt thự / Villa", desc: "Không gian sang trọng, nội thất cao cấp" },
                     { id: "van-phong", icon: "bi-building", label: "Văn phòng / Tòa nhà", desc: "Tần suất cao, vận hành bền bỉ" }
-                  ].map((item) => (
-                    <div className="col-sm-6" key={item.id}>
-                      <button
-                        type="button"
-                        className={`estimator-option-btn w-100 text-start p-3 rounded-2 border ${buildingType === item.id ? "active-option" : ""}`}
-                        onClick={() => setBuildingType(item.id)}
-                      >
-                        <div className="d-flex align-items-center mb-1">
-                          <i className={`bi ${item.icon} fs-4 me-2 text-primary`}></i>
-                          <strong className="fs-6">{item.label}</strong>
+                  ].map((item) => {
+                    const isActive = buildingType === item.id;
+                    return (
+                      <div className="col-sm-6" key={item.id}>
+                        <div
+                          className={`estimator-choice-card ${isActive ? "active" : ""}`}
+                          onClick={() => setBuildingType(item.id)}
+                        >
+                          <div className="choice-header">
+                            <div className="choice-icon-wrap">
+                              <i className={`bi ${item.icon}`}></i>
+                            </div>
+                            {isActive && (
+                              <div className="choice-check">
+                                <i className="bi bi-check"></i>
+                              </div>
+                            )}
+                          </div>
+                          <div className="choice-title">{item.label}</div>
+                          <p className="choice-desc">{item.desc}</p>
                         </div>
-                        <small className="text-muted d-block">{item.desc}</small>
-                      </button>
-                    </div>
-                  ))}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
 
-              {/* Step 2: Stops and Capacity */}
-              <div className="estimator-card p-4 bg-white rounded-3 shadow-sm border mb-4">
-                <h2 className="estimator-step-title mb-4">
-                  <span className="step-num me-2">2</span>
-                  Số tầng & Tải trọng
-                </h2>
+              {/* Bước 2: Số tầng & Tải trọng */}
+              <div className="estimator-step-card">
+                <div className="estimator-step-header">
+                  <div className="step-badge-wrap">
+                    <span className="step-badge-num">02</span>
+                    <h2 className="step-title-text">Số tầng &amp; Tải trọng cabin</h2>
+                  </div>
+                  <span className="badge bg-warning text-dark fw-bold px-3 py-1.5" style={{ fontSize: "12px" }}>
+                    {stops} Tầng ({stops} Điểm dừng)
+                  </span>
+                </div>
 
+                {/* Chọn số tầng */}
                 <div className="mb-4">
-                  <label className="form-label fw-bold d-flex justify-content-between">
-                    <span>Số tầng phục vụ (Số điểm dừng):</span>
-                    <span className="badge bg-primary fs-6 px-3">{stops} Tầng ({stops} Stops)</span>
+                  <label className="form-label fw-bold small text-muted text-uppercase mb-2">
+                    Chọn số tầng phục vụ:
                   </label>
-                  <div className="d-flex flex-wrap gap-2 pt-2">
+                  <div className="floor-pills-grid">
                     {[2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
                       <button
                         key={num}
                         type="button"
-                        className={`btn ${stops === num ? "btn-primary" : "btn-outline-secondary"} px-3 py-2`}
+                        className={`floor-pill-btn ${stops === num ? "active" : ""}`}
                         onClick={() => setStops(num)}
                       >
                         {num} Tầng
@@ -390,271 +407,294 @@ export default function DuToanThangMay() {
                   </div>
                 </div>
 
+                {/* Chọn tải trọng */}
                 <div>
-                  <label className="form-label fw-bold d-block mb-3">Tải trọng cabin đề xuất:</label>
+                  <label className="form-label fw-bold small text-muted text-uppercase mb-2">
+                    Tải trọng cabin đề xuất:
+                  </label>
                   <div className="row g-3">
                     {[
                       { kg: 300, people: "3 - 4 người", desc: "Homelift mini, diện tích giếng từ 1.2m" },
                       { kg: 350, people: "4 - 5 người", desc: "Lựa chọn vàng cho nhà phố gia đình" },
                       { kg: 450, people: "6 người", desc: "Rộng rãi, chở đồ đạc và xe lăn" },
                       { kg: 630, people: "8 - 9 người", desc: "Tải khách, văn phòng, homestay" }
-                    ].map((cap) => (
-                      <div className="col-sm-6" key={cap.kg}>
-                        <button
-                          type="button"
-                          className={`estimator-option-btn w-100 text-start p-3 rounded-2 border ${capacityKg === cap.kg ? "active-option" : ""}`}
-                          onClick={() => setCapacityKg(cap.kg)}
-                        >
-                          <div className="d-flex justify-content-between align-items-center mb-1">
-                            <strong className="text-primary fs-5">{cap.kg} kg</strong>
-                            <span className="badge bg-light text-dark border">{cap.people}</span>
+                    ].map((cap) => {
+                      const isActive = capacityKg === cap.kg;
+                      return (
+                        <div className="col-sm-6" key={cap.kg}>
+                          <div
+                            className={`estimator-choice-card ${isActive ? "active" : ""}`}
+                            onClick={() => setCapacityKg(cap.kg)}
+                          >
+                            <div className="choice-header">
+                              <span className="fw-bold fs-5 text-primary">{cap.kg} kg</span>
+                              <span className="badge bg-light text-dark border">{cap.people}</span>
+                            </div>
+                            <p className="choice-desc">{cap.desc}</p>
                           </div>
-                          <small className="text-muted d-block">{cap.desc}</small>
-                        </button>
-                      </div>
-                    ))}
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               </div>
 
-              {/* Step 3: Elevator Type and Style */}
-              <div className="estimator-card p-4 bg-white rounded-3 shadow-sm border mb-4">
-                <h2 className="estimator-step-title mb-4">
-                  <span className="step-num me-2">3</span>
-                  Phong cách Cabin & Kết cấu
-                </h2>
-                <div className="row g-3">
+              {/* Bước 3: Phong cách Cabin & Kiểu cửa */}
+              <div className="estimator-step-card">
+                <div className="estimator-step-header">
+                  <div className="step-badge-wrap">
+                    <span className="step-badge-num">03</span>
+                    <h2 className="step-title-text">Phong cách Cabin &amp; Kiểu mở cửa</h2>
+                  </div>
+                </div>
+
+                <div className="row g-3 mb-4">
                   {[
                     { id: "homelift-kinh", label: "Thang Kính Homelift", badge: "Cao cấp & Sang trọng", desc: "Khung nhôm/thép bọc kính cường lực 4 mặt, pit nông 25-35cm" },
                     { id: "inox-tieu-chuan", label: "Inox 304 Tiêu Chuẩn", badge: "Bền bỉ & Tối ưu", desc: "Inox sọc nhuyễn chống xước phối inox gương, phù hợp mọi nhà" },
                     { id: "inox-guong-vang", label: "Inox Gương Vàng Luxury", badge: "Phong cách Hoàng Gia", desc: "Inox gương vàng khắc hoa văn laser tinh xảo, trần LED cao cấp" }
-                  ].map((style) => (
-                    <div className="col-12" key={style.id}>
-                      <button
-                        type="button"
-                        className={`estimator-option-btn w-100 text-start p-3 rounded-2 border ${elevatorType === style.id ? "active-option" : ""}`}
-                        onClick={() => setElevatorType(style.id)}
-                      >
-                        <div className="d-flex justify-content-between align-items-center mb-1">
-                          <strong className="fs-6">{style.label}</strong>
-                          <span className="badge bg-secondary">{style.badge}</span>
+                  ].map((style) => {
+                    const isActive = elevatorType === style.id;
+                    return (
+                      <div className="col-12" key={style.id}>
+                        <div
+                          className={`estimator-choice-card ${isActive ? "active" : ""}`}
+                          onClick={() => setElevatorType(style.id)}
+                        >
+                          <div className="choice-header">
+                            <strong className="fs-6 text-dark">{style.label}</strong>
+                            <span className="badge bg-secondary">{style.badge}</span>
+                          </div>
+                          <p className="choice-desc">{style.desc}</p>
                         </div>
-                        <small className="text-muted">{style.desc}</small>
-                      </button>
-                    </div>
-                  ))}
+                      </div>
+                    );
+                  })}
                 </div>
 
-                <div className="mt-4 pt-3 border-top">
-                  <label className="form-label fw-bold d-block mb-2">Quy cách mở cửa tự động:</label>
-                  <div className="row g-2">
-                    <div className="col-6">
-                      <button
-                        type="button"
-                        className={`estimator-option-btn w-100 text-start p-2 rounded-2 border ${doorType === "CO" ? "active-option" : ""}`}
-                        onClick={() => setDoorType("CO")}
-                      >
-                        <strong className="d-block fs-6">Cửa mở tim (CO)</strong>
-                        <small className="text-muted" style={{ fontSize: "11px" }}>2 cánh mở về 2 phía cân đối</small>
-                      </button>
+                {/* Kiểu mở cửa */}
+                <div className="pt-3 border-top">
+                  <label className="form-label fw-bold small text-muted text-uppercase mb-2">
+                    Quy cách mở cửa tự động:
+                  </label>
+                  <div className="door-toggle-grid">
+                    <div
+                      className={`estimator-choice-card ${doorType === "CO" ? "active" : ""}`}
+                      onClick={() => setDoorType("CO")}
+                    >
+                      <strong className="d-block choice-title">Cửa mở tim (CO)</strong>
+                      <small className="text-muted" style={{ fontSize: "11px" }}>2 cánh mở về 2 phía cân đối</small>
                     </div>
-                    <div className="col-6">
-                      <button
-                        type="button"
-                        className={`estimator-option-btn w-100 text-start p-2 rounded-2 border ${doorType === "SO" ? "active-option" : ""}`}
-                        onClick={() => setDoorType("SO")}
-                      >
-                        <strong className="d-block fs-6">Cửa mở lùa (SO)</strong>
-                        <small className="text-muted" style={{ fontSize: "11px" }}>2 cánh lùa 1 bên (cho hố hẹp)</small>
-                      </button>
+                    <div
+                      className={`estimator-choice-card ${doorType === "SO" ? "active" : ""}`}
+                      onClick={() => setDoorType("SO")}
+                    >
+                      <strong className="d-block choice-title">Cửa mở lùa (SO)</strong>
+                      <small className="text-muted" style={{ fontSize: "11px" }}>2 cánh lùa 1 bên (cho hố hẹp)</small>
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Step 4: Motor Brand */}
-              <div className="estimator-card p-4 bg-white rounded-3 shadow-sm border mb-4">
-                <h2 className="estimator-step-title mb-4">
-                  <span className="step-num me-2">4</span>
-                  Thương hiệu Động cơ (Không hộp số)
-                </h2>
+              {/* Bước 4: Thương hiệu Động cơ */}
+              <div className="estimator-step-card">
+                <div className="estimator-step-header">
+                  <div className="step-badge-wrap">
+                    <span className="step-badge-num">04</span>
+                    <h2 className="step-title-text">Thương hiệu Động cơ (Không hộp số)</h2>
+                  </div>
+                </div>
+
                 <div className="row g-3">
                   {[
                     { id: "Fuji", label: "Fuji", origin: "Công nghệ Nhật Bản", desc: "Biến tần đồng bộ, vận hành êm, tiết kiệm điện, chi phí hợp lý nhất." },
                     { id: "Mitsubishi", label: "Mitsubishi", origin: "Thái Lan / Nhật Bản", desc: "Thương hiệu nổi tiếng về độ bền bỉ, êm ái và phụ tùng dễ thay thế." },
-                    { id: "Montanari", label: "Montanari", origin: "Nhập khẩu nguyên chiếc Ý", desc: "Đạt chuẩn Châu Âu khắt khe, không hộp số, vận hành êm tuyệt đối." }
-                  ].map((motor) => (
-                    <div className="col-md-4" key={motor.id}>
-                      <button
-                        type="button"
-                        className={`estimator-option-btn w-100 text-start p-3 rounded-2 border h-100 ${motorBrand === motor.id ? "active-option" : ""}`}
-                        onClick={() => setMotorBrand(motor.id)}
-                      >
-                        <strong className="text-primary fs-5 d-block">{motor.label}</strong>
-                        <span className="badge bg-light text-dark border mb-2 d-inline-block">{motor.origin}</span>
-                        <small className="text-muted d-block" style={{ fontSize: "12px" }}>{motor.desc}</small>
-                      </button>
-                    </div>
-                  ))}
+                    { id: "Montanari", label: "Montanari", origin: "Nhập khẩu Ý", desc: "Đạt chuẩn Châu Âu khắt khe, không hộp số, vận hành êm tuyệt đối." }
+                  ].map((motor) => {
+                    const isActive = motorBrand === motor.id;
+                    return (
+                      <div className="col-md-4" key={motor.id}>
+                        <div
+                          className={`estimator-choice-card ${isActive ? "active" : ""}`}
+                          onClick={() => setMotorBrand(motor.id)}
+                        >
+                          <div className="d-flex justify-content-between align-items-center mb-1">
+                            <strong className="text-primary fs-5">{motor.label}</strong>
+                            {isActive && <i className="bi bi-check-circle-fill text-warning"></i>}
+                          </div>
+                          <span className="badge bg-light text-dark border mb-2 d-inline-block" style={{ fontSize: "11px" }}>
+                            {motor.origin}
+                          </span>
+                          <p className="choice-desc" style={{ fontSize: "12px" }}>{motor.desc}</p>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             </div>
 
-            {/* Right Column: Live Estimates & Blueprint Display */}
+            {/* CỘT BÊN PHẢI: BẢNG GIÁ DỰ TOÁN, FORM GỬI & PHỐI CẢNH CABIN */}
             <div className="col-lg-5">
               <div className="estimator-sticky-sidebar">
-                {/* Real-time Interactive 2.5D Cabin Visualizer */}
-                <CabinVisualizer
-                  elevatorType={elevatorType}
-                  onChangeElevatorType={setElevatorType}
-                  capacityKg={Number(capacityKg)}
-                  stops={Number(stops)}
-                  doorType={doorType}
-                  onChangeDoorType={setDoorType}
-                  onApplyConfig={setCabinSpecs}
-                  onRequestConsultation={handleCabinConsultation}
-                />
-
-                {/* Price Display Card */}
-                <div className="card shadow-sm border-0 mb-4 overflow-hidden rounded-3">
-                  <div className="card-header bg-primary text-white p-3">
-                    <span className="text-uppercase tracking-wider fs-7 opacity-75 d-block">DỰ TOÁN CHI PHÍ TRỌN GÓI</span>
-                    <h3 className="card-title h4 mb-0 text-white">Thang Máy Hà Hồng</h3>
+                
+                {/* 1. LAYOUT GIÁ TIỀN & THÔNG SỐ (GỌN GÀNG, SANG TRỌNG, BẮT MẮT) */}
+                <div className="estimator-price-card">
+                  <div className="estimator-price-header">
+                    <div>
+                      <span className="header-badge">DỰ TOÁN CHI PHÍ TRỌN GÓI</span>
+                      <h3 className="h5 fw-bold text-white mb-0 mt-1">Thang Máy Hà Hồng</h3>
+                    </div>
+                    <span className="badge bg-warning text-dark fw-bold">
+                      {stops} Tầng • {capacityKg}kg
+                    </span>
                   </div>
-                  <div className="card-body p-4 bg-light">
+
+                  <div className="estimator-price-body">
                     {loading ? (
                       <div className="text-center py-4">
-                        <div className="spinner-border text-primary" role="status"></div>
-                        <p className="mt-2 text-muted">Đang cập nhật tính toán...</p>
+                        <div className="spinner-border text-warning" role="status"></div>
+                        <p className="mt-2 text-muted small">Đang tính toán dự toán mới nhất...</p>
                       </div>
                     ) : (
                       <>
-                        <div className="price-highlight-box p-3 bg-white rounded-3 border text-center mb-4">
-                          <small className="text-muted d-block mb-1">Khoảng giá dự toán tham khảo ({stops} tầng):</small>
-                          <div className="fs-3 fw-bold text-danger">
+                        {/* Hộp Giá Tiền Nổi Bật */}
+                        <div className="price-showcase-box">
+                          <div className="price-showcase-label">Khoảng giá dự toán trọn gói tham khảo</div>
+                          <div className="price-showcase-val">
                             {formatVnd(result?.estimatedPriceMin)} - {formatVnd(result?.estimatedPriceMax)}
                           </div>
-                          <small className="text-success d-block mt-1">
-                            <i className="bi bi-shield-check me-1"></i>
-                            Đã bao gồm động cơ, cabin, kiểm định nhà nước & lắp đặt trọn gói
-                          </small>
+                          <div className="price-showcase-note">
+                            <i className="bi bi-shield-check"></i>
+                            Đã gồm động cơ, cabin, giếng thang, lắp đặt &amp; kiểm định trọn gói
+                          </div>
                         </div>
 
-                        {/* Breakdown accordion */}
-                        <div className="cost-breakdown mb-4">
-                          <h6 className="fw-bold mb-3 text-secondary text-uppercase fs-7">Bóc tách chi phí ước tính:</h6>
-                          <div className="list-group list-group-flush border rounded-2 bg-white">
+                        {/* Bóc tách chi phí ước tính */}
+                        <div className="cost-breakdown-wrap">
+                          <div className="breakdown-title-bar">
+                            <i className="bi bi-pie-chart-fill text-warning"></i>
+                            BÓC TÁCH CHI PHÍ CẤU THÀNH:
+                          </div>
+                          <div className="breakdown-items-list">
                             {result?.breakdownItems?.map((item, idx) => (
-                              <div className="list-group-item p-3" key={idx}>
-                                <div className="d-flex justify-content-between align-items-center mb-1">
-                                  <strong className="fs-6">{item.category}</strong>
-                                  <span className="badge bg-primary-subtle text-primary">
-                                    {formatVnd(item.minPrice)}
-                                  </span>
+                              <div className="breakdown-item-row" key={idx}>
+                                <div className="breakdown-item-info">
+                                  <span className="breakdown-item-name">{item.category}</span>
+                                  <span className="breakdown-item-sub">{item.title}</span>
                                 </div>
-                                <small className="text-muted d-block">{item.title}</small>
+                                <span className="breakdown-item-price">
+                                  {formatVnd(item.minPrice)}
+                                </span>
                               </div>
                             ))}
                           </div>
                         </div>
 
-                        {/* Blueprint technical specifications */}
-                        <div className="specs-box bg-white p-3 rounded-2 border mb-4">
-                          <h6 className="fw-bold mb-3 text-secondary text-uppercase fs-7">
-                            <i className="bi bi-rulers me-2"></i>
-                            Thông số giếng thang đề xuất:
-                          </h6>
-                          <div className="table-responsive">
-                            <table className="table table-sm table-borderless mb-0" style={{ fontSize: "13px" }}>
-                              <tbody>
-                                <tr>
-                                  <td className="text-muted">Kích thước lọt lòng hố (W x D):</td>
-                                  <td className="text-end fw-bold text-primary">{result?.shaftWidth} x {result?.shaftDepth} mm</td>
-                                </tr>
-                                <tr>
-                                  <td className="text-muted">Kích thước cabin (W x D x H):</td>
-                                  <td className="text-end fw-bold">{result?.cabinWidth} x {result?.cabinDepth} x 2200 mm</td>
-                                </tr>
-                                <tr>
-                                  <td className="text-muted">Chiều sâu hố PIT yêu cầu:</td>
-                                  <td className="text-end fw-bold">{result?.pitDepth} mm</td>
-                                </tr>
-                                <tr>
-                                  <td className="text-muted">Chiều cao tầng trên cùng (OH):</td>
-                                  <td className="text-end fw-bold">{result?.overheadHeight} mm</td>
-                                </tr>
-                                <tr>
-                                  <td className="text-muted">Cửa tầng tự động (W x H):</td>
-                                  <td className="text-end fw-bold">{result?.doorWidth} x 2100 mm</td>
-                                </tr>
-                                <tr>
-                                  <td className="text-muted">Nguồn điện yêu cầu:</td>
-                                  <td className="text-end fw-bold">{result?.powerSupply}</td>
-                                </tr>
-                                <tr>
-                                  <td className="text-muted">Thời gian bảo hành:</td>
-                                  <td className="text-end fw-bold text-success">{result?.warrantyMonths} tháng chính hãng</td>
-                                </tr>
-                              </tbody>
-                            </table>
+                        {/* Bảng thông số hố thang đề xuất */}
+                        <div className="specs-summary-box">
+                          <div className="breakdown-title-bar mb-2">
+                            <i className="bi bi-rulers text-warning"></i>
+                            THÔNG SỐ GIẾNG THANG ĐỀ XUẤT:
                           </div>
+                          <table className="specs-summary-table">
+                            <tbody>
+                              <tr>
+                                <td>Hố lọt lòng (W x D):</td>
+                                <td>{result?.shaftWidth} x {result?.shaftDepth} mm</td>
+                              </tr>
+                              <tr>
+                                <td>Kích thước Cabin:</td>
+                                <td>{result?.cabinWidth} x {result?.cabinDepth} x 2200 mm</td>
+                              </tr>
+                              <tr>
+                                <td>Hố PIT &amp; Chiều cao OH:</td>
+                                <td>Pit: {result?.pitDepth} mm • OH: {result?.overheadHeight} mm</td>
+                              </tr>
+                              <tr>
+                                <td>Nguồn điện:</td>
+                                <td>{result?.powerSupply}</td>
+                              </tr>
+                              <tr>
+                                <td>Bảo hành &amp; Bảo trì:</td>
+                                <td className="text-success">{result?.warrantyMonths} tháng chính hãng</td>
+                              </tr>
+                            </tbody>
+                          </table>
                         </div>
                       </>
                     )}
+                  </div>
+                </div>
 
-                    {/* Customer Info Form for PDF & Survey */}
-                    <div className="quote-form-card p-3 bg-white rounded-2 border">
-                      <h6 className="fw-bold mb-2">Nhận Bảng Báo Giá Chi Tiết (PDF)</h6>
-                      <p className="text-muted mb-3" style={{ fontSize: "13px" }}>
-                        Điền thông tin để xuất file PDF in ấn có đóng dấu kỹ thuật hoặc nhận khảo sát công trình tận nơi miễn phí.
+                {/* 2. FORM GỬI YÊU CẦU BÁO GIÁ (ĐẶC TẢ TÁCH BIỆT, RÕ RÀNG, DỄ NHẬP) */}
+                <div className="quote-submit-card quote-form-card" id="quote-form-section">
+                  <div className="quote-submit-header">
+                    <div className="quote-submit-title">
+                      <i className="bi bi-file-earmark-pdf-fill text-warning fs-4"></i>
+                      <span>Nhận Báo Giá Chi Tiết &amp; Đặt Lịch Đo Laser</span>
+                    </div>
+                    <p className="quote-submit-subtitle">
+                      Hệ thống tự động xuất file PDF báo giá kỹ thuật đóng dấu gửi về Gmail của bạn và kỹ sư sẽ đến đo đạc laser miễn phí.
+                    </p>
+                  </div>
+
+                  {submitSuccess ? (
+                    <div className="quote-success-card">
+                      <i className="bi bi-check-circle-fill quote-success-icon"></i>
+                      <div className="quote-success-title">Gửi Yêu Cầu &amp; Lưu Dự Toán Thành Công!</div>
+                      <p className="quote-success-desc">
+                        Bảng dự toán kỹ thuật chi tiết đã được gửi tự động tới Gmail <strong>{email}</strong>.
+                        Kỹ sư Thang Máy Hà Hồng sẽ liên hệ qua SĐT <strong>{phoneNumber}</strong> trong vòng 15 phút.
                       </p>
-
-                      {submitSuccess ? (
-                        <div className="alert alert-success py-3 text-center mb-0">
-                          <i className="bi bi-check-circle-fill fs-3 d-block mb-1 text-success"></i>
-                          <h6 className="fw-bold text-success mb-1">Gửi Yêu Cầu & Lưu Dự Toán Thành Công!</h6>
-                          <p className="mb-2" style={{ fontSize: "13px" }}>
-                            Bảng dự toán kỹ thuật chi tiết đã được gửi tự động tới Gmail <strong>{email}</strong>.
-                            Kỹ sư Thang Máy Hà Hồng sẽ liên hệ qua SĐT <strong>{phoneNumber}</strong> trong vòng 15 phút.
-                          </p>
-                          <button
-                            type="button"
-                            className="btn btn-outline-success btn-sm w-100 mb-2 fw-semibold"
-                            onClick={handleDownloadPdf}
-                          >
-                            <i className="bi bi-file-earmark-pdf-fill me-2 text-danger"></i>
-                            Tải Ngay Bảng Báo Giá PDF Kỹ Thuật (Có Dấu & Chữ Ký)
-                          </button>
-                          <small className="text-muted d-block" style={{ fontSize: "11px" }}>
-                            <i className="bi bi-envelope-check me-1 text-success"></i>
-                            Quý khách vui lòng kiểm tra hộp thư đến (hoặc hòm thư Spam) của Gmail <strong>{email}</strong>.
-                          </small>
+                      <button
+                        type="button"
+                        className="btn-download-pdf-success"
+                        onClick={handleDownloadPdf}
+                      >
+                        <i className="bi bi-download"></i>
+                        Tải Ngay Bảng Báo Giá PDF Kỹ Thuật (Có Dấu &amp; Chữ Ký)
+                      </button>
+                    </div>
+                  ) : (
+                    <form onSubmit={handleFormSubmit}>
+                      {errorMsg && (
+                        <div className="alert alert-danger py-2 mb-3" style={{ fontSize: "12.5px" }}>
+                          <i className="bi bi-exclamation-circle-fill me-1"></i> {errorMsg}
                         </div>
-                      ) : (
-                        <form onSubmit={handleFormSubmit}>
-                          {errorMsg && <div className="alert alert-danger py-2 mb-2" style={{ fontSize: "12px" }}>{errorMsg}</div>}
-                          <div className="mb-2">
-                            <label className="form-label mb-1" style={{ fontSize: "12px", fontWeight: "600" }}>
-                              Họ và tên của bạn <span className="text-danger">*</span>
-                            </label>
+                      )}
+
+                      <div className="row g-2">
+                        {/* Họ và tên */}
+                        <div className="col-12 col-sm-6 form-input-box">
+                          <label className="form-input-label">
+                            Họ và tên <span className="text-danger">*</span>
+                          </label>
+                          <div className="form-input-inner">
+                            <i className="bi bi-person-fill form-input-icon"></i>
                             <input
                               type="text"
-                              className="form-control form-control-sm"
-                              placeholder="Họ và tên của bạn *"
+                              className="form-input-field"
+                              placeholder="Họ và tên của bạn"
                               value={customerName}
                               onChange={(e) => setCustomerName(e.target.value)}
                               required
                               maxLength={100}
                             />
                           </div>
-                          <div className="mb-2">
-                            <label className="form-label mb-1" style={{ fontSize: "12px", fontWeight: "600" }}>
-                              Số điện thoại (đúng 10 chữ số) <span className="text-danger">*</span>
-                            </label>
+                        </div>
+
+                        {/* Số điện thoại */}
+                        <div className="col-12 col-sm-6 form-input-box">
+                          <label className="form-input-label">
+                            Số điện thoại (10 số) <span className="text-danger">*</span>
+                          </label>
+                          <div className="form-input-inner">
+                            <i className="bi bi-telephone-fill form-input-icon"></i>
                             <input
                               type="tel"
-                              className="form-control form-control-sm"
-                              placeholder="Số điện thoại (10 chữ số, chỉ nhập số) *"
+                              className="form-input-field"
+                              placeholder="0912345678"
                               value={phoneNumber}
                               onChange={handlePhoneChange}
                               maxLength={10}
@@ -662,216 +702,185 @@ export default function DuToanThangMay() {
                               pattern="[0-9]*"
                               required
                             />
-                            <small className="text-muted" style={{ fontSize: "11px" }}>Chỉ nhập 10 chữ số, bắt đầu bằng số 0 (VD: 0912345678)</small>
                           </div>
-                          <div className="mb-2">
-                            <label className="form-label mb-1" style={{ fontSize: "12px", fontWeight: "600" }}>
-                              Địa chỉ Gmail <span className="text-danger">*</span>
-                            </label>
+                        </div>
+
+                        {/* Địa chỉ Gmail */}
+                        <div className="col-12 col-sm-6 form-input-box">
+                          <label className="form-input-label">
+                            Địa chỉ Gmail <span className="text-danger">*</span>
+                          </label>
+                          <div className="form-input-inner">
+                            <i className="bi bi-envelope-fill form-input-icon"></i>
                             <input
                               type="email"
-                              className="form-control form-control-sm"
-                              placeholder="Địa chỉ Gmail (VD: example@gmail.com) *"
+                              className="form-input-field"
+                              placeholder="yourname@gmail.com"
                               value={email}
                               onChange={(e) => setEmail(e.target.value)}
                               maxLength={150}
                               required
                             />
-                            <small className="text-muted" style={{ fontSize: "11px" }}>Bắt buộc phải có đuôi @gmail.com để nhận file báo giá</small>
                           </div>
-                          <div className="mb-2">
-                            <label className="form-label mb-1" style={{ fontSize: "12px", fontWeight: "600" }}>
-                              Địa chỉ công trình
-                            </label>
+                        </div>
+
+                        {/* Địa chỉ công trình */}
+                        <div className="col-12 col-sm-6 form-input-box">
+                          <label className="form-input-label">Địa chỉ công trình</label>
+                          <div className="form-input-inner">
+                            <i className="bi bi-geo-alt-fill form-input-icon"></i>
                             <input
                               type="text"
-                              className="form-control form-control-sm"
-                              placeholder="Địa chỉ công trình (Quận/Huyện, Tỉnh thành)"
+                              className="form-input-field"
+                              placeholder="Quận/Huyện, Tỉnh thành"
                               value={address}
                               onChange={(e) => setAddress(e.target.value)}
                               maxLength={250}
                             />
                           </div>
+                        </div>
 
-                          <div className="mb-3">
-                            <label className="form-label mb-1 d-flex justify-content-between align-items-center" style={{ fontSize: "12px", fontWeight: "600" }}>
-                              <span>Ghi chú cấu hình Cabin & Yêu cầu kỹ thuật</span>
-                              <span className="badge bg-primary-subtle text-primary" style={{ fontSize: "10px" }}>Đồng bộ Studio</span>
-                            </label>
-                            <textarea
-                              className="form-control form-control-sm"
-                              rows={2}
-                              placeholder="Cấu hình nội thất cabin và yêu cầu riêng..."
-                              value={customerNotes}
-                              onChange={(e) => setCustomerNotes(e.target.value)}
-                              maxLength={500}
-                              style={{ fontSize: "12px" }}
-                            />
-                            <small className="text-muted d-block mt-1" style={{ fontSize: "11px" }}>
-                              Đã bao gồm cấu hình vách, sàn đá, trần và tay vịn vừa chọn ở Studio Cabin.
-                            </small>
-                          </div>
+                        {/* Ghi chú */}
+                        <div className="col-12 form-input-box">
+                          <label className="form-input-label d-flex justify-content-between align-items-center">
+                            <span>Ghi chú cấu hình &amp; Yêu cầu riêng</span>
+                            <span className="badge bg-primary-subtle text-primary" style={{ fontSize: "10px" }}>Đồng bộ Studio</span>
+                          </label>
+                          <textarea
+                            className="form-input-field"
+                            style={{ paddingLeft: "0.85rem", minHeight: "65px" }}
+                            rows={2}
+                            placeholder="Ghi chú thêm về hiện trạng nhà, phong thủy hoặc mong muốn..."
+                            value={customerNotes}
+                            onChange={(e) => setCustomerNotes(e.target.value)}
+                            maxLength={500}
+                          />
+                        </div>
+                      </div>
 
-                          <div className="d-grid gap-2 pt-2">
-                            <button
-                              type="submit"
-                              className="btn btn-primary fw-bold"
-                              disabled={submitting}
-                            >
-                              {submitting ? "Đang xử lý..." : "Lưu & Nhận Báo Giá Kỹ Thuật"}
-                              <i className="bi bi-arrow-right ms-2"></i>
-                            </button>
-                            <button
-                              type="button"
-                              className="btn btn-outline-secondary btn-sm"
-                              onClick={handlePrint}
-                            >
-                              <i className="bi bi-file-earmark-pdf me-2 text-danger"></i>
-                              Xem trước & Tải file PDF
-                            </button>
-                          </div>
-                        </form>
-                      )}
-                    </div>
-                  </div>
+                      {/* Nút gửi */}
+                      <button
+                        type="submit"
+                        className="btn-quote-submit mt-2"
+                        disabled={submitting}
+                      >
+                        <i className="bi bi-send-fill"></i>
+                        <span>{submitting ? "Đang xử lý..." : "LƯU & NHẬN BÁO GIÁ KỸ THUẬT"}</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        className="btn-quote-preview"
+                        onClick={handlePrint}
+                      >
+                        <i className="bi bi-printer me-1"></i>
+                        Xem trước &amp; In báo giá
+                      </button>
+                    </form>
+                  )}
                 </div>
 
-                <div className="alert alert-info border-0 shadow-sm d-flex align-items-center">
+                {/* 3. PHỐI CẢNH CABIN 2.5D (GIỮ NGUYÊN BẢN GỐC TÍNH NĂNG ĐẦY ĐỦ NHƯ NÃY) */}
+                <div className="mb-4">
+                  <CabinVisualizer
+                    elevatorType={elevatorType}
+                    onChangeElevatorType={setElevatorType}
+                    capacityKg={Number(capacityKg)}
+                    stops={Number(stops)}
+                    doorType={doorType}
+                    onChangeDoorType={setDoorType}
+                    onApplyConfig={setCabinSpecs}
+                    onRequestConsultation={handleCabinConsultation}
+                  />
+                </div>
+
+                {/* Hotline hỗ trợ */}
+                <div className="alert alert-info border-0 shadow-sm d-flex align-items-center rounded-3 p-3">
                   <i className="bi bi-headset fs-2 me-3 text-primary"></i>
                   <div>
-                    <strong className="d-block">Cần kỹ sư tư vấn kết cấu trực tiếp?</strong>
-                    <small className="text-muted">Hotline 24/7: </small>
+                    <strong className="d-block" style={{ fontSize: "13.5px" }}>Cần kỹ sư tư vấn kết cấu trực tiếp?</strong>
+                    <small className="text-muted">Hotline kỹ thuật 24/7: </small>
                     <a href={`tel:${soDienThoaiLienKet}`} className="fw-bold text-primary text-decoration-none">
                       {soDienThoaiCongTy}
                     </a>
                   </div>
                 </div>
+
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Printable Quotation Template (Active only during print/PDF generation) */}
-      <div id="print-quotation" className="d-none d-print-block" ref={printRef}>
-        <div style={{ padding: "40px", fontFamily: "Arial, sans-serif", color: "#111", maxWidth: "800px", margin: "0 auto" }}>
-          {/* Header */}
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "2px solid #0056b3", paddingBottom: "15px", marginBottom: "25px" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
-              <img src={logoHaHong} alt="Logo" style={{ height: "65px", borderRadius: "6px" }} />
+      {/* Printable Quotation Sheet (Giữ nguyên cho in ấn PDF) */}
+      <div id="print-quotation" ref={printRef} style={{ display: "none" }}>
+        <div style={{ padding: "30px", fontFamily: "Arial, sans-serif", color: "#111" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "2px solid #0b2246", paddingBottom: "15px", marginBottom: "20px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+              <img src={logoHaHong} alt="Logo Hà Hồng" style={{ width: "60px", height: "60px", objectFit: "cover", borderRadius: "6px" }} />
               <div>
-                <h2 style={{ margin: "0", color: "#0056b3", fontSize: "20px", textTransform: "uppercase" }}>CÔNG TY TNHH THANG MÁY HÀ HỒNG</h2>
-                <small style={{ color: "#555" }}>Chuyên Gia Thang Máy Gia Đình & Dịch Vụ Kỹ Thuật TPHCM</small><br />
-                <small style={{ color: "#555" }}>Hotline: {soDienThoaiCongTy} | Email: {emailCongTy} | Web: thangmayhahong.xyz</small>
+                <h2 style={{ margin: "0", color: "#0b2246", fontSize: "20px", fontWeight: "bold" }}>CÔNG TY CỔ PHẦN THANG MÁY HÀ HỒNG</h2>
+                <p style={{ margin: "3px 0 0", fontSize: "12px", color: "#555" }}>Chuyên cung cấp, lắp đặt và bảo trì thang máy gia đình Fuji, Mitsubishi chính hãng</p>
+                <p style={{ margin: "2px 0 0", fontSize: "12px", color: "#555" }}>Hotline: {soDienThoaiCongTy} | Email: {emailCongTy} | Website: thangmayhahong.xyz</p>
               </div>
             </div>
             <div style={{ textAlign: "right" }}>
-              <strong style={{ color: "#d9534f", fontSize: "16px" }}>BẢNG DỰ TOÁN BÁO GIÁ</strong><br />
-              <small style={{ color: "#777" }}>Mã: HH-{savedEstimateId || Date.now().toString().slice(-6)}</small><br />
-              <small style={{ color: "#777" }}>Ngày: {new Date().toLocaleDateString("vi-VN")}</small>
+              <span style={{ fontSize: "12px", color: "#777" }}>Mã dự toán:</span>
+              <div style={{ fontWeight: "bold", fontSize: "14px", color: "#0b2246" }}>HH-{savedEstimateId || "PREVIEW"}</div>
+              <div style={{ fontSize: "11px", color: "#777" }}>Ngày: {new Date().toLocaleDateString("vi-VN")}</div>
             </div>
           </div>
 
-          {/* Customer info */}
-          <div style={{ backgroundColor: "#f9f9f9", padding: "12px 18px", borderRadius: "6px", marginBottom: "20px", border: "1px solid #eee" }}>
-            <table style={{ width: "100%", fontSize: "14px" }}>
-              <tbody>
-                <tr>
-                  <td style={{ width: "18%", color: "#666" }}>Kính gửi:</td>
-                  <td style={{ width: "32%" }}><strong>{customerName || "Quý khách hàng"}</strong></td>
-                  <td style={{ width: "18%", color: "#666" }}>Số điện thoại:</td>
-                  <td style={{ width: "32%" }}><strong>{phoneNumber || "---"}</strong></td>
-                </tr>
-                <tr>
-                  <td style={{ color: "#666" }}>Địa chỉ Gmail:</td>
-                  <td><strong>{email || "---"}</strong></td>
-                  <td style={{ color: "#666" }}>Địa chỉ công trình:</td>
-                  <td>{address || "TP. Hồ Chí Minh"}</td>
-                </tr>
-              </tbody>
-            </table>
+          <h3 style={{ textAlign: "center", color: "#0b2246", margin: "0 0 20px", fontSize: "18px", textTransform: "uppercase", letterSpacing: "1px" }}>
+            BẢNG DỰ TOÁN CHI PHÍ THIẾT BỊ VÀ THI CÔNG LẮP ĐẶT
+          </h3>
+
+          <div style={{ background: "#f8fafc", padding: "12px 16px", borderRadius: "6px", marginBottom: "20px", fontSize: "13px" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
+              <div><strong>Khách hàng:</strong> {customerName || "Quý khách hàng"}</div>
+              <div><strong>Số điện thoại:</strong> {phoneNumber || "Chưa cung cấp"}</div>
+              <div><strong>Địa chỉ:</strong> {address || "Chưa cung cấp"}</div>
+              <div><strong>Email:</strong> {email || "Chưa cung cấp"}</div>
+            </div>
           </div>
 
-          {/* Specs Summary */}
-          <h3 style={{ fontSize: "16px", color: "#0056b3", borderLeft: "4px solid #0056b3", paddingLeft: "8px", margin: "15px 0 10px" }}>
-            I. THÔNG SỐ KỸ THUẬT CƠ BẢN
-          </h3>
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px", marginBottom: "20px" }}>
+          <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "20px", fontSize: "12.5px" }}>
             <thead>
-              <tr style={{ backgroundColor: "#0056b3", color: "#fff" }}>
-                <th style={{ border: "1px solid #ddd", padding: "8px", textAlign: "left" }}>Hạng mục</th>
+              <tr style={{ background: "#0b2246", color: "#fff" }}>
+                <th style={{ border: "1px solid #ddd", padding: "8px", textAlign: "left" }}>Hạng mục cấu hình</th>
                 <th style={{ border: "1px solid #ddd", padding: "8px", textAlign: "left" }}>Thông số kỹ thuật đề xuất</th>
               </tr>
             </thead>
             <tbody>
-              <tr><td style={{ border: "1px solid #ddd", padding: "6px 8px" }}>Số tầng phục vụ</td><td style={{ border: "1px solid #ddd", padding: "6px 8px" }}><strong>{stops} Điểm dừng (Stops)</strong></td></tr>
-              <tr><td style={{ border: "1px solid #ddd", padding: "6px 8px" }}>Tải trọng định mức</td><td style={{ border: "1px solid #ddd", padding: "6px 8px" }}><strong>{capacityKg} kg</strong> (Khoảng 4 - 6 người)</td></tr>
+              <tr><td style={{ border: "1px solid #ddd", padding: "6px 8px" }}>Số tầng / Điểm dừng</td><td style={{ border: "1px solid #ddd", padding: "6px 8px" }}>{stops} Tầng ({stops} Stops)</td></tr>
+              <tr><td style={{ border: "1px solid #ddd", padding: "6px 8px" }}>Tải trọng / Sức chứa</td><td style={{ border: "1px solid #ddd", padding: "6px 8px" }}>{capacityKg} kg ({Math.round(capacityKg / 70)} người)</td></tr>
               <tr><td style={{ border: "1px solid #ddd", padding: "6px 8px" }}>Dòng thang máy</td><td style={{ border: "1px solid #ddd", padding: "6px 8px" }}>{elevatorType === "homelift-kinh" ? "Thang máy kính Homelift Panorama" : (elevatorType === "inox-guong-vang" ? "Cabin Inox Gương Vàng Luxury" : "Inox 304 Tiêu Chuẩn")}</td></tr>
               <tr><td style={{ border: "1px solid #ddd", padding: "6px 8px" }}>Nội thất Cabin cấu hình</td><td style={{ border: "1px solid #ddd", padding: "6px 8px" }}><strong>Vách:</strong> {cabinSpecs.wall} | <strong>Sàn:</strong> {cabinSpecs.floor} | <strong>Trần:</strong> {cabinSpecs.ceiling} | <strong>Tay vịn:</strong> {cabinSpecs.handrail}</td></tr>
-              <tr><td style={{ border: "1px solid #ddd", padding: "6px 8px" }}>Động cơ chính</td><td style={{ border: "1px solid #ddd", padding: "6px 8px" }}><strong>{motorBrand}</strong> {result?.motorPowerKw}kW (Không hộp số tiết kiệm điện)</td></tr>
-              <tr><td style={{ border: "1px solid #ddd", padding: "6px 8px" }}>Kích thước giếng thang (W x D)</td><td style={{ border: "1px solid #ddd", padding: "6px 8px" }}>{result?.shaftWidth} x {result?.shaftDepth} mm</td></tr>
+              <tr><td style={{ border: "1px solid #ddd", padding: "6px 8px" }}>Động cơ kéo</td><td style={{ border: "1px solid #ddd", padding: "6px 8px" }}>Động cơ không hộp số {motorBrand} {result?.motorPowerKw} kW</td></tr>
+              <tr><td style={{ border: "1px solid #ddd", padding: "6px 8px" }}>Quy cách cửa tầng</td><td style={{ border: "1px solid #ddd", padding: "6px 8px" }}>Cửa mở tự động {doorType === "CO" ? "2 cánh mở tim (2CO)" : "2 cánh lùa 1 bên (2SO)"}</td></tr>
+              <tr><td style={{ border: "1px solid #ddd", padding: "6px 8px" }}>Kích thước hố thang lọt lòng (W x D)</td><td style={{ border: "1px solid #ddd", padding: "6px 8px" }}>{result?.shaftWidth} x {result?.shaftDepth} mm</td></tr>
               <tr><td style={{ border: "1px solid #ddd", padding: "6px 8px" }}>Kích thước cabin (W x D x H)</td><td style={{ border: "1px solid #ddd", padding: "6px 8px" }}>{result?.cabinWidth} x {result?.cabinDepth} x 2200 mm</td></tr>
-              <tr><td style={{ border: "1px solid #ddd", padding: "6px 8px" }}>Chiều sâu hố PIT / Chiều cao OH</td><td style={{ border: "1px solid #ddd", padding: "6px 8px" }}>PIT: {result?.pitDepth} mm | OH: {result?.overheadHeight} mm</td></tr>
-              <tr><td style={{ border: "1px solid #ddd", padding: "6px 8px" }}>Nguồn điện yêu cầu</td><td style={{ border: "1px solid #ddd", padding: "6px 8px" }}>{result?.powerSupply}</td></tr>
+              <tr><td style={{ border: "1px solid #ddd", padding: "6px 8px" }}>Chiều sâu hố PIT / Chiều cao OH</td><td style={{ border: "1px solid #ddd", padding: "6px 8px" }}>Pit: {result?.pitDepth} mm | OH: {result?.overheadHeight} mm</td></tr>
+              <tr><td style={{ border: "1px solid #ddd", padding: "6px 8px" }}>Thời gian bảo hành</td><td style={{ border: "1px solid #ddd", padding: "6px 8px" }}>{result?.warrantyMonths} tháng chính hãng (Bảo trì miễn phí {result?.freeMaintenanceMonths} tháng)</td></tr>
             </tbody>
           </table>
 
-          {/* Pricing Table */}
-          <h3 style={{ fontSize: "16px", color: "#0056b3", borderLeft: "4px solid #0056b3", paddingLeft: "8px", margin: "15px 0 10px" }}>
-            II. BẢNG BÓC TÁCH DỰ TOÁN CHI PHÍ TRỌN GÓI
-          </h3>
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px", marginBottom: "20px" }}>
-            <thead>
-              <tr style={{ backgroundColor: "#f2f2f2" }}>
-                <th style={{ border: "1px solid #ddd", padding: "8px", textAlign: "center", width: "40px" }}>STT</th>
-                <th style={{ border: "1px solid #ddd", padding: "8px", textAlign: "left" }}>Nội dung công việc / Thiết bị</th>
-                <th style={{ border: "1px solid #ddd", padding: "8px", textAlign: "right", width: "180px" }}>Khoảng giá dự toán (VNĐ)</th>
-              </tr>
-            </thead>
-            <tbody>
-              {result?.breakdownItems?.map((item, idx) => (
-                <tr key={idx}>
-                  <td style={{ border: "1px solid #ddd", padding: "6px 8px", textAlign: "center" }}>{idx + 1}</td>
-                  <td style={{ border: "1px solid #ddd", padding: "6px 8px" }}>
-                    <strong>{item.category}:</strong> {item.title}
-                  </td>
-                  <td style={{ border: "1px solid #ddd", padding: "6px 8px", textAlign: "right" }}>
-                    {formatVnd(item.minPrice)}
-                  </td>
-                </tr>
-              ))}
-              <tr style={{ backgroundColor: "#eef6ff", fontWeight: "bold" }}>
-                <td colSpan="2" style={{ border: "1px solid #ddd", padding: "10px 8px", textAlign: "right", fontSize: "14px" }}>
-                  TỔNG GIÁ TRỊ DỰ TOÁN TRỌN GÓI:
-                </td>
-                <td style={{ border: "1px solid #ddd", padding: "10px 8px", textAlign: "right", fontSize: "15px", color: "#d9534f" }}>
-                  {formatVnd(result?.estimatedPriceMin)} - {formatVnd(result?.estimatedPriceMax)}
-                </td>
-              </tr>
-            </tbody>
-          </table>
-
-          {/* Terms & Warranty */}
-          <div style={{ fontSize: "12px", color: "#555", marginTop: "15px", lineHeight: "1.6" }}>
-            <strong>Chính sách cam kết của Thang Máy Hà Hồng:</strong><br />
-            • Bảo hành toàn bộ thiết bị chính hãng: <strong>{result?.warrantyMonths} tháng</strong>.<br />
-            • Tặng gói dịch vụ bảo trì định kỳ miễn phí: <strong>{result?.freeMaintenanceMonths} tháng</strong>.<br />
-            • Cứu hộ kỹ thuật khẩn cấp 24/7 có mặt xử lý trong 30 - 60 phút tại khu vực TPHCM.<br />
-            • Đã bao gồm trọn gói: Hồ sơ thiết kế kỹ thuật, kiểm định an toàn của cơ quan Nhà nước và bảo hiểm công trình.
+          <div style={{ background: "#fef3c7", border: "1px solid #f59e0b", borderRadius: "6px", padding: "14px", marginBottom: "25px", textAlign: "center" }}>
+            <div style={{ fontSize: "13px", color: "#92400e", marginBottom: "4px" }}>TỔNG DỰ TOÁN TRỌN GÓI THAM KHẢO (ĐÃ GỒM ĐỘNG CƠ, CABIN, THI CÔNG &amp; KIỂM ĐỊNH):</div>
+            <div style={{ fontSize: "22px", fontWeight: "bold", color: "#0b2246" }}>
+              {formatVnd(result?.estimatedPriceMin)} - {formatVnd(result?.estimatedPriceMax)}
+            </div>
           </div>
 
-          {/* Signature block */}
-          <div style={{ display: "flex", justifyContent: "space-between", marginTop: "40px", textAlign: "center", fontSize: "13px" }}>
-            <div>
-              <strong>ĐẠI DIỆN KHÁCH HÀNG</strong><br />
-              <small style={{ color: "#777" }}>(Ký và ghi rõ họ tên)</small>
+          <div style={{ display: "flex", justifyContent: "space-between", marginTop: "40px", fontSize: "12px", textAlign: "center" }}>
+            <div style={{ width: "200px" }}>
+              <div style={{ fontWeight: "bold", marginBottom: "50px" }}>ĐẠI DIỆN KHÁCH HÀNG</div>
+              <div>(Ký và ghi rõ họ tên)</div>
             </div>
-            <div>
-              <strong>CÔNG TY TNHH THANG MÁY HÀ HỒNG</strong><br />
-              <small style={{ color: "#777" }}>(Đã duyệt dự toán kỹ thuật)</small>
-              <div style={{ marginTop: "45px", color: "#d9534f", fontWeight: "bold" }}>
-                [HÀ HỒNG ELEVATOR]
-              </div>
+            <div style={{ width: "220px" }}>
+              <div style={{ fontWeight: "bold", marginBottom: "50px" }}>CÔNG TY CP THANG MÁY HÀ HỒNG</div>
+              <div style={{ fontWeight: "bold", color: "#0b2246" }}>KỸ SƯ TRƯỞNG DUYỆT</div>
+              <div style={{ fontSize: "11px", color: "#666" }}>(Đã ký &amp; đóng dấu số)</div>
             </div>
           </div>
         </div>
