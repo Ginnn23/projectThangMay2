@@ -108,7 +108,7 @@ $@"💬 <b>KHÁCH ĐANG HỎI TRỢ LÝ AI TRÊN WEBSITE:</b>
                     await file.CopyToAsync(fileStream, cancellationToken);
                 }
 
-                savedImageUrl = $"/uploads/{fileName}";
+                savedImageUrl = $"{Request.Scheme}://{Request.Host.Value}/uploads/{fileName}";
             }
             catch
             {

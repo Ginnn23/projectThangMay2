@@ -1,6 +1,12 @@
 import { useState, useRef } from "react";
-import { apiClient } from "../api/client";
+import { API_ORIGIN, apiClient } from "../api/client";
 import "./AiVisionScanner.css";
+
+function resolveImageUrl(url) {
+  if (!url) return null;
+  if (/^https?:\/\//i.test(url) || url.startsWith("data:") || url.startsWith("blob:")) return url;
+  return `${API_ORIGIN}${url.startsWith("/") ? url : `/${url}`}`;
+}
 
 // Blueprint sample presets with SVG data URIs
 const SAMPLE_PRESETS = [
@@ -27,8 +33,8 @@ const SAMPLE_PRESETS = [
   }
 ];
 
-function generateBlueprintSvg(title, w, d, color = "#0284c7") {
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="600" height="400" viewBox="0 0 600 400" style="background:#09192f;font-family:sans-serif;">
+function getBlueprintSvgString(title, w, d, color = "#0284c7") {
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="600" height="400" viewBox="0 0 600 400" style="background:#09192f;font-family:sans-serif;">
     <defs>
       <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
         <path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
@@ -67,7 +73,11 @@ function generateBlueprintSvg(title, w, d, color = "#0284c7") {
     <rect x="180" y="320" width="240" height="26" rx="4" fill="${color}" opacity="0.9"/>
     <text x="300" y="338" fill="#ffffff" font-size="12" font-weight="bold" text-anchor="middle">${title}</text>
   </svg>`;
-  return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+}
+
+function generateBlueprintSvg(title, w, d, color = "#0284c7") {
+  const svg = getBlueprintSvgString(title, w, d, color);
+  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
 }
 
 export default function AiVisionScanner({ onApplySpecs }) {
@@ -129,15 +139,14 @@ export default function AiVisionScanner({ onApplySpecs }) {
     if (sample.id === "thang-tieu-chuan") { w = "1500"; d = "1550"; }
     if (sample.id === "biet-thu-cao-cap") { w = "1750"; d = "1750"; }
 
-    const svgUrl = generateBlueprintSvg(sample.name, w, d, sample.svgColor);
-    setPreviewUrl(svgUrl);
+    const svgString = getBlueprintSvgString(sample.name, w, d, sample.svgColor);
+    const dataUri = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgString)}`;
+    setPreviewUrl(dataUri);
     setFile(null);
 
-    // Convert SVG Data URL to Blob
     try {
-      const res = await fetch(svgUrl);
-      const blob = await res.blob();
-      const sampleFile = new File([blob], `${sample.id}-blueprint.png`, { type: "image/png" });
+      const blob = new Blob([svgString], { type: "image/svg+xml" });
+      const sampleFile = new File([blob], `${sample.id}-blueprint.svg`, { type: "image/svg+xml" });
       await analyzeWithApi(sampleFile, sample.prompt);
     } catch {
       await analyzeWithApi(null, sample.prompt);
@@ -336,11 +345,22 @@ export default function AiVisionScanner({ onApplySpecs }) {
           <div className="ai-vision-result-card">
             <div className="row g-4 align-items-center">
               <div className="col-lg-5 text-center">
-                <div className="position-relative d-inline-block rounded-3 overflow-hidden border border-warning shadow">
+                <div
+                  className="position-relative rounded-3 overflow-hidden border border-warning shadow d-flex align-items-center justify-content-center"
+                  style={{ width: "100%", height: "260px", background: "#09192f" }}
+                >
                   <img
-                    src={result.imageUrl || previewUrl}
+                    src={
+                      previewUrl ||
+                      (result.imageUrl ? resolveImageUrl(result.imageUrl) : null) ||
+                      generateBlueprintSvg(result.imageType || "Bản vẽ kỹ thuật", result.shaftWidthMm || 1350, result.shaftDepthMm || 1400)
+                    }
                     alt="Kết quả phân tích bản vẽ"
-                    style={{ width: "100%", maxHeight: "260px", objectFit: "cover", display: "block" }}
+                    style={{ width: "100%", height: "100%", objectFit: "contain", display: "block", background: "#09192f" }}
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = generateBlueprintSvg(result.imageType || "Bản vẽ kỹ thuật", result.shaftWidthMm || 1350, result.shaftDepthMm || 1400);
+                    }}
                   />
                   <div className="position-absolute bottom-0 start-0 end-0 bg-dark bg-opacity-75 text-white py-1 px-2 small">
                     <i className="bi bi-check2-circle text-success me-1"></i>
