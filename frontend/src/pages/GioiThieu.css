@@ -678,3 +678,201 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ==========================================
+   THÔNG TIN PHÁP LÝ (LEGAL INFO CARD)
+   ========================================== */
+.about-legal-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 16px 40px rgba(11, 31, 58, 0.08);
+  height: 100%;
+}
+
+.about-legal-header {
+  background: linear-gradient(135deg, #0b1f3a 0%, #1565c0 100%);
+  padding: 20px 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #ffffff;
+}
+
+.about-legal-header i {
+  font-size: 24px;
+  color: #d9a441;
+}
+
+.about-legal-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.about-legal-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.about-legal-list li {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 12px 24px;
+  border-bottom: 1px solid #f1f5f9;
+  transition: background 0.2s;
+}
+
+.about-legal-list li:last-child {
+  border-bottom: none;
+}
+
+.about-legal-list li:hover {
+  background: #f8fafc;
+}
+
+.about-legal-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: #94a3b8;
+}
+
+.about-legal-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: #0b1f3a;
+  line-height: 1.5;
+}
+
+.about-map-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 16px 24px 20px;
+  padding: 12px 20px;
+  background: linear-gradient(135deg, #d9a441 0%, #b88628 100%);
+  color: #0b1f3a;
+  font-weight: 800;
+  font-size: 14px;
+  border-radius: 10px;
+  text-decoration: none;
+  transition: all 0.25s ease;
+  box-shadow: 0 6px 18px rgba(217, 164, 65, 0.3);
+}
+
+.about-map-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(217, 164, 65, 0.45);
+  color: #0b1f3a;
+}
+
+/* ==========================================
+   DỊCH VỤ (SERVICES SECTION)
+   ========================================== */
+.about-services-section-new {
+  padding: 90px 0;
+  background: #f1f5f9;
+}
+
+.about-service-item {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  padding: 30px 26px;
+  height: 100%;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.about-service-item::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #d9a441, #0b1f3a);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.about-service-item:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 44px rgba(11, 31, 58, 0.1);
+  border-color: rgba(217, 164, 65, 0.4);
+}
+
+.about-service-item:hover::after {
+  opacity: 1;
+}
+
+.about-service-icon-wrap {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #0b1f3a, #1565c0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #d9a441;
+  font-size: 24px;
+  margin-bottom: 18px;
+}
+
+.about-service-item h3 {
+  font-size: 18px;
+  font-weight: 800;
+  color: #0b1f3a;
+  margin-bottom: 10px;
+  line-height: 1.35;
+}
+
+.about-service-item p {
+  font-size: 14.5px;
+  color: #64748b;
+  line-height: 1.7;
+  margin-bottom: 18px;
+}
+
+.about-service-link {
+  display: inline-flex;
+  align-items: center;
+  color: #1565c0;
+  font-weight: 800;
+  font-size: 14px;
+  text-decoration: none;
+  transition: gap 0.2s ease, color 0.2s;
+}
+
+.about-service-link:hover {
+  color: #d9a441;
+  gap: 6px;
+}
+
+/* Responsive mobile */
+@media (max-width: 767px) {
+  .about-legal-list li {
+    padding: 10px 16px;
+  }
+  .about-map-btn {
+    margin: 12px 16px 16px;
+  }
+  .about-services-section-new {
+    padding: 60px 0;
+  }
+  .about-stat-item {
+    border-right: none;
+    border-bottom: 1px solid #edf2f7;
+  }
+  .about-stat-item:last-child {
+    border-bottom: none;
+  }
+}

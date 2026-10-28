@@ -1,3 +1,10 @@
+export const tenCongTy = "Công Ty Cổ Phần Thương Mại Dịch Vụ Thang Máy Hà Hồng";
+export const tenQuocTe = "HA HONG LIFT TRADING - SERVICE CORPORATION";
+export const maSoThue = "0313908417";
+export const ngayThanhLap = "11/07/2016";
+export const nguoiDaiDien = "Vũ Tuyên Khôi";
+export const diaChiDangKy = "168/4 ấp Thới Tây 2, Xã Tân Hiệp, Huyện Hóc Môn, TP. Hồ Chí Minh";
+export const diaChiVPGD = "100 Tân Sơn, Phường 15, Quận Tân Bình, TP. Hồ Chí Minh";
 export const soDienThoaiCongTy = "0909 9333 58";
 export const soDienThoaiLienKet = "0909933358";
 export const emailCongTy = "hahongco@gmail.com";
