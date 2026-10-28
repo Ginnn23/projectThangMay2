@@ -333,7 +333,7 @@ export default function DuToanThangMay() {
           )}
 
           <div className="row g-4">
-            {/* CỘT BÊN TRÁI: BỘ CHỌN CẤU HÌNH (ĐẸP MẮT, GỌN GÀNG, CHUẨN THƯƠNG HIỆU) */}
+            {/* CỘT BÊN TRÁI: BỘ CHỌN CẤU HÌNH (GỌN GÀNG, SANG TRỌNG) */}
             <div className="col-lg-7">
               {/* Bước 1: Loại công trình */}
               <div className="estimator-step-card estimator-card">
@@ -534,11 +534,25 @@ export default function DuToanThangMay() {
               </div>
             </div>
 
-            {/* CỘT BÊN PHẢI: BẢNG GIÁ DỰ TOÁN, FORM GỬI & PHỐI CẢNH CABIN */}
+            {/* CỘT BÊN PHẢI: CABIN Ở TRÊN CÙNG, TIẾP ĐẾN BẢNG GIÁ, TIẾP ĐẾN FORM GỬI */}
             <div className="col-lg-5">
               <div className="estimator-sticky-sidebar">
-                
-                {/* 1. LAYOUT GIÁ TIỀN & THÔNG SỐ (GỌN GÀNG, SANG TRỌNG, BẮT MẮT) */}
+
+                {/* 1. PHỐI CẢNH CABIN 2.5D (ĐẶT Ở TRÊN CÙNG THEO YÊU CẦU CỦA BẠN) */}
+                <div className="mb-4">
+                  <CabinVisualizer
+                    elevatorType={elevatorType}
+                    onChangeElevatorType={setElevatorType}
+                    capacityKg={Number(capacityKg)}
+                    stops={Number(stops)}
+                    doorType={doorType}
+                    onChangeDoorType={setDoorType}
+                    onApplyConfig={setCabinSpecs}
+                    onRequestConsultation={handleCabinConsultation}
+                  />
+                </div>
+
+                {/* 2. BẢNG DỰ TOÁN GIÁ TIỀN & THÔNG SỐ (GỌN GÀNG, SANG TRỌNG) */}
                 <div className="estimator-price-card">
                   <div className="estimator-price-header">
                     <div>
@@ -627,7 +641,7 @@ export default function DuToanThangMay() {
                   </div>
                 </div>
 
-                {/* 2. FORM GỬI YÊU CẦU BÁO GIÁ (ĐẶC TẢ TÁCH BIỆT, RÕ RÀNG, DỄ NHẬP) */}
+                {/* 3. FORM GỬI YÊU CẦU BÁO GIÁ (ĐẶC TẢ TÁCH BIỆT, RÕ RÀNG, DỄ NHẬP) */}
                 <div className="quote-submit-card quote-form-card" id="quote-form-section">
                   <div className="quote-submit-header">
                     <div className="quote-submit-title">
@@ -780,20 +794,6 @@ export default function DuToanThangMay() {
                   )}
                 </div>
 
-                {/* 3. PHỐI CẢNH CABIN 2.5D (GIỮ NGUYÊN BẢN GỐC TÍNH NĂNG ĐẦY ĐỦ NHƯ NÃY) */}
-                <div className="mb-4">
-                  <CabinVisualizer
-                    elevatorType={elevatorType}
-                    onChangeElevatorType={setElevatorType}
-                    capacityKg={Number(capacityKg)}
-                    stops={Number(stops)}
-                    doorType={doorType}
-                    onChangeDoorType={setDoorType}
-                    onApplyConfig={setCabinSpecs}
-                    onRequestConsultation={handleCabinConsultation}
-                  />
-                </div>
-
                 {/* Hotline hỗ trợ */}
                 <div className="alert alert-info border-0 shadow-sm d-flex align-items-center rounded-3 p-3">
                   <i className="bi bi-headset fs-2 me-3 text-primary"></i>
@@ -812,7 +812,7 @@ export default function DuToanThangMay() {
         </div>
       </section>
 
-      {/* Printable Quotation Sheet (Giữ nguyên cho in ấn PDF) */}
+      {/* Printable Quotation Sheet (In ấn PDF) */}
       <div id="print-quotation" ref={printRef} style={{ display: "none" }}>
         <div style={{ padding: "30px", fontFamily: "Arial, sans-serif", color: "#111" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "2px solid #0b2246", paddingBottom: "15px", marginBottom: "20px" }}>
