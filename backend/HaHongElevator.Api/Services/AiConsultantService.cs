@@ -481,7 +481,24 @@ BẮT BUỘC trả về ĐÚNG MỘT đối tượng JSON (không thêm bất k�
         int oh = 3200;
         int stops = 4;
 
-        if (prompt.Contains("300") || prompt.Contains("nho"))
+        // Phân tích số tầng từ văn bản / ghi chú / tên file
+        var stopMatch = Regex.Match(prompt, @"(\d+)\s*(?:tang|tầng|stops|stop|floor)");
+        if (stopMatch.Success && int.TryParse(stopMatch.Groups[1].Value, out var parsedStops))
+        {
+            stops = Math.Clamp(parsedStops, 2, 10);
+        }
+
+        var isCommercialHighRise = stops >= 7 || prompt.Contains("van phong") || prompt.Contains("văn phòng") || prompt.Contains("toa nha") || prompt.Contains("tòa nhà") || prompt.Contains("khach san") || prompt.Contains("khách sạn");
+
+        if (isCommercialHighRise)
+        {
+            capacity = 630;
+            shaftW = 1800;
+            shaftD = 1800;
+            pit = 1400;
+            oh = 4200;
+        }
+        else if (prompt.Contains("300") || prompt.Contains("nho"))
         {
             capacity = 300;
             shaftW = 1200;
@@ -501,13 +518,33 @@ BẮT BUỘC trả về ĐÚNG MỘT đối tượng JSON (không thêm bất k�
         }
 
         var elevType = isVilla ? "biet-thu" : (isGlass ? "homelift-kinh" : "tieu-chuan");
-        var buildingType = isVilla ? "biet-thu" : (isRenovation ? "nha-pho-cai-tao" : "nha-pho-xay-moi");
+        var buildingType = isCommercialHighRise ? "van-phong" : (isVilla ? "biet-thu" : (isRenovation ? "nha-pho-cai-tao" : "nha-pho-xay-moi"));
+
+        var summary = isCommercialHighRise
+            ? $"AI Vision đã nhận diện bản vẽ Tòa nhà cao tầng ({stops} tầng). Với công trình cao tầng có tần suất di chuyển liên tục, giải pháp tối ưu là lắp đặt Thang Máy Tải Khách Tiêu Chuẩn Inox 304 tốc độ cao (1.5 - 1.75 m/s) tải trọng {capacity}kg (8 - 9 người). Hố PIT yêu cầu từ {pit}mm và chiều cao OH {oh}mm để bố trí bộ giảm chấn thủy lực đạt chuẩn an toàn TCVN."
+            : $"AI Vision đã nhận diện cấu trúc giếng thang với kích thước lọt lòng ước tính khoảng {shaftW} x {shaftD} mm. Phương án tối ưu nhất là lắp đặt Thang Máy {(elevType == "homelift-kinh" ? "Kính Homelift Panorama" : (elevType == "biet-thu" ? "Biệt Thự Sang Trọng Inox Gương Vàng PVD" : "Gia Đình Tiêu Chuẩn Inox 304"))} tải trọng {capacity}kg.";
+
+        var highlights = isCommercialHighRise
+            ? new List<string>
+            {
+                $"Tòa nhà {stops} tầng yêu cầu động cơ kéo công suất lớn 5.5kW - 7.5kW và cáp tải cường độ cao chống dão.",
+                $"Hố PIT yêu cầu tối thiểu {pit} mm để bố trí trụ giảm chấn thủy lực đáy hố theo đúng quy chuẩn an toàn TCVN 6395.",
+                $"Chiều cao tầng trên cùng OH yêu cầu {oh} mm để đảm bảo khoảng cách an toàn bảo trì trên nóc cabin.",
+                "Hệ thống điều khiển tín hiệu vi xử lý nhóm thông minh (Duplex/Triplex) tối ưu thời gian chờ gọi tầng."
+            }
+            : new List<string>
+            {
+                $"Kích thước lọt lòng hố {shaftW} x {shaftD} mm lý tưởng cho phương án thi công kết cấu khung thép bọc kính cường lực hoặc hố bê tông truyền thống.",
+                $"Hố PIT yêu cầu tối thiểu {pit} mm, phù hợp hoàn hảo với hiện trạng mà không cần đục sâu ảnh hưởng móng nhà.",
+                "Động cơ không hộp số Fuji (Nhật Bản/Hàn Quốc) tiết kiệm 40% điện năng và vận hành êm ái.",
+                "Cửa tầng tự động êm dịu tích hợp photocell màng hồng ngoại an toàn đa điểm."
+            };
 
         return new VisionAnalysisResponseDto
         {
             IsElevatorDetected = true,
             ConfidenceScore = 0.94,
-            ImageType = isRenovation ? "Ảnh chụp hiện trạng ô thang thực tế" : "Bản vẽ mặt bằng kiến trúc & kết cấu",
+            ImageType = isCommercialHighRise ? $"Bản vẽ kiến trúc tòa nhà cao tầng ({stops} tầng)" : (isRenovation ? "Ảnh chụp hiện trạng ô thang thực tế" : "Bản vẽ mặt bằng kiến trúc & kết cấu"),
             ShaftWidthMm = shaftW,
             ShaftDepthMm = shaftD,
             PitDepthMm = pit,
@@ -519,22 +556,16 @@ BẮT BUỘC trả về ĐÚNG MỘT đối tượng JSON (không thêm bất k�
             SuggestedMotorBrand = "Fuji",
             SuggestedDoorType = shaftW < 1250 ? "2SO" : "2CO",
             CabinDimensions = $"{shaftW - 400} x {shaftD - 450} x 2200 mm",
-            EstimatedPriceMin = 320000000,
-            EstimatedPriceMax = 380000000,
-            SummaryAnalysis = $"AI Vision đã nhận diện cấu trúc giếng thang với kích thước lọt lòng ước tính khoảng {shaftW} x {shaftD} mm. Phương án tối ưu nhất là lắp đặt Thang Máy {(elevType == "homelift-kinh" ? "Kính Homelift Panorama" : (elevType == "biet-thu" ? "Biệt Thự Sang Trọng Inox Gương Vàng PVD" : "Gia Đình Tiêu Chuẩn Inox 304"))} tải trọng {capacity}kg.",
-            TechnicalHighlights = new List<string>
-            {
-                $"Kích thước lọt lòng hố {shaftW} x {shaftD} mm lý tưởng cho phương án thi công kết cấu khung thép bọc kính cường lực hoặc hố bê tông truyền thống.",
-                $"Hố PIT yêu cầu tối thiểu {pit} mm, phù hợp hoàn hảo với hiện trạng mà không cần đục sâu ảnh hưởng móng nhà.",
-                "Động cơ không hộp số Fuji (Nhật Bản/Hàn Quốc) tiết kiệm 40% điện năng và vận hành êm ái.",
-                "Cửa tầng tự động êm dịu tích hợp photocell màng hồng ngoại an toàn đa điểm."
-            },
+            EstimatedPriceMin = isCommercialHighRise ? 520000000 : 320000000,
+            EstimatedPriceMax = isCommercialHighRise ? 680000000 : 380000000,
+            SummaryAnalysis = summary,
+            TechnicalHighlights = highlights,
             SuitableCabinStyles = new List<string>
             {
-                "Vách kính cường lực siêu trong 10mm lấy sáng tự nhiên 4 mặt",
-                "Khung nhôm định hình mạ Anode màu Gold hoặc Đen mờ sang trọng",
+                "Inox 304 sọc nhuyễn kết hợp inox gương chống trầy xước, dễ vệ sinh",
+                "Màn hình hiển thị LCD đa phương tiện hiển thị tầng và chiều chạy",
                 "Trần đèn LED chiếu sáng vát gián tiếp chống chói mắt",
-                "Sàn đá cẩm thạch hoa văn tia chớp Nero Marquina hoặc nẹp chỉ đồng Chevron"
+                "Sàn đá Granite tự nhiên nguyên khối chịu mài mòn tần suất cao"
             }
         };
     }
