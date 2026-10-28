@@ -47,50 +47,148 @@ const SAMPLE_PRESETS = [
   }
 ];
 
-function getBlueprintSvgString(title, w, d, color = "#0284c7") {
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="600" height="400" viewBox="0 0 600 400" style="background:#09192f;font-family:sans-serif;">
+function getAdaptiveBlueprintSvgString({
+  title = "Mặt bằng bố trí hố thang máy",
+  w = 1350,
+  d = 1400,
+  cabinType = "tieu-chuan",
+  capacity = 450,
+  stops = 4,
+  isFacade = false,
+  isCommercialHighRise = false,
+  isCap4 = false,
+  hasMezzanine = false
+}) {
+  const isGlass = cabinType === "homelift-kinh" || isFacade;
+  const isVilla = cabinType === "biet-thu";
+  const highRiseMode = isCommercialHighRise || stops >= 7;
+
+  let shaftStroke = "#d9a441";
+  let shaftFill = "rgba(217,164,65,0.06)";
+  let cabinStroke = "#38bdf8";
+  let cabinFill = "rgba(56,189,248,0.1)";
+  let cabinLabel = `CABIN INOX 304 (${capacity}KG - ${Math.round(capacity / 70)} NGƯỜI)`;
+  let wallDesc = "HỐ BÊ TÔNG / GẠCH 200MM";
+
+  if (isCap4 && !hasMezzanine) {
+    shaftStroke = "#ef4444";
+    shaftFill = "rgba(239,68,68,0.08)";
+    cabinStroke = "#ef4444";
+    cabinFill = "rgba(239,68,68,0.05)";
+    cabinLabel = "⚠️ CHƯA ĐỦ 2 ĐIỂM DỪNG (CẦN TỐI THIỂU 2 TẦNG)";
+  } else if (isGlass) {
+    shaftStroke = "#06b6d4";
+    shaftFill = "rgba(6,182,212,0.08)";
+    cabinStroke = "#22d3ee";
+    cabinFill = "rgba(6,182,212,0.18)";
+    cabinLabel = isFacade
+      ? "CABIN KÍNH CƯỜNG LỰC 10MM (PANORAMA VIEW PHỐ)"
+      : "CABIN KÍNH HOMELIFT ĐÓN SÁNG (10MM)";
+    wallDesc = isFacade ? "VÁCH KÍNH MẶT TIỀN / KHUNG NHÔM ANODE" : "KHUNG THÉP BỌC KÍNH CƯỜNG LỰC";
+  } else if (isVilla) {
+    shaftStroke = "#eab308";
+    shaftFill = "rgba(234,179,8,0.08)";
+    cabinStroke = "#f59e0b";
+    cabinFill = "rgba(245,158,11,0.18)";
+    cabinLabel = "CABIN INOX GƯƠNG VÀNG PVD LUXURY";
+    wallDesc = "HỐ BÊ TÔNG ỐP ĐÁ / KHUNG MẠ PVD";
+  } else if (highRiseMode) {
+    shaftStroke = "#8b5cf6";
+    shaftFill = "rgba(139,92,246,0.08)";
+    cabinStroke = "#a78bfa";
+    cabinFill = "rgba(139,92,246,0.15)";
+    cabinLabel = `CABIN CAO ỐC 630KG (8-9 NGƯỜI) - 1.75M/S`;
+    wallDesc = "TƯỜNG BÊ TÔNG CỐT THÉP CHỊU LỰC 200MM";
+  }
+
+  const shaftSvgW = Math.min(270, Math.max(190, (w / 1800) * 260));
+  const shaftSvgD = Math.min(230, Math.max(160, (d / 1800) * 220));
+  const shaftX = 310 - shaftSvgW / 2;
+  const shaftY = 195 - shaftSvgD / 2;
+
+  const cabinSvgW = shaftSvgW * 0.72;
+  const cabinSvgD = shaftSvgD * 0.72;
+  const cabinX = 310 - cabinSvgW / 2;
+  const cabinY = shaftY + (shaftSvgD - cabinSvgD) / 2 + 10;
+
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="620" height="420" viewBox="0 0 620 420" style="background:#09192f;font-family:sans-serif;">
     <defs>
       <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
-        <path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+        <path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+      </pattern>
+      <pattern id="concreteHatch" width="10" height="10" patternUnits="userSpaceOnUse">
+        <path d="M 0 10 L 10 0 M 0 0 L 10 10" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="0.8"/>
       </pattern>
     </defs>
     <rect width="100%" height="100%" fill="url(#grid)" />
-    <!-- Outer building wall -->
-    <rect x="70" y="50" width="460" height="300" fill="none" stroke="#64748b" stroke-width="2" stroke-dasharray="6,4"/>
-    <text x="80" y="75" fill="#94a3b8" font-size="12" font-weight="bold">MẶT BẰNG BỐ TRÍ HỐ THANG MÁY - THANG MÁY HÀ HỒNG</text>
-    
-    <!-- Elevator Shaft -->
-    <rect x="180" y="100" width="240" height="200" fill="rgba(217,164,65,0.08)" stroke="${color}" stroke-width="3"/>
-    
-    <!-- Diagonal cross representing elevator shaft -->
-    <line x1="180" y1="100" x2="420" y2="300" stroke="${color}" stroke-width="1.5" stroke-dasharray="4,4" opacity="0.6"/>
-    <line x1="420" y1="100" x2="180" y2="300" stroke="${color}" stroke-width="1.5" stroke-dasharray="4,4" opacity="0.6"/>
-    
-    <!-- Cabin Inner Box -->
-    <rect x="220" y="130" width="160" height="140" fill="rgba(255,255,255,0.05)" stroke="#38bdf8" stroke-width="2"/>
-    <text x="250" y="205" fill="#38bdf8" font-size="14" font-weight="bold">CABIN THANG</text>
-    
-    <!-- Dimension arrows -->
-    <!-- Width W -->
-    <line x1="180" y1="85" x2="420" y2="85" stroke="#ffd875" stroke-width="2"/>
-    <circle cx="180" cy="85" r="3" fill="#ffd875"/>
-    <circle cx="420" cy="85" r="3" fill="#ffd875"/>
-    <text x="255" y="78" fill="#ffd875" font-size="13" font-weight="bold">W: ${w} mm</text>
-    
-    <!-- Depth D -->
-    <line x1="440" y1="100" x2="440" y2="300" stroke="#ffd875" stroke-width="2"/>
-    <circle cx="440" cy="100" r="3" fill="#ffd875"/>
-    <circle cx="440" cy="300" r="3" fill="#ffd875"/>
-    <text x="450" y="205" fill="#ffd875" font-size="13" font-weight="bold">D: ${d} mm</text>
-    
-    <!-- Title tag -->
-    <rect x="180" y="320" width="240" height="26" rx="4" fill="${color}" opacity="0.9"/>
-    <text x="300" y="338" fill="#ffffff" font-size="12" font-weight="bold" text-anchor="middle">${title}</text>
+
+    <rect x="35" y="30" width="550" height="350" fill="none" stroke="#334155" stroke-width="1.5" stroke-dasharray="6,4"/>
+    <text x="45" y="50" fill="#94a3b8" font-size="11" font-weight="bold">MẶT BẰNG KỸ THUẬT 2D - ĐIỀU CHỈNH THEO ĐỀ XUẤT CABIN AI</text>
+    <text x="575" y="50" fill="#38bdf8" font-size="10" text-anchor="end">${wallDesc}</text>
+
+    ${isFacade ? `
+      <rect x="${shaftX - 25}" y="${shaftY - 28}" width="${shaftSvgW + 50}" height="18" rx="3" fill="rgba(6,182,212,0.2)" stroke="#06b6d4" stroke-width="1"/>
+      <text x="310" y="${shaftY - 15}" fill="#22d3ee" font-size="9.5" font-weight="bold" text-anchor="middle">▲ MẶT TIỀN ĐƯỜNG PHỐ (HƯỚNG NHÌN PANORAMA TOÀN CẢNH) ▲</text>
+    ` : ''}
+
+    <rect x="${shaftX - 16}" y="${shaftY - 16}" width="${shaftSvgW + 32}" height="${shaftSvgD + 32}" fill="url(#concreteHatch)" stroke="#475569" stroke-width="2"/>
+    <rect x="${shaftX}" y="${shaftY}" width="${shaftSvgW}" height="${shaftSvgD}" fill="${shaftFill}" stroke="${shaftStroke}" stroke-width="2.5"/>
+
+    <line x1="${shaftX}" y1="${shaftY}" x2="${shaftX + shaftSvgW}" y2="${shaftY + shaftSvgD}" stroke="${shaftStroke}" stroke-width="1" stroke-dasharray="4,4" opacity="0.35"/>
+    <line x1="${shaftX + shaftSvgW}" y1="${shaftY}" x2="${shaftX}" y2="${shaftY + shaftSvgD}" stroke="${shaftStroke}" stroke-width="1" stroke-dasharray="4,4" opacity="0.35"/>
+
+    ${highRiseMode ? `
+      <rect x="250" y="${shaftY + 4}" width="120" height="18" fill="rgba(167,139,250,0.3)" stroke="#a78bfa" stroke-width="1.5"/>
+      <text x="310" y="${shaftY + 16}" fill="#ddd6fe" font-size="9" font-weight="bold" text-anchor="middle">ĐỐI TRỌNG (RAY T89)</text>
+    ` : ''}
+
+    <rect x="${cabinX}" y="${cabinY}" width="${cabinSvgW}" height="${cabinSvgD}" rx="4" fill="${cabinFill}" stroke="${cabinStroke}" stroke-width="${isGlass ? '3' : '2'}"/>
+
+    ${isGlass ? `
+      <line x1="${cabinX + 4}" y1="${cabinY + 4}" x2="${cabinX + cabinSvgW - 4}" y2="${cabinY + 4}" stroke="#67e8f9" stroke-width="2"/>
+      <line x1="${cabinX + 4}" y1="${cabinY + 4}" x2="${cabinX + 4}" y2="${cabinY + cabinSvgD - 4}" stroke="#67e8f9" stroke-width="2"/>
+      <line x1="${cabinX + cabinSvgW - 4}" y1="${cabinY + 4}" x2="${cabinX + cabinSvgW - 4}" y2="${cabinY + cabinSvgD - 4}" stroke="#67e8f9" stroke-width="2"/>
+    ` : ''}
+
+    ${isVilla ? `
+      <rect x="${cabinX + 3}" y="${cabinY + 3}" width="10" height="10" fill="none" stroke="#f59e0b" stroke-width="1.5"/>
+      <rect x="${cabinX + cabinSvgW - 13}" y="${cabinY + 3}" width="10" height="10" fill="none" stroke="#f59e0b" stroke-width="1.5"/>
+      <rect x="${cabinX + 3}" y="${cabinY + cabinSvgD - 13}" width="10" height="10" fill="none" stroke="#f59e0b" stroke-width="1.5"/>
+      <rect x="${cabinX + cabinSvgW - 13}" y="${cabinY + cabinSvgD - 13}" width="10" height="10" fill="none" stroke="#f59e0b" stroke-width="1.5"/>
+    ` : ''}
+
+    <line x1="${cabinX + cabinSvgW * 0.2}" y1="${cabinY + cabinSvgD}" x2="${cabinX + cabinSvgW * 0.8}" y2="${cabinY + cabinSvgD}" stroke="#fbbf24" stroke-width="4"/>
+    <text x="310" y="${cabinY + cabinSvgD + 14}" fill="#fbbf24" font-size="9" font-weight="bold" text-anchor="middle">CỬA MỞ 2 CÁNH (2CO)</text>
+
+    <text x="310" y="${cabinY + cabinSvgD / 2 - 4}" fill="${cabinStroke}" font-size="10.5" font-weight="bold" text-anchor="middle">${cabinLabel}</text>
+    <text x="310" y="${cabinY + cabinSvgD / 2 + 12}" fill="#cbd5e1" font-size="9" text-anchor="middle">KÍCH THƯỚC: ${w - 400} x ${d - 450} mm</text>
+
+    <line x1="${shaftX}" y1="${shaftY - 8}" x2="${shaftX + shaftSvgW}" y2="${shaftY - 8}" stroke="#ffd875" stroke-width="1.5"/>
+    <circle cx="${shaftX}" cy="${shaftY - 8}" r="2.5" fill="#ffd875"/>
+    <circle cx="${shaftX + shaftSvgW}" cy="${shaftY - 8}" r="2.5" fill="#ffd875"/>
+    <text x="310" y="${shaftY - 14}" fill="#ffd875" font-size="11" font-weight="bold" text-anchor="middle">W: ${w} mm</text>
+
+    <line x1="${shaftX + shaftSvgW + 18}" y1="${shaftY}" x2="${shaftX + shaftSvgW + 18}" y2="${shaftY + shaftSvgD}" stroke="#ffd875" stroke-width="1.5"/>
+    <circle cx="${shaftX + shaftSvgW + 18}" cy="${shaftY}" r="2.5" fill="#ffd875"/>
+    <circle cx="${shaftX + shaftSvgW + 18}" cy="${shaftY + shaftSvgD}" r="2.5" fill="#ffd875"/>
+    <text x="${shaftX + shaftSvgW + 28}" y="${shaftY + shaftSvgD / 2 + 4}" fill="#ffd875" font-size="11" font-weight="bold">D: ${d} mm</text>
+
+    <rect x="110" y="388" width="400" height="24" rx="4" fill="${shaftStroke}" opacity="0.95"/>
+    <text x="310" y="404" fill="#09192f" font-size="11" font-weight="bold" text-anchor="middle">${title} • ${stops} TẦNG</text>
   </svg>`;
 }
 
+function getBlueprintSvgString(title, w, d, color = "#0284c7") {
+  return getAdaptiveBlueprintSvgString({ title, w, d });
+}
+
 function generateBlueprintSvg(title, w, d, color = "#0284c7") {
-  const svg = getBlueprintSvgString(title, w, d, color);
+  const svg = getAdaptiveBlueprintSvgString({ title, w, d });
+  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+}
+
+function generateAdaptiveBlueprintSvg(opts) {
+  const svg = getAdaptiveBlueprintSvgString(opts);
   return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
 }
 
@@ -102,6 +200,8 @@ export default function AiVisionScanner({ onApplySpecs }) {
   const [result, setResult] = useState(null);
   const [error, setError] = useState("");
   const [isDragActive, setIsDragActive] = useState(false);
+  const [activeCabinChoice, setActiveCabinChoice] = useState("homelift-kinh");
+  const [viewMode, setViewMode] = useState("2d");
   const fileInputRef = useRef(null);
 
   const scanSteps = [
@@ -310,7 +410,7 @@ export default function AiVisionScanner({ onApplySpecs }) {
     onApplySpecs({
       buildingType: result.buildingType || "nha-pho-xay-moi",
       capacityKg: result.suggestedCapacityKg || 350,
-      elevatorType: result.suggestedElevatorType || "homelift-kinh",
+      elevatorType: activeCabinChoice || result.suggestedElevatorType || "homelift-kinh",
       motorBrand: result.suggestedMotorBrand || "Fuji",
       doorType: result.suggestedDoorType || "2CO",
       stops: result.stops || 4,
@@ -323,8 +423,32 @@ export default function AiVisionScanner({ onApplySpecs }) {
     setFile(null);
     setPreviewUrl(null);
     setResult(null);
+    setActiveCabinChoice("homelift-kinh");
+    setViewMode("2d");
     setError("");
   };
+
+  const currentCabin = activeCabinChoice || result?.suggestedElevatorType || "tieu-chuan";
+  const isFacadeResult = result?.summaryAnalysis?.toLowerCase().includes("mặt tiền") ||
+                         result?.imageType?.toLowerCase().includes("mặt tiền") ||
+                         currentCabin === "homelift-kinh";
+  const isHighRiseResult = (result?.stops || 4) >= 7;
+  const isCap4Result = result?.stops === 2 && !result?.isElevatorDetected;
+
+  const adaptiveSvgDataUri = result
+    ? generateAdaptiveBlueprintSvg({
+        title: result.imageType || "Bản vẽ mặt bằng kiến trúc",
+        w: result.shaftWidthMm || 1350,
+        d: result.shaftDepthMm || 1400,
+        cabinType: currentCabin,
+        capacity: result.suggestedCapacityKg || 450,
+        stops: result.stops || 4,
+        isFacade: isFacadeResult,
+        isCommercialHighRise: isHighRiseResult,
+        isCap4: isCap4Result,
+        hasMezzanine: result?.isElevatorDetected && isCap4Result
+      })
+    : null;
 
   const formatVnd = (val) => (val ? new Intl.NumberFormat("vi-VN").format(val) + " đ" : "350.000.000 đ");
 
@@ -444,26 +568,52 @@ export default function AiVisionScanner({ onApplySpecs }) {
           <div className="ai-vision-result-card">
             <div className="row g-4 align-items-center">
               <div className="col-lg-5 text-center">
+                <div className="d-flex align-items-center justify-content-between mb-2 px-1">
+                  <div className="btn-group btn-group-sm">
+                    <button
+                      type="button"
+                      className={`btn btn-sm ${viewMode === "2d" ? "btn-warning fw-bold text-dark" : "btn-outline-secondary text-white"}`}
+                      onClick={() => setViewMode("2d")}
+                    >
+                      <i className="bi bi-rulers me-1"></i> Mặt bằng 2D Cabin
+                    </button>
+                    {previewUrl && !previewUrl.startsWith("data:image/svg+xml") && (
+                      <button
+                        type="button"
+                        className={`btn btn-sm ${viewMode === "photo" ? "btn-warning fw-bold text-dark" : "btn-outline-secondary text-white"}`}
+                        onClick={() => setViewMode("photo")}
+                      >
+                        <i className="bi bi-image me-1"></i> Ảnh bản vẽ gốc
+                      </button>
+                    )}
+                  </div>
+                  <span className="badge bg-dark border border-secondary text-warning" style={{ fontSize: "11px" }}>
+                    {currentCabin === "homelift-kinh"
+                      ? "🪟 Kính Panorama"
+                      : currentCabin === "biet-thu"
+                      ? "⚜️ Inox Vàng PVD"
+                      : "🏢 Inox 304"}
+                  </span>
+                </div>
+
                 <div
                   className="position-relative rounded-3 overflow-hidden border border-warning shadow d-flex align-items-center justify-content-center"
-                  style={{ width: "100%", height: "260px", background: "#09192f" }}
+                  style={{ width: "100%", height: "270px", background: "#09192f" }}
                 >
                   <img
                     src={
-                      previewUrl ||
-                      (result.imageUrl ? resolveImageUrl(result.imageUrl) : null) ||
-                      generateBlueprintSvg(result.imageType || "Bản vẽ kỹ thuật", result.shaftWidthMm || 1350, result.shaftDepthMm || 1400)
+                      viewMode === "photo" && previewUrl && !previewUrl.startsWith("data:image/svg+xml")
+                        ? previewUrl
+                        : (adaptiveSvgDataUri || previewUrl)
                     }
-                    alt="Kết quả phân tích bản vẽ"
+                    alt="Mặt bằng kỹ thuật 2D điều chỉnh theo cabin"
                     style={{ width: "100%", height: "100%", objectFit: "contain", display: "block", background: "#09192f" }}
-                    onError={(e) => {
-                      e.target.onerror = null;
-                      e.target.src = generateBlueprintSvg(result.imageType || "Bản vẽ kỹ thuật", result.shaftWidthMm || 1350, result.shaftDepthMm || 1400);
-                    }}
                   />
                   <div className="position-absolute bottom-0 start-0 end-0 bg-dark bg-opacity-75 text-white py-1 px-2 small">
                     <i className="bi bi-check2-circle text-success me-1"></i>
-                    {result.imageType || "Bản vẽ kỹ thuật"} (Độ tin cậy: {(result.confidenceScore * 100).toFixed(0)}%)
+                    {viewMode === "2d"
+                      ? `Mặt bằng 2D: Cabin ${currentCabin === "homelift-kinh" ? "Kính Panorama" : (currentCabin === "biet-thu" ? "Inox Vàng PVD" : "Inox 304")}`
+                      : (result.imageType || "Ảnh bản vẽ")}
                   </div>
                 </div>
               </div>
@@ -521,7 +671,7 @@ export default function AiVisionScanner({ onApplySpecs }) {
                   )}
                 </div>
 
-                {/* Tư vấn thiết kế cabin theo vị trí lắp đặt */}
+                {/* Tư vấn thiết kế cabin theo vị trí lắp đặt & Cho phép chọn để điều chỉnh 2D */}
                 {result.suitableCabinStyles?.length > 0 && (
                   <div
                     className="p-3 mb-3 rounded-3"
@@ -532,14 +682,52 @@ export default function AiVisionScanner({ onApplySpecs }) {
                   >
                     <div className="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
                       <span className="fw-bold text-warning small">
-                        <i className="bi bi-palette2 me-1"></i> TƯ VẤN MẪU CABIN & VỊ TRÍ LẮP ĐẶT PHÙ HỢP:
+                        <i className="bi bi-palette2 me-1"></i> TƯ VẤN MẪU CABIN &amp; ĐIỀU CHỈNH TRÊN BẢN VẼ 2D:
                       </span>
-                      {result.suggestedElevatorType === "homelift-kinh" && (
+                      {currentCabin === "homelift-kinh" && (
                         <span className="badge bg-info text-dark fw-bold" style={{ fontSize: "11px" }}>
-                          <i className="bi bi-eye-fill me-1"></i> Ưu tiên Kính Cường Lực Mặt Tiền
+                          <i className="bi bi-eye-fill me-1"></i> Khuyến nghị Kính Cường Lực Mặt Tiền
                         </span>
                       )}
                     </div>
+
+                    {/* Bộ nút chuyển đổi mẫu cabin live trên bản vẽ 2D */}
+                    <div className="d-flex flex-wrap gap-2 mb-2">
+                      <button
+                        type="button"
+                        className={`btn btn-sm ${currentCabin === "homelift-kinh" ? "btn-warning fw-bold text-dark" : "btn-outline-light text-light"}`}
+                        style={{ fontSize: "12px", borderRadius: "8px" }}
+                        onClick={() => {
+                          setActiveCabinChoice("homelift-kinh");
+                          setViewMode("2d");
+                        }}
+                      >
+                        <i className="bi bi-eye-fill me-1"></i> Vách Kính Mặt Tiền (Panorama)
+                      </button>
+                      <button
+                        type="button"
+                        className={`btn btn-sm ${currentCabin === "biet-thu" ? "btn-warning fw-bold text-dark" : "btn-outline-light text-light"}`}
+                        style={{ fontSize: "12px", borderRadius: "8px" }}
+                        onClick={() => {
+                          setActiveCabinChoice("biet-thu");
+                          setViewMode("2d");
+                        }}
+                      >
+                        <i className="bi bi-gem me-1"></i> Inox Gương Vàng PVD Luxury
+                      </button>
+                      <button
+                        type="button"
+                        className={`btn btn-sm ${currentCabin === "tieu-chuan" ? "btn-warning fw-bold text-dark" : "btn-outline-light text-light"}`}
+                        style={{ fontSize: "12px", borderRadius: "8px" }}
+                        onClick={() => {
+                          setActiveCabinChoice("tieu-chuan");
+                          setViewMode("2d");
+                        }}
+                      >
+                        <i className="bi bi-shield-check me-1"></i> {result.stops >= 7 ? "Inox 304 Cao Ốc Văn Phòng" : "Inox 304 Tiêu Chuẩn"}
+                      </button>
+                    </div>
+
                     <ul className="small text-light mb-0 ps-3">
                       {result.suitableCabinStyles.map((styleItem, idx) => (
                         <li key={idx} className="mb-1">{styleItem}</li>
@@ -548,12 +736,24 @@ export default function AiVisionScanner({ onApplySpecs }) {
                   </div>
                 )}
 
-                <div className="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
-                  <div>
-                    <small className="text-secondary d-block">Dự toán sơ bộ trọn gói (Tham khảo):</small>
-                    <span className="fs-5 fw-bold text-danger">
-                      {formatVnd(result.estimatedPriceMin)} - {formatVnd(result.estimatedPriceMax)}
-                    </span>
+                {/* Ghi chú kỹ thuật về bản vẽ 2D: Không hiển thị giá cứng tham khảo ở đây */}
+                <div
+                  className="p-3 mb-3 rounded-3"
+                  style={{
+                    background: "rgba(11, 31, 58, 0.75)",
+                    border: "1px dashed rgba(217, 164, 65, 0.45)"
+                  }}
+                >
+                  <div className="d-flex align-items-start gap-2">
+                    <i className="bi bi-rulers fs-5 text-warning mt-1"></i>
+                    <div>
+                      <div className="fw-semibold text-warning small mb-1">
+                        <i className="bi bi-info-circle-fill me-1"></i> BẢN VẼ 2D: ĐỊNH HÌNH KÍCH THƯỚC GIẾNG THANG &amp; VẬT LIỆU CABIN
+                      </div>
+                      <p className="small text-secondary mb-0" style={{ fontSize: "12px", lineHeight: "1.5" }}>
+                        Bản vẽ mặt bằng 2D xác định <strong>kích thước hình học hố thang ({result.shaftWidthMm} x {result.shaftDepthMm} mm)</strong> và <strong>mô phỏng bố trí mẫu cabin 2D</strong>. Do bản vẽ 2D chưa thể hiện cao độ thực tế và địa chất hố móng, bảng dự toán chi phí chi tiết sẽ hiển thị khi bạn bấm nút <strong>[Áp dụng vào bộ dự toán]</strong> bên dưới hoặc hẹn kỹ sư đo laser miễn phí.
+                      </p>
+                    </div>
                   </div>
                 </div>
 
