@@ -424,21 +424,44 @@ export default function AiVisionScanner({ onApplySpecs }) {
 
                 <div className="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
                   <div>
-                    <small className="text-secondary d-block">Dự toán sơ bộ trọn gói:</small>
+                    <small className="text-secondary d-block">Dự toán sơ bộ trọn gói (Tham khảo):</small>
                     <span className="fs-5 fw-bold text-danger">
                       {formatVnd(result.estimatedPriceMin)} - {formatVnd(result.estimatedPriceMax)}
                     </span>
                   </div>
                 </div>
 
-                <button
-                  type="button"
-                  className="ai-vision-apply-btn"
-                  onClick={handleApply}
-                >
-                  <i className="bi bi-lightning-charge-fill fs-5"></i>
-                  ÁP DỤNG THÔNG SỐ NÀY VÀO BỘ DỰ TOÁN & XEM PHỐI CẢNH CABIN
-                </button>
+                {/* Khuyến cáo kỹ thuật chính thức */}
+                <div className="p-2 mb-3 rounded-2 bg-dark bg-opacity-50 border border-secondary" style={{ fontSize: "12px", color: "#94a3b8" }}>
+                  <i className="bi bi-info-circle-fill text-warning me-1"></i>
+                  <strong>Khuyến cáo kỹ thuật:</strong> Kết quả nhận diện mang <em>tính chất tham khảo &amp; định hướng sơ bộ</em>. Để đảm bảo an toàn cơ khí và sản xuất lắp đặt chuẩn xác 100%, Kỹ sư Thang Máy Hà Hồng bắt buộc sẽ đến công trình khảo sát, đo độ thẳng đứng giếng thang bằng thước laser (hoàn toàn miễn phí) trước khi triển khai.
+                </div>
+
+                <div className="d-flex flex-column flex-sm-row gap-2">
+                  <button
+                    type="button"
+                    className="ai-vision-apply-btn flex-grow-1"
+                    onClick={handleApply}
+                  >
+                    <i className="bi bi-lightning-charge-fill fs-5"></i>
+                    ÁP DỤNG THÔNG SỐ NÀY VÀO BỘ DỰ TOÁN
+                  </button>
+                  <a
+                    href="#quote-form-section"
+                    className="btn btn-outline-warning d-flex align-items-center justify-content-center fw-semibold px-3 py-2"
+                    style={{ fontSize: "0.9rem", borderRadius: "10px", whiteSpace: "nowrap" }}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleApply();
+                      setTimeout(() => {
+                        const form = document.querySelector(".quote-form-card");
+                        if (form) form.scrollIntoView({ behavior: "smooth" });
+                      }, 200);
+                    }}
+                  >
+                    <i className="bi bi-calendar-check me-1"></i> Đặt lịch đo thực tế
+                  </a>
+                </div>
               </div>
             </div>
           </div>
