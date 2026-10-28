@@ -876,3 +876,219 @@
     border-bottom: none;
   }
 }
+
+/* ==========================================
+   INTRO SECTION (BÀI VIẾT DẠNG VĂN XUÔI)
+   ========================================== */
+.gt-intro-section {
+  padding: 90px 0;
+  background: #ffffff;
+}
+
+.gt-prose p {
+  font-size: 16px;
+  color: #374151;
+  line-height: 1.85;
+  margin-bottom: 18px;
+}
+
+.gt-prose p:last-child { margin-bottom: 0; }
+
+/* ==========================================
+   GIÁ TRỊ CỐT LÕI – CARD DỌC CÓ NỘI DUNG DÀI
+   ========================================== */
+.gt-value-card {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  padding: 28px 26px;
+  height: 100%;
+  transition: all 0.3s ease;
+}
+
+.gt-value-card:hover {
+  border-color: rgba(217,164,65,0.45);
+  box-shadow: 0 16px 36px rgba(11,31,58,0.09);
+  background: #ffffff;
+  transform: translateY(-4px);
+}
+
+.gt-value-icon {
+  width: 54px;
+  height: 54px;
+  min-width: 54px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #0b1f3a, #1565c0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #d9a441;
+  font-size: 24px;
+}
+
+.gt-value-body h3 {
+  font-size: 18px;
+  font-weight: 800;
+  color: #0b1f3a;
+  margin-bottom: 10px;
+  line-height: 1.35;
+}
+
+.gt-value-body p {
+  font-size: 14.5px;
+  color: #64748b;
+  line-height: 1.75;
+  margin-bottom: 10px;
+}
+
+.gt-value-body p:last-child { margin-bottom: 0; }
+
+/* ==========================================
+   DỊCH VỤ – CARD ĐẦY ĐỦ NỘI DUNG
+   ========================================== */
+.gt-services-section {
+  padding: 90px 0;
+  background: #f1f5f9;
+}
+
+.gt-service-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  padding: 30px 26px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.gt-service-card::after {
+  content: "";
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #d9a441, #0b1f3a);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.gt-service-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 44px rgba(11,31,58,0.1);
+  border-color: rgba(217,164,65,0.4);
+}
+
+.gt-service-card:hover::after { opacity: 1; }
+
+.gt-service-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #0b1f3a, #1565c0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #d9a441;
+  font-size: 24px;
+  margin-bottom: 18px;
+  flex-shrink: 0;
+}
+
+.gt-service-card h3 {
+  font-size: 18px;
+  font-weight: 800;
+  color: #0b1f3a;
+  margin-bottom: 12px;
+  line-height: 1.35;
+}
+
+.gt-service-card p {
+  font-size: 14.5px;
+  color: #64748b;
+  line-height: 1.75;
+  margin-bottom: 10px;
+  flex: 1;
+}
+
+.gt-service-card p:last-of-type { margin-bottom: 16px; }
+
+.gt-service-link {
+  display: inline-flex;
+  align-items: center;
+  color: #1565c0;
+  font-weight: 800;
+  font-size: 14px;
+  text-decoration: none;
+  margin-top: auto;
+  transition: color 0.2s;
+}
+
+.gt-service-link:hover { color: #d9a441; }
+
+/* ==========================================
+   QUY TRÌNH 6 BƯỚC – CARD CHI TIẾT
+   ========================================== */
+.gt-process-section {
+  padding: 90px 0;
+  background: #ffffff;
+}
+
+.gt-step-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  padding: 30px 26px;
+  height: 100%;
+  transition: all 0.3s ease;
+}
+
+.gt-step-card:hover {
+  border-color: #d9a441;
+  background: #ffffff;
+  transform: translateY(-4px);
+  box-shadow: 0 14px 34px rgba(11,31,58,0.08);
+}
+
+.gt-step-num {
+  font-size: 48px;
+  font-weight: 900;
+  color: rgba(217,164,65,0.3);
+  line-height: 1;
+  margin-bottom: 12px;
+  font-variant-numeric: tabular-nums;
+  font-family: monospace;
+}
+
+.gt-step-card h3 {
+  font-size: 18px;
+  font-weight: 800;
+  color: #0b1f3a;
+  margin-bottom: 12px;
+  line-height: 1.35;
+}
+
+.gt-step-card p {
+  font-size: 14.5px;
+  color: #64748b;
+  line-height: 1.75;
+  margin: 0;
+}
+
+/* ==========================================
+   RESPONSIVE
+   ========================================== */
+@media (max-width: 767px) {
+  .gt-intro-section,
+  .about-values-grid-section,
+  .gt-services-section,
+  .gt-process-section { padding: 60px 0; }
+
+  .gt-value-card { flex-direction: column; gap: 14px; }
+  .gt-value-icon { width: 48px; height: 48px; min-width: 48px; font-size: 20px; }
+  .gt-step-num { font-size: 36px; }
+}

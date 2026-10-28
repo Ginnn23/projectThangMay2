@@ -4,150 +4,140 @@ import heroImage from "../assets/images/hero-elevator.jpg";
 import lobbyImage from "../assets/images/elevator-lobby.jpg";
 import hotelLobbyImage from "../assets/images/elevator-hotel-lobby.jpg";
 import {
-  tenCongTy,
-  tenQuocTe,
-  maSoThue,
-  ngayThanhLap,
-  nguoiDaiDien,
-  diaChiDangKy,
-  diaChiVPGD,
   soDienThoaiCongTy,
   soDienThoaiLienKet,
-  emailCongTy,
   googleMapsUrl,
 } from "../data/contactInfo";
 import "./GioiThieu.css";
 
-/* =====================================================================
-   DỮ LIỆU THỰC TẾ CÔNG TY (tra từ CSDL doanh nghiệp quốc gia)
-   ===================================================================== */
-
 const thongKeCongTy = [
-  {
-    icon: "bi-calendar2-check-fill",
-    num: "2016",
-    title: "Năm thành lập",
-    desc: "Giấy CNĐKKD cấp ngày 11/07/2016 bởi Sở KH&ĐT TP.HCM"
-  },
-  {
-    icon: "bi-buildings-fill",
-    num: "500+",
-    title: "Công trình hoàn thiện",
-    desc: "Nhà phố, biệt thự, homelift kính tại TP.HCM & miền Nam"
-  },
-  {
-    icon: "bi-shield-fill-check",
-    num: "100%",
-    title: "Linh kiện chính hãng",
-    desc: "CO/CQ minh bạch, nhập khẩu trực tiếp từ nhà sản xuất"
-  },
-  {
-    icon: "bi-clock-fill",
-    num: "24/7",
-    title: "Hỗ trợ kỹ thuật",
-    desc: "Đội kỹ thuật túc trực hỗ trợ sự cố và bảo trì xuyên ngày đêm"
-  }
-];
-
-const thongTinPhapLy = [
-  { label: "Tên đầy đủ", value: tenCongTy },
-  { label: "Tên quốc tế", value: tenQuocTe },
-  { label: "Mã số thuế", value: maSoThue },
-  { label: "Ngày thành lập", value: ngayThanhLap },
-  { label: "Người đại diện", value: nguoiDaiDien },
-  { label: "Địa chỉ ĐKKD", value: diaChiDangKy },
-  { label: "Văn phòng giao dịch", value: diaChiVPGD },
-  { label: "Hotline", value: soDienThoaiCongTy },
-  { label: "Email", value: emailCongTy },
+  { icon: "bi-calendar2-check-fill", num: "2016", title: "Năm thành lập", desc: "Hoạt động chính thức từ tháng 7/2016 tại TP. Hồ Chí Minh" },
+  { icon: "bi-buildings-fill", num: "500+", title: "Công trình hoàn thiện", desc: "Nhà phố, biệt thự, văn phòng, cơ sở y tế tại TP.HCM & miền Nam" },
+  { icon: "bi-shield-fill-check", num: "100%", title: "Linh kiện chính hãng", desc: "CO/CQ minh bạch, nhập khẩu trực tiếp từ nhà sản xuất uy tín" },
+  { icon: "bi-clock-fill", num: "24/7", title: "Hỗ trợ kỹ thuật", desc: "Đội kỹ thuật túc trực xử lý sự cố xuyên ngày đêm, kể cả ngày lễ" },
 ];
 
 const giaTriCotLoi = [
   {
     icon: "bi-shield-shaded",
-    title: "An Toàn Là Ưu Tiên Số 1",
-    desc: "Mọi công trình đều được kiểm định bởi Trung tâm Kiểm định Kỹ thuật An toàn Khu vực II. Trang bị đầy đủ phanh cơ học chống rơi, ARD cứu hộ tự động khi mất điện, rèm quang học chống kẹt cửa."
+    title: "An Toàn Là Ưu Tiên Tuyệt Đối",
+    desc: `Với Thang Máy Hà Hồng, an toàn không phải là khẩu hiệu mà là tiêu chuẩn bất di bất dịch trong từng hạng mục thi công. Mọi sản phẩm đều được kiểm định bởi Trung tâm Kiểm định Kỹ thuật An toàn Khu vực II – Bộ Lao động Thương binh và Xã hội, cấp tem an toàn theo tiêu chuẩn TCVN 6395:2008 trước khi bàn giao sử dụng.
+
+Hệ thống bảo vệ đa tầng được tích hợp trong mọi sản phẩm bao gồm: phanh cơ học chống rơi tự do, bộ cứu hộ tự động ARD khi mất điện đột ngột, rèm quang học mành cửa chống kẹp, công tắc hành trình đầu giếng và đáy hầm, cùng hệ thống giám sát áp lực cáp thời gian thực. Đây là nền tảng để gia chủ yên tâm cho người thân lớn tuổi, trẻ nhỏ sử dụng mỗi ngày.`,
   },
   {
     icon: "bi-cpu-fill",
-    title: "Kỹ Thuật Chính Xác",
-    desc: "Đội ngũ kỹ sư cơ điện lắp đặt ray dẫn hướng sai số dưới 0.5mm. Căn chỉnh cabin, đo tải và hiệu chỉnh dừng tầng chính xác trước khi nghiệm thu bàn giao."
+    title: "Kỹ Thuật Chính Xác – Thi Công Nghiêm Ngặt",
+    desc: `Đội ngũ kỹ thuật viên và kỹ sư cơ điện của Hà Hồng đều được đào tạo bài bản, tích lũy nhiều năm kinh nghiệm thực tế trên nhiều loại công trình khác nhau. Quy trình lắp đặt được chuẩn hóa theo checklist kỹ thuật gồm hơn 48 điểm kiểm soát, từ căn chỉnh ray dẫn hướng với sai số dưới 0.5mm, kiểm tra tốc độ đặt tầng, đến đo tải trọng thực tế trước nghiệm thu.
+
+Cabin thang máy được cân chỉnh để dừng tầng với độ lệch sàn không vượt quá ±5mm, đảm bảo hành trình êm ái, không có cảm giác hẫng hay rung lắc. Tất cả đường điện, đường cáp đều đi cố định gọn gàng trong ống gen bảo vệ chống chuột và ẩm, đạt tiêu chuẩn công trình dân dụng cấp cao.`,
   },
   {
     icon: "bi-gem",
-    title: "Đa Dạng Giải Pháp",
-    desc: "Từ thang máy gia đình hố PIT nông chỉ 300mm, homelift kính Panorama toàn cảnh, đến thang máy tải hàng và thang bệnh viện. Tư vấn phù hợp ngân sách và hiện trạng từng công trình."
+    title: "Đa Dạng Giải Pháp – Phù Hợp Mọi Công Trình",
+    desc: `Không có một thiết kế thang máy nào phù hợp với mọi ngôi nhà. Hà Hồng hiểu rõ điều này và luôn tiếp cận từng dự án theo hướng tùy chỉnh cá nhân hóa. Từ những căn nhà phố hẹp chỉ 2.2m chiều rộng mặt tiền, hố thang vuông vức chỉ 1m x 1m, PIT nông 300mm – Hà Hồng vẫn có thể thiết kế giải pháp homelift phù hợp mà không phá vỡ kết cấu móng hay chiếm dụng thêm diện tích sàn.
+
+Với các biệt thự và công trình cao cấp, Hà Hồng cung cấp dòng cabin kính Panorama toàn cảnh, khung Inox PVD Gold hoặc Black, sàn đá hoa cương tự nhiên nẹp đồng và hệ đèn vòm LED nghệ thuật – biến chiếc thang máy thành điểm nhấn kiến trúc sang trọng cho cả không gian nội thất.`,
   },
   {
     icon: "bi-heart-fill",
-    title: "Tận Tâm Hậu Mãi",
-    desc: "Bảo hành 24 tháng toàn hệ thống, bảo trì định kỳ miễn phí 18 tháng đầu. Hotline kỹ thuật 24/7 – kỹ thuật viên có mặt xử lý sự cố trong vòng 60 phút tại nội thành TP.HCM."
-  }
+    title: "Tận Tâm Hậu Mãi – Đồng Hành Trọn Đời",
+    desc: `Mối quan hệ giữa Hà Hồng và khách hàng không kết thúc sau khi bàn giao chìa khóa. Chúng tôi cam kết bảo hành toàn hệ thống 24 tháng, bảo trì định kỳ miễn phí 18 tháng đầu sau lắp đặt với chu kỳ 1–2 tháng/lần. Kỹ thuật viên sẽ kiểm tra, vệ sinh và tra dầu toàn bộ cơ cấu truyền động, đảm bảo thang luôn hoạt động êm ái như ngày đầu.
+
+Hotline kỹ thuật 24/7 – kể cả ngày lễ, ngày Tết – luôn có người trực. Khi phát sinh sự cố, kỹ thuật viên có mặt tại hiện trường trong vòng 30–60 phút tại nội thành TP.HCM, 60–90 phút tại các quận huyện ngoại thành. Đây là cam kết có văn bản trong hợp đồng bảo trì, không phải lời hứa miệng.`,
+  },
+  {
+    icon: "bi-cash-coin",
+    title: "Minh Bạch Chi Phí – Không Phát Sinh",
+    desc: `Hà Hồng tin rằng sự tin tưởng bắt đầu từ sự minh bạch. Mọi báo giá đều được lập chi tiết từng hạng mục: thiết bị, nhân công, vật tư phụ kiện, phí kiểm định, phí cẩu thang và phí đào tạo vận hành – không có khoản "phát sinh" bất ngờ sau khi ký hợp đồng.
+
+Khách hàng được nhận bản dự toán PDF chi tiết, có thể tham chiếu đối chiếu với thị trường. Hợp đồng quy định rõ tiến độ thanh toán theo từng giai đoạn thi công, đặt cọc hợp lý, không ép trả trước 100%. Chúng tôi tự hào rằng hơn 60% khách hàng mới đến qua giới thiệu từ khách hàng cũ – minh chứng sống động nhất cho sự uy tín và minh bạch.`,
+  },
+  {
+    icon: "bi-award-fill",
+    title: "Chất Lượng Chuẩn Quốc Gia – Linh Kiện Nhập Khẩu",
+    desc: `Hà Hồng chỉ sử dụng linh kiện nhập khẩu chính hãng có đầy đủ chứng từ CO (Certificate of Origin) và CQ (Certificate of Quality) theo quy định của Tổng cục Hải quan Việt Nam. Động cơ không hộp số (Gearless PMSM) nhập từ các nhà sản xuất uy tín tại Nhật Bản và châu Âu, biến tần VVVF điều khiển tốc độ mượt mà, tủ điện điều khiển lập trình PLC thế hệ mới.
+
+Cabin được gia công tại xưởng cơ khí chính xác với vật liệu Inox SUS304, vật liệu kính cường lực 2 lớp PVB chống vỡ theo tiêu chuẩn xây dựng. Mỗi sản phẩm xuất xưởng đều có phiếu kiểm tra chất lượng nội bộ trước khi đưa ra công trình.`,
+  },
 ];
 
 const danhMucDichVu = [
   {
     icon: "bi-house-add-fill",
-    title: "Thang Máy Gia Đình & Homelift",
-    desc: "Thiết kế tối ưu cho nhà phố xây mới và cải tạo. Hố PIT nông từ 300mm, không cần phòng máy (MRL), tiết kiệm tối đa diện tích sàn."
+    title: "Thang Máy Gia Đình & Nhà Phố",
+    desc: `Đây là dòng sản phẩm chủ lực của Hà Hồng, phục vụ nhu cầu di chuyển hàng ngày cho các gia đình 3–5 thế hệ sống chung trong nhà phố cao tầng. Chúng tôi thiết kế tối ưu cho không gian hẹp, hố thang từ 900×900mm, tải trọng 200–450kg (3–6 người), không cần phòng máy (MRL – Machine Room Less), tiết kiệm tối đa diện tích sàn mỗi tầng.
+
+Cabin được tùy biến theo phong cách nội thất nhà: từ inox gương trắng sang trọng, inox vân gỗ ấm áp, đến kính cường lực toàn cảnh cho nhà mặt phố muốn tạo điểm nhấn thị giác. Hệ thống vận hành êm ái với biến tần VVVF, tốc độ 0.4–1.0 m/s phù hợp nhà 4–7 tầng.`,
   },
   {
     icon: "bi-eye-fill",
-    title: "Thang Kính Panorama Toàn Cảnh",
-    desc: "Cabin kính cường lực 2 lớp toàn cảnh, khung Inox PVD Gold/Black. Tạo điểm nhấn kiến trúc vượt trội cho nhà ở cao cấp và biệt thự."
+    title: "Thang Kính Homelift Panorama Toàn Cảnh",
+    desc: `Là xu hướng kiến trúc được ưa chuộng nhất hiện nay trong phân khúc nhà phố cao cấp và biệt thự hiện đại. Thang kính Homelift Panorama của Hà Hồng sử dụng kính cường lực 2 lớp PVB 8+8mm chống vỡ vụn, khung kết cấu Inox PVD Gold hoặc PVD Black tùy chọn, cabin không có vách kín tạo cảm giác thông thoáng, rộng rãi và hòa nhập với không gian kiến trúc mở.
+
+Đặc biệt phù hợp với nhà phố cải tạo có sẵn giếng thang, hố PIT nông chỉ 300mm mà không cần phá móng. Không cần phòng máy phía trên, không ảnh hưởng đến trần sân thượng. Tải trọng từ 200–320kg, lắp đặt trong 7–10 ngày làm việc tùy quy mô công trình.`,
   },
   {
     icon: "bi-building",
     title: "Thang Máy Tải Khách Thương Mại",
-    desc: "Giải pháp cho văn phòng, tòa nhà, khách sạn. Tần suất vận hành cao, cabin inox bền bỉ, hệ điều khiển phân tầng tối ưu chờ đợi."
+    desc: `Phục vụ các công trình văn phòng, tòa nhà căn hộ, trung tâm thương mại và khách sạn có nhu cầu vận chuyển hành khách với tần suất cao và liên tục trong giờ cao điểm. Tải trọng từ 630–1.600kg (8–21 người), tốc độ 1.0–2.5 m/s tùy số tầng.
+
+Hệ điều khiển phân tầng thông minh (Collective Selective Control) tối ưu thời gian chờ, giảm số lần dừng trung gian không cần thiết. Cabin inox bền bỉ, thiết kế mặt bằng rộng rãi, đèn chiếu sáng LED tiết kiệm điện, sàn chịu lực cao với bề mặt chống trượt theo tiêu chuẩn công trình công cộng.`,
   },
   {
     icon: "bi-truck",
-    title: "Thang Tải Hàng & Thực Phẩm",
-    desc: "Tải trọng 500kg - 5.000kg theo yêu cầu. Đáp ứng kho xưởng, nhà hàng, siêu thị và bệnh viện. Chứng nhận an toàn kiểm định nhà nước."
+    title: "Thang Tải Hàng & Thang Thực Phẩm",
+    desc: `Giải pháp vận chuyển hàng hóa nặng cho kho xưởng sản xuất, siêu thị, trung tâm phân phối và nhà hàng – khách sạn. Tải trọng từ 500kg đến 5.000kg tùy nhu cầu, thiết kế cabin không cần thẩm mỹ cao nhưng ưu tiên độ bền cơ khí và khả năng chịu tải liên tục nhiều giờ.
+
+Thang thực phẩm (Dumbwaiter) là loại thang nhỏ chuyên dụng cho nhà hàng nhiều tầng, tải trọng 50–200kg, vận hành yên tĩnh, bề mặt cabin dễ vệ sinh theo tiêu chuẩn vệ sinh an toàn thực phẩm. Tất cả đều được kiểm định nhà nước và cấp phép trước khi đưa vào sử dụng thương mại.`,
+  },
+  {
+    icon: "bi-hospital",
+    title: "Thang Máy Bệnh Viện & Y Tế",
+    desc: `Dòng thang đặc biệt thiết kế riêng cho cơ sở y tế: phòng khám tư nhân, bệnh viện đa khoa và nhà dưỡng lão. Kích thước cabin rộng đủ để vào ra cáng bệnh nhân và xe lăn dễ dàng (tiêu chuẩn tối thiểu 1.400×2.100mm), vận hành cực kỳ êm ái để không làm ảnh hưởng đến bệnh nhân trong quá trình vận chuyển.
+
+Trang bị nội thất y tế chuyên dụng: tay vịn bao quanh 3 mặt, gương quan sát phía sau, sàn chống trượt tiêu chuẩn bệnh viện, hệ thống thông gió cưỡng bức, đèn khẩn cấp tự động khi mất điện. Đặc biệt không phát ra tiếng ồn vượt quá 45dB để phù hợp với môi trường chữa bệnh.`,
   },
   {
     icon: "bi-wrench-adjustable-circle",
-    title: "Bảo Trì & Sửa Chữa Định Kỳ",
-    desc: "Kiểm tra, vệ sinh và tra dầu định kỳ 1 - 2 tháng/lần. Phát hiện sớm hao mòn linh kiện, đảm bảo thang vận hành ổn định lâu dài."
+    title: "Bảo Trì, Sửa Chữa & Nâng Cấp",
+    desc: `Hà Hồng cung cấp dịch vụ bảo trì định kỳ cho tất cả các hãng thang máy hiện có: Mitsubishi, Schindler, OTIS, Hyundai, Fuji, Kone và nhiều hãng khác. Kỹ thuật viên được đào tạo chuyên sâu theo từng dòng sản phẩm, sử dụng phụ tùng chính hãng hoặc tương đương chất lượng cao, không dùng hàng nhái.
+
+Ngoài ra, Hà Hồng còn thực hiện nâng cấp thang cũ: thay động cơ tiết kiệm điện, thay hệ điều khiển mới tăng độ tin cậy, thay cửa tầng cũ kỹ gây tiếng ồn, làm mới nội thất cabin giữ nguyên kết cấu giếng thang. Giải pháp này tiết kiệm 40–60% chi phí so với tháo toàn bộ lắp mới.`,
   },
-  {
-    icon: "bi-arrow-repeat",
-    title: "Cải Tạo & Nâng Cấp Thang Cũ",
-    desc: "Thay động cơ, hệ điều khiển và nâng cấp nội thất cabin cho thang máy đang sử dụng. Kéo dài tuổi thọ thiết bị, tiết kiệm chi phí đầu tư mới."
-  }
 ];
 
 const quyTrinhSauBuoc = [
   {
     num: "01",
-    title: "Tiếp Nhận & Khảo Sát",
-    desc: "Kỹ sư đến tận nơi đo đạc hố thang, đánh giá kết cấu, nguồn điện và hiện trạng công trình hoàn toàn miễn phí."
+    title: "Tiếp Nhận Thông Tin & Tư Vấn Ban Đầu",
+    desc: `Khách hàng có thể liên hệ qua hotline, Zalo, email hoặc đến trực tiếp văn phòng tại Quận Tân Bình. Đội ngũ tư vấn của Hà Hồng sẽ lắng nghe nhu cầu, số tầng, loại công trình, phong cách nội thất mong muốn và ngân sách dự kiến để đề xuất giải pháp phù hợp ngay trong buổi tư vấn đầu tiên – hoàn toàn miễn phí, không ràng buộc.`,
   },
   {
     num: "02",
-    title: "Tư Vấn & Lên Phương Án",
-    desc: "Đề xuất phương án kỹ thuật phù hợp ngân sách, thiết kế bản vẽ 2D/3D cấu hình thang máy theo yêu cầu thực tế."
+    title: "Khảo Sát Thực Địa & Đo Đạc Hố Thang",
+    desc: `Kỹ sư kỹ thuật đến tận công trình để đo đạc chính xác kích thước hố thang (chiều rộng, chiều sâu, chiều cao giếng), kiểm tra kết cấu bê tông, xác định vị trí nguồn điện 3 pha và đánh giá điều kiện thi công. Đặc biệt với nhà cải tạo, kỹ sư sẽ kiểm tra độ sâu PIT hiện có, tình trạng móng và khả năng bố trí phòng máy hoặc áp dụng giải pháp MRL phù hợp.`,
   },
   {
     num: "03",
-    title: "Báo Giá & Ký Hợp Đồng",
-    desc: "Báo giá chi tiết, minh bạch từng hạng mục. Hợp đồng quy định rõ tiến độ, tiêu chuẩn kỹ thuật và chính sách bảo hành."
+    title: "Lên Bản Vẽ 2D/3D & Báo Giá Chi Tiết",
+    desc: `Dựa trên số liệu khảo sát thực tế, bộ phận kỹ thuật thiết kế bản vẽ mặt bằng hố thang 2D, phối cảnh cabin 3D theo phong cách nội thất khách hàng mong muốn. Báo giá được lập chi tiết theo từng hạng mục: thiết bị, nhân công lắp đặt, vật tư phụ kiện, phí kiểm định nhà nước, tem an toàn và chi phí đào tạo vận hành – không có khoản phát sinh ẩn.`,
   },
   {
     num: "04",
-    title: "Thi Công Lắp Đặt",
-    desc: "Đội thợ chuyên nghiệp lắp dựng ray, kéo cáp, thả cabin và đấu nối hệ điều khiển theo quy trình kiểm soát chất lượng nghiêm ngặt."
+    title: "Ký Hợp Đồng & Sản Xuất Gia Công",
+    desc: `Hợp đồng được soạn thảo rõ ràng, quy định cụ thể: tiêu chuẩn kỹ thuật, tiến độ từng giai đoạn thi công, điều kiện nghiệm thu, chính sách bảo hành và lịch bảo trì định kỳ. Sau khi ký kết, bộ phận sản xuất bắt đầu gia công cabin, gia công khung ray và đặt nhập khẩu thiết bị điều khiển, động cơ theo đúng cấu hình đã thỏa thuận.`,
   },
   {
     num: "05",
-    title: "Kiểm Định & Nghiệm Thu",
-    desc: "Phối hợp với Trung tâm Kiểm định Kỹ thuật An toàn thử tải, thử phanh và cấp tem an toàn trước khi đưa vào sử dụng."
+    title: "Thi Công Lắp Đặt Trên Công Trình",
+    desc: `Đội thi công triển khai theo quy trình nghiêm ngặt: lắp dựng dàn giáo trong giếng thang, neo ray dẫn hướng, kéo và neo cáp thang, thả cabin và đối trọng, lắp tủ điện điều khiển và đi dây hoàn chỉnh. Toàn bộ tiến trình được giám sát bởi kỹ sư trưởng, có biên bản kiểm tra từng hạng mục theo checklist 48 điểm trước khi chạy thử.`,
   },
   {
     num: "06",
-    title: "Bàn Giao & Bảo Hành",
-    desc: "Hướng dẫn vận hành, bàn giao toàn bộ hồ sơ kỹ thuật. Kích hoạt chế độ bảo hành 24 tháng và bảo trì định kỳ theo hợp đồng."
-  }
+    title: "Kiểm Định – Nghiệm Thu – Bàn Giao Chính Thức",
+    desc: `Phối hợp với Trung tâm Kiểm định Kỹ thuật An toàn Khu vực II tiến hành thử tải 125% tải định mức, thử phanh hãm tốc và kiểm tra toàn bộ thiết bị an toàn. Sau khi có Biên bản kiểm định đạt yêu cầu và tem an toàn, Hà Hồng bàn giao toàn bộ hồ sơ gốc (bản vẽ hoàn công, sổ tay vận hành, phiếu kiểm định), hướng dẫn gia chủ vận hành và kích hoạt chế độ bảo hành 24 tháng.`,
+  },
 ];
 
 export default function GioiThieu() {
@@ -155,33 +145,21 @@ export default function GioiThieu() {
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
     "@id": "https://thangmayhahong.xyz/#organization",
-    name: tenCongTy,
+    name: "Công Ty Cổ Phần Thương Mại Dịch Vụ Thang Máy Hà Hồng",
     alternateName: "Thang Máy Hà Hồng",
-    legalName: tenCongTy,
     url: "https://thangmayhahong.xyz",
     logo: "https://thangmayhahong.xyz/logo-ha-hong.jpg",
     foundingDate: "2016-07-11",
-    taxID: maSoThue,
-    description:
-      "Công ty Cổ phần Thương mại Dịch vụ Thang máy Hà Hồng (MST: 0313908417) chuyên tư vấn, thiết kế, lắp đặt thang máy gia đình, thang máy kính homelift, thang tải hàng và bảo trì sửa chữa 24/7 tại TP.HCM.",
+    taxID: "0313908417",
+    description: "Công ty Cổ phần Thương mại Dịch vụ Thang máy Hà Hồng thành lập năm 2016 tại TP.HCM, chuyên lắp đặt thang máy gia đình, homelift kính, thang tải hàng và bảo trì 24/7.",
     telephone: "+84909933358",
-    email: emailCongTy,
     address: {
       "@type": "PostalAddress",
       streetAddress: "100 Tân Sơn, Phường 15",
       addressLocality: "Quận Tân Bình",
       addressRegion: "TP. Hồ Chí Minh",
-      addressCountry: "VN"
+      addressCountry: "VN",
     },
-    priceRange: "280.000.000 VNĐ - 850.000.000 VNĐ",
-    openingHoursSpecification: [
-      {
-        "@type": "OpeningHoursSpecification",
-        dayOfWeek: ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],
-        opens: "08:00",
-        closes: "17:30"
-      }
-    ]
   };
 
   const breadcrumbSchema = {
@@ -189,27 +167,27 @@ export default function GioiThieu() {
     "@type": "BreadcrumbList",
     itemListElement: [
       { "@type": "ListItem", position: 1, name: "Trang chủ", item: "https://thangmayhahong.xyz/" },
-      { "@type": "ListItem", position: 2, name: "Giới thiệu", item: "https://thangmayhahong.xyz/gioi-thieu" }
-    ]
+      { "@type": "ListItem", position: 2, name: "Giới thiệu", item: "https://thangmayhahong.xyz/gioi-thieu" },
+    ],
   };
 
   return (
     <main className="about-page-wrap">
       <SeoHead
-        title="Giới Thiệu Công Ty Cổ Phần Thương Mại Dịch Vụ Thang Máy Hà Hồng | MST 0313908417"
-        description="Thang Máy Hà Hồng (MST: 0313908417) thành lập 11/07/2016 tại TP.HCM. Chuyên tư vấn, lắp đặt thang máy gia đình, homelift kính, thang tải hàng và bảo trì 24/7. Đại diện pháp lý: Ông Vũ Tuyên Khôi."
-        keywords="giới thiệu thang máy hà hồng, công ty cổ phần thương mại dịch vụ thang máy hà hồng, mã số thuế 0313908417, ha hong lift trading service corporation, thang máy tphcm"
+        title="Giới Thiệu Công Ty Thang Máy Hà Hồng | Lắp Đặt Bảo Trì Uy Tín TP.HCM"
+        description="Thang Máy Hà Hồng (Cổ phần Thương mại Dịch vụ – MST 0313908417) thành lập 2016. Chuyên lắp đặt thang máy gia đình, homelift kính Panorama, thang tải hàng, bảo trì 24/7 tại TP.HCM và miền Nam."
+        keywords="giới thiệu thang máy hà hồng, công ty cổ phần thương mại dịch vụ thang máy hà hồng, lắp đặt thang máy tphcm uy tín, thang máy gia đình homelift"
         canonical="https://thangmayhahong.xyz/gioi-thieu"
         jsonLd={[companySchema, breadcrumbSchema]}
       />
 
-      {/* ── 1. HERO BANNER ── */}
+      {/* ── HERO BANNER ── */}
       <section
         className="about-banner"
         style={{
           backgroundImage: `linear-gradient(90deg, rgba(5,14,28,0.95), rgba(5,14,28,0.68)), url(${heroImage})`,
           backgroundPosition: "center",
-          backgroundSize: "cover"
+          backgroundSize: "cover",
         }}
       >
         <div className="site-container">
@@ -219,14 +197,14 @@ export default function GioiThieu() {
             <span>Giới thiệu công ty</span>
           </nav>
           <span className="section-eyebrow">VỀ CHÚNG TÔI</span>
-          <h1>Công Ty Cổ Phần Thương Mại Dịch Vụ Thang Máy Hà Hồng</h1>
+          <h1>Thang Máy Hà Hồng – Uy Tín Xây Từng Công Trình</h1>
           <p>
-            Thành lập từ năm 2016 tại TP. Hồ Chí Minh — Đồng hành cùng hàng trăm công trình nhà phố, biệt thự và tòa nhà thương mại trên toàn miền Nam với giải pháp thang máy an toàn, bền vững và thẩm mỹ.
+            Thành lập năm 2016 tại TP. Hồ Chí Minh, Hà Hồng đã và đang đồng hành cùng hàng trăm gia đình và doanh nghiệp trên hành trình xây dựng không gian sống tiện nghi, an toàn và đẳng cấp hơn mỗi ngày.
           </p>
         </div>
       </section>
 
-      {/* ── 2. STATS STRIP ── */}
+      {/* ── STATS STRIP ── */}
       <section className="about-stats-strip">
         <div className="site-container">
           <div className="row g-3">
@@ -247,86 +225,51 @@ export default function GioiThieu() {
         </div>
       </section>
 
-      {/* ── 3. THÔNG TIN PHÁP LÝ & CÂU CHUYỆN CÔNG TY ── */}
-      <section className="about-story-section">
+      {/* ── GIỚI THIỆU DẠNG BÀI VIẾT ── */}
+      <section className="gt-intro-section">
         <div className="site-container">
-          <div className="row align-items-stretch g-5">
-
-            {/* CỘT TRÁI – Giới thiệu tự sự */}
+          <div className="row g-5 align-items-center">
             <div className="col-lg-7">
               <div className="about-section-header">
                 <span className="about-tag-eyebrow">
-                  <i className="bi bi-building-fill-check"></i> GIỚI THIỆU DOANH NGHIỆP
+                  <i className="bi bi-building-fill-check"></i> GIỚI THIỆU
                 </span>
-                <h2 className="about-section-heading">
-                  Hành Trình Xây Dựng Niềm Tin Từ Chất Lượng &amp; Tận Tâm
-                </h2>
+                <h2 className="about-section-heading">Về Công Ty Thang Máy Hà Hồng</h2>
               </div>
 
-              <div className="about-story-card">
-                <p className="about-story-lead">
-                  Được thành lập chính thức vào ngày <strong>11/07/2016</strong> với Giấy chứng nhận đăng ký doanh nghiệp tại Sở Kế hoạch &amp; Đầu tư TP. Hồ Chí Minh, <strong>Công ty Cổ phần Thương mại Dịch vụ Thang máy Hà Hồng</strong> (tên quốc tế: <em>HA HONG LIFT TRADING - SERVICE CORPORATION</em>) ra đời từ khát vọng mang đến những giải pháp thang máy an toàn, minh bạch và phù hợp với từng ngôi nhà Việt.
+              <div className="gt-prose">
+                <p>
+                  <strong>Công ty Cổ phần Thương mại Dịch vụ Thang máy Hà Hồng</strong> được thành lập vào năm 2016 tại Thành phố Hồ Chí Minh. Trải qua gần một thập kỷ xây dựng và phát triển, Hà Hồng đã trở thành một trong những đơn vị uy tín trong lĩnh vực tư vấn, thiết kế, thi công lắp đặt và bảo trì thang máy tại khu vực TP.HCM và các tỉnh thành miền Nam.
                 </p>
-                <p className="about-story-text">
-                  Trải qua gần một thập kỷ hoạt động, công ty đã phát triển từ một đơn vị nhỏ chuyên bảo trì sửa chữa thành một nhà thầu thi công thang máy uy tín tại khu vực TP.HCM và các tỉnh thành miền Nam. Chúng tôi tự hào đã hoàn thiện hàng trăm công trình từ nhà phố hẹp, biệt thự cao cấp cho đến tòa nhà văn phòng và cơ sở y tế.
+                <p>
+                  Từ những ngày đầu hoạt động với đội ngũ kỹ sư nhỏ tập trung vào bảo trì sửa chữa, Hà Hồng từng bước mở rộng sang thi công lắp đặt mới, đầu tư xưởng gia công cơ khí chính xác và xây dựng hệ thống cung ứng thiết bị chính hãng nhập khẩu. Đến nay, công ty sở hữu đội ngũ kỹ sư và kỹ thuật viên lành nghề, có thể đảm nhận các dự án thang máy từ nhà phố gia đình, biệt thự cao cấp, văn phòng thương mại cho đến cơ sở y tế và công trình công nghiệp.
                 </p>
-                <p className="about-story-text">
-                  Dưới sự lãnh đạo của người đại diện pháp luật <strong>Ông Vũ Tuyên Khôi</strong>, Hà Hồng kiên định xây dựng văn hóa doanh nghiệp đặt <em>an toàn kỹ thuật</em> và <em>sự hài lòng của khách hàng</em> làm trọng tâm trong mọi quyết định kinh doanh.
+                <p>
+                  Hà Hồng đặc biệt chú trọng vào việc tối ưu hóa giải pháp cho từng công trình cụ thể, đặc biệt là các nhà phố cải tạo – vốn là thách thức lớn với nhiều đơn vị thi công do hạn chế về không gian hố thang, độ sâu hầm PIT nông và kết cấu móng cũ. Với kinh nghiệm và giải pháp kỹ thuật linh hoạt, Hà Hồng đã thành công lắp đặt thang máy cho hàng trăm công trình mà trước đó nhiều người cho là "không thể lắp được".
                 </p>
-
-                <div className="about-story-features">
-                  <div className="about-story-feat-item">
-                    <i className="bi bi-check-circle-fill"></i>
-                    <span>Kiểm định nhà nước theo TCVN 6395</span>
-                  </div>
-                  <div className="about-story-feat-item">
-                    <i className="bi bi-check-circle-fill"></i>
-                    <span>Hợp đồng minh bạch, rõ ràng từng hạng mục</span>
-                  </div>
-                  <div className="about-story-feat-item">
-                    <i className="bi bi-check-circle-fill"></i>
-                    <span>Linh kiện nhập khẩu CO/CQ gốc</span>
-                  </div>
-                  <div className="about-story-feat-item">
-                    <i className="bi bi-check-circle-fill"></i>
-                    <span>Đội kỹ thuật hơn 10 năm kinh nghiệm</span>
-                  </div>
-                </div>
+                <p>
+                  Phương châm hoạt động của Hà Hồng là: <strong>"An toàn – Chất lượng – Tận tâm"</strong>. Không chỉ là khẩu hiệu, đây là cam kết được thể hiện qua từng mối hàn, từng vít bắt ray, từng lần chỉnh cabin và từng cuộc gọi hỗ trợ kỹ thuật lúc nửa đêm khi khách hàng gặp sự cố. Đó là lý do vì sao hơn 60% khách hàng mới của Hà Hồng đến từ giới thiệu của khách hàng cũ đã hài lòng.
+                </p>
               </div>
             </div>
 
-            {/* CỘT PHẢI – Bảng thông tin pháp lý */}
             <div className="col-lg-5">
-              <div className="about-legal-card">
-                <div className="about-legal-header">
+              <div className="about-story-visual-wrap">
+                <img src={lobbyImage} alt="Thang máy Hà Hồng thi công tại TP.HCM" />
+                <div className="about-story-badge-floating">
                   <i className="bi bi-patch-check-fill"></i>
-                  <h3>Thông Tin Doanh Nghiệp</h3>
+                  <div>
+                    <strong>Phương châm: An Toàn – Chất Lượng – Tận Tâm</strong>
+                    <span>Hơn 60% khách hàng mới đến qua giới thiệu từ khách hàng cũ</span>
+                  </div>
                 </div>
-                <ul className="about-legal-list">
-                  {thongTinPhapLy.map((item, idx) => (
-                    <li key={idx}>
-                      <span className="about-legal-label">{item.label}</span>
-                      <span className="about-legal-value">{item.value}</span>
-                    </li>
-                  ))}
-                </ul>
-                <a
-                  href={googleMapsUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="about-map-btn"
-                >
-                  <i className="bi bi-geo-alt-fill"></i>
-                  Xem vị trí trên Google Maps
-                </a>
               </div>
             </div>
-
           </div>
         </div>
       </section>
 
-      {/* ── 4. GIÁ TRỊ CỐT LÕI ── */}
+      {/* ── GIÁ TRỊ CỐT LÕI ── */}
       <section className="about-values-grid-section">
         <div className="site-container">
           <div className="about-section-header text-center">
@@ -335,18 +278,22 @@ export default function GioiThieu() {
             </span>
             <h2 className="about-section-heading">Giá Trị Cốt Lõi Của Hà Hồng</h2>
             <p className="about-section-desc">
-              Bốn cam kết nền tảng dẫn dắt mọi hành động của đội ngũ Thang Máy Hà Hồng từ ngày đầu thành lập cho đến hôm nay.
+              Sáu cam kết nền tảng dẫn dắt mọi hành động của đội ngũ Thang Máy Hà Hồng từ ngày đầu thành lập cho đến hôm nay.
             </p>
           </div>
           <div className="row g-4">
             {giaTriCotLoi.map((val, idx) => (
-              <div className="col-md-6 col-lg-3" key={idx}>
-                <div className="about-pillar-card">
-                  <div className="about-pillar-icon">
+              <div className="col-md-6" key={idx}>
+                <div className="gt-value-card">
+                  <div className="gt-value-icon">
                     <i className={`bi ${val.icon}`}></i>
                   </div>
-                  <h3>{val.title}</h3>
-                  <p>{val.desc}</p>
+                  <div className="gt-value-body">
+                    <h3>{val.title}</h3>
+                    {val.desc.split("\n\n").map((para, pIdx) => (
+                      <p key={pIdx}>{para}</p>
+                    ))}
+                  </div>
                 </div>
               </div>
             ))}
@@ -354,8 +301,8 @@ export default function GioiThieu() {
         </div>
       </section>
 
-      {/* ── 5. DANH MỤC DỊCH VỤ ── */}
-      <section className="about-services-section-new">
+      {/* ── DANH MỤC DỊCH VỤ ── */}
+      <section className="gt-services-section">
         <div className="site-container">
           <div className="about-section-header text-center">
             <span className="about-tag-eyebrow">
@@ -363,19 +310,21 @@ export default function GioiThieu() {
             </span>
             <h2 className="about-section-heading">Các Dịch Vụ Của Hà Hồng</h2>
             <p className="about-section-desc">
-              Giải pháp thang máy toàn diện — từ thiết kế, thi công đến bảo trì — cho mọi loại công trình và ngân sách.
+              Giải pháp thang máy toàn diện – từ tư vấn thiết kế, thi công đến bảo trì lâu dài – cho mọi loại công trình và ngân sách tại TP.HCM và miền Nam.
             </p>
           </div>
           <div className="row g-4">
             {danhMucDichVu.map((sv, idx) => (
               <div className="col-md-6 col-lg-4" key={idx}>
-                <article className="about-service-item">
-                  <div className="about-service-icon-wrap">
+                <article className="gt-service-card">
+                  <div className="gt-service-icon">
                     <i className={`bi ${sv.icon}`}></i>
                   </div>
                   <h3>{sv.title}</h3>
-                  <p>{sv.desc}</p>
-                  <Link to="/lien-he" className="about-service-link">
+                  {sv.desc.split("\n\n").map((para, pIdx) => (
+                    <p key={pIdx}>{para}</p>
+                  ))}
+                  <Link to="/lien-he" className="gt-service-link">
                     Tư vấn miễn phí <i className="bi bi-arrow-right ms-1"></i>
                   </Link>
                 </article>
@@ -385,8 +334,8 @@ export default function GioiThieu() {
         </div>
       </section>
 
-      {/* ── 6. QUY TRÌNH 6 BƯỚC ── */}
-      <section className="about-process-grid-section">
+      {/* ── QUY TRÌNH 6 BƯỚC ── */}
+      <section className="gt-process-section">
         <div className="site-container">
           <div className="about-section-header text-center">
             <span className="about-tag-eyebrow">
@@ -394,14 +343,14 @@ export default function GioiThieu() {
             </span>
             <h2 className="about-section-heading">6 Bước Đồng Hành Cùng Khách Hàng</h2>
             <p className="about-section-desc">
-              Từ cuộc khảo sát đầu tiên đến khi bàn giao chìa khóa — mọi bước đều được kiểm soát chặt chẽ và minh bạch.
+              Từ cuộc điện thoại đầu tiên đến ngày bàn giao chìa khóa – mọi bước đều minh bạch, có văn bản xác nhận và đúng tiến độ cam kết.
             </p>
           </div>
           <div className="row g-4">
             {quyTrinhSauBuoc.map((step, idx) => (
               <div className="col-md-6 col-lg-4" key={idx}>
-                <div className="about-workflow-card">
-                  <div className="about-workflow-num">{step.num}</div>
+                <div className="gt-step-card">
+                  <div className="gt-step-num">{step.num}</div>
                   <h3>{step.title}</h3>
                   <p>{step.desc}</p>
                 </div>
@@ -411,7 +360,7 @@ export default function GioiThieu() {
         </div>
       </section>
 
-      {/* ── 7. CAM KẾT BẢO HÀNH ── */}
+      {/* ── BẢO HÀNH ── */}
       <section className="about-commitment-badge-section">
         <div className="site-container">
           <div className="about-section-header text-center">
@@ -421,44 +370,40 @@ export default function GioiThieu() {
             <h2 className="about-section-heading">Chính Sách Bảo Hành &amp; Hậu Mãi</h2>
           </div>
           <div className="row g-4">
-            <div className="col-lg-4">
-              <div className="about-commit-card">
-                <div className="about-commit-icon">
-                  <i className="bi bi-shield-check"></i>
-                </div>
-                <div className="about-commit-content">
-                  <h3>Bảo Hành 24 Tháng</h3>
-                  <p>Bảo hành toàn hệ thống cơ điện — động cơ, biến tần, tủ điện điều khiển và toàn bộ linh kiện chính hãng. Đổi mới miễn phí nếu có lỗi sản xuất.</p>
-                </div>
-              </div>
-            </div>
-            <div className="col-lg-4">
-              <div className="about-commit-card">
-                <div className="about-commit-icon">
-                  <i className="bi bi-tools"></i>
-                </div>
-                <div className="about-commit-content">
-                  <h3>Bảo Trì Định Kỳ Miễn Phí</h3>
-                  <p>Kiểm tra, vệ sinh và bôi trơn định kỳ 1–2 tháng/lần trong 18 tháng đầu sau bàn giao. Phát hiện sớm hao mòn, giữ thang luôn êm ái như mới.</p>
-                </div>
-              </div>
-            </div>
-            <div className="col-lg-4">
-              <div className="about-commit-card">
-                <div className="about-commit-icon">
-                  <i className="bi bi-telephone-inbound-fill"></i>
-                </div>
-                <div className="about-commit-content">
-                  <h3>Cứu Hộ Khẩn Cấp 24/7</h3>
-                  <p>Hotline kỹ thuật trực 24 giờ, 7 ngày, kể cả ngày lễ Tết. Kỹ thuật viên có mặt xử lý sự cố trong 30–60 phút tại các quận nội thành TP.HCM.</p>
+            {[
+              {
+                icon: "bi-shield-check",
+                title: "Bảo Hành 24 Tháng Toàn Hệ Thống",
+                desc: "Bảo hành toàn bộ cơ điện: động cơ, biến tần, tủ điều khiển, ray, cáp và linh kiện chính hãng. Miễn phí đổi mới nếu có lỗi sản xuất.",
+              },
+              {
+                icon: "bi-tools",
+                title: "Bảo Trì Định Kỳ Miễn Phí 18 Tháng",
+                desc: "Kiểm tra, vệ sinh và bôi trơn 1–2 tháng/lần trong 18 tháng đầu. Phát hiện sớm hao mòn, đảm bảo thang vận hành ổn định lâu dài.",
+              },
+              {
+                icon: "bi-telephone-inbound-fill",
+                title: "Hotline Kỹ Thuật 24/7 – Cứu Hộ 30 Phút",
+                desc: "Đường dây kỹ thuật trực xuyên ngày đêm kể cả ngày lễ Tết. Kỹ thuật viên có mặt tại nội thành TP.HCM trong 30–60 phút.",
+              },
+            ].map((item, idx) => (
+              <div className="col-lg-4" key={idx}>
+                <div className="about-commit-card">
+                  <div className="about-commit-icon">
+                    <i className={`bi ${item.icon}`}></i>
+                  </div>
+                  <div className="about-commit-content">
+                    <h3>{item.title}</h3>
+                    <p>{item.desc}</p>
+                  </div>
                 </div>
               </div>
-            </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* ── 8. CTA ── */}
+      {/* ── CTA ── */}
       <section className="about-cta-container">
         <div className="site-container">
           <div className="about-cta-box">
@@ -469,7 +414,7 @@ export default function GioiThieu() {
                 </span>
                 <h2>Bạn Đang Cần Lắp Đặt Hoặc Bảo Trì Thang Máy?</h2>
                 <p>
-                  Kỹ sư Hà Hồng sẵn sàng đến tận nơi khảo sát mặt bằng hố thang và tư vấn phương án kỹ thuật tối ưu — <strong>hoàn toàn miễn phí</strong>, không ràng buộc.
+                  Kỹ sư Hà Hồng sẵn sàng đến tận nơi khảo sát hố thang và tư vấn phương án kỹ thuật tối ưu — <strong>hoàn toàn miễn phí</strong>, không ràng buộc.
                 </p>
                 <div className="about-cta-btns">
                   <Link to="/du-toan" className="about-btn-gold">
@@ -491,7 +436,7 @@ export default function GioiThieu() {
                     maxWidth: "100%",
                     borderRadius: "16px",
                     boxShadow: "0 20px 40px rgba(0,0,0,0.4)",
-                    border: "2px solid rgba(217,164,65,0.4)"
+                    border: "2px solid rgba(217,164,65,0.4)",
                   }}
                 />
               </div>
