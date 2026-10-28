@@ -37,6 +37,13 @@ const SAMPLE_PRESETS = [
     badge: "Tòa nhà 10 tầng",
     prompt: "Bản vẽ mặt bằng kiến trúc tòa nhà văn phòng 10 tầng, giếng thang bê tông lọt lòng 1800x1800mm, hố PIT 1400mm, OH 4200mm, tải trọng 630kg động cơ Fuji tốc độ cao 1.75m/s.",
     svgColor: "#8b5cf6"
+  },
+  {
+    id: "thang-mat-tien-kinh",
+    name: "Thang ngoài mặt tiền đường (Kính Panorama 4 tầng)",
+    badge: "Mặt tiền phố",
+    prompt: "Bản vẽ kiến trúc thang máy bố trí ngoài mặt tiền đường, 4 tầng, giếng thang kính lọt lòng 1600x1600mm, cabin vách kính an toàn view phố.",
+    svgColor: "#06b6d4"
   }
 ];
 
@@ -146,6 +153,7 @@ export default function AiVisionScanner({ onApplySpecs }) {
     if (sample.id === "thang-tieu-chuan") { w = "1500"; d = "1550"; }
     if (sample.id === "biet-thu-cao-cap") { w = "1750"; d = "1750"; }
     if (sample.id === "toa-nha-10-tang") { w = "1800"; d = "1800"; }
+    if (sample.id === "thang-mat-tien-kinh") { w = "1600"; d = "1600"; }
 
     const svgString = getBlueprintSvgString(sample.name, w, d, sample.svgColor);
     const dataUri = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgString)}`;
@@ -191,9 +199,13 @@ export default function AiVisionScanner({ onApplySpecs }) {
 
       // Smart client fallback based on prompt / file name
       const hint = `${promptText || ""} ${fileToUpload?.name || ""}`.toLowerCase();
+      const isFacade = hint.includes("mat tien") || hint.includes("mặt tiền") || hint.includes("ngoai troi") || hint.includes("ngoài trời") || hint.includes("view") || hint.includes("pho") || hint.includes("phố");
       const is10 = hint.includes("10 tang") || hint.includes("10 tầng") || hint.includes("10-tang") || hint.includes("10t") || hint.includes("10 floor");
       const isCap4 = hint.includes("cap 4") || hint.includes("cấp 4") || hint.includes("1 tang") || hint.includes("1 tầng");
       const hasMezzanine = hint.includes("lung") || hint.includes("lửng") || hint.includes("gac") || hint.includes("gác");
+
+      const priceMin = is10 ? 780000000 : (isCap4 ? 280000000 : (isFacade ? 400000000 : 360000000));
+      const priceMax = is10 ? 960000000 : (isCap4 ? 340000000 : (isFacade ? 490000000 : 440000000));
 
       const fallbackResult = {
         success: true,
@@ -201,27 +213,31 @@ export default function AiVisionScanner({ onApplySpecs }) {
         confidenceScore: is10 ? 0.95 : 0.92,
         imageType: is10
           ? "Bản vẽ kiến trúc tòa nhà cao tầng (10 tầng)"
-          : isCap4
+          : (isFacade
+          ? "Bản vẽ thang máy mặt tiền quan sát phố (4 tầng)"
+          : (isCap4
           ? (hasMezzanine ? "Bản vẽ nhà cấp 4 (Có gác lửng/bán hầm)" : "Bản vẽ nhà cấp 4 (1 tầng trệt thuần túy)")
-          : "Bản vẽ mặt bằng kết cấu hố thang",
-        shaftWidthMm: is10 ? 1800 : isCap4 ? 1200 : 1500,
-        shaftDepthMm: is10 ? 1800 : isCap4 ? 1200 : 1550,
-        pitDepthMm: is10 ? 1400 : isCap4 ? 250 : 800,
-        overheadMm: is10 ? 4200 : isCap4 ? 2800 : 3600,
-        stops: is10 ? 10 : isCap4 ? 2 : 5,
-        buildingType: is10 ? "van-phong" : isCap4 ? "nha-pho-cai-tao" : "nha-pho-xay-moi",
-        suggestedCapacityKg: is10 ? 630 : isCap4 ? 300 : 450,
-        suggestedElevatorType: is10 ? "tieu-chuan" : isCap4 ? "homelift-kinh" : "tieu-chuan",
+          : "Bản vẽ mặt bằng kết cấu hố thang")),
+        shaftWidthMm: is10 ? 1800 : (isFacade ? 1600 : (isCap4 ? 1200 : 1500)),
+        shaftDepthMm: is10 ? 1800 : (isFacade ? 1600 : (isCap4 ? 1200 : 1550)),
+        pitDepthMm: is10 ? 1400 : (isFacade ? 350 : (isCap4 ? 250 : 800)),
+        overheadMm: is10 ? 4200 : (isFacade ? 3000 : (isCap4 ? 2800 : 3600)),
+        stops: is10 ? 10 : (isFacade ? 4 : (isCap4 ? 2 : 5)),
+        buildingType: is10 ? "van-phong" : (isCap4 ? "nha-pho-cai-tao" : "nha-pho-xay-moi"),
+        suggestedCapacityKg: is10 ? 630 : (isCap4 ? 300 : 450),
+        suggestedElevatorType: (isFacade || isCap4) ? "homelift-kinh" : (is10 ? "tieu-chuan" : "tieu-chuan"),
         suggestedMotorBrand: "Fuji",
         suggestedDoorType: "2CO",
-        cabinDimensions: is10 ? "1400 x 1350 x 2200 mm" : "1100 x 1000 x 2150 mm",
-        estimatedPriceMin: is10 ? 520000000 : isCap4 ? 280000000 : 340000000,
-        estimatedPriceMax: is10 ? 680000000 : isCap4 ? 330000000 : 390000000,
+        cabinDimensions: is10 ? "1400 x 1350 x 2200 mm" : (isFacade ? "1100 x 1050 x 2200 mm" : "1100 x 1000 x 2150 mm"),
+        estimatedPriceMin: priceMin,
+        estimatedPriceMax: priceMax,
         summaryAnalysis: is10
           ? "Đã nhận diện bản vẽ Tòa nhà cao tầng (10 tầng). Với công trình cao tầng có tần suất di chuyển liên tục, giải pháp tối ưu là thang máy tải khách tiêu chuẩn Inox 304 tốc độ cao (1.5 - 1.75 m/s) tải trọng 630kg (8-9 người). Hố PIT yêu cầu từ 1400mm và OH 4200mm đạt chuẩn an toàn TCVN."
-          : isCap4 && !hasMezzanine
+          : (isFacade
+          ? "AI Vision nhận diện vị trí hố thang bố trí ở MẶT TIỀN ĐƯỜNG / NGOÀI TRỜI (4 tầng). Khuyến nghị tối ưu 100% là lắp đặt Thang Máy Kính Cường Lực Panorama Quan Sát Phố. Giúp ngắm trọn cảnh quan đường phố, tạo điểm nhấn kiến trúc sang trọng hiện đại cho mặt tiền mà không tốn diện tích sàn bên trong nhà."
+          : (isCap4 && !hasMezzanine
           ? "⚠️ LƯU Ý KỸ THUẬT: Bản vẽ được nhận diện là Nhà Cấp 4 (1 tầng trệt). Thang máy bắt buộc phải có tối thiểu 2 điểm dừng. Nếu nhà thuần 1 tầng và không có gác lửng/bán hầm thì không khả thi lắp thang máy tiêu chuẩn."
-          : "Hệ thống phân tích dự phòng: Đã nhận diện ô thang mặt bằng kỹ thuật, kích thước giếng thang tối ưu cho thang máy gia đình tiêu chuẩn.",
+          : "Hệ thống phân tích dự phòng: Đã nhận diện ô thang mặt bằng kỹ thuật, kích thước giếng thang tối ưu cho thang máy gia đình tiêu chuẩn.")),
         technicalHighlights: is10
           ? [
               "Tòa nhà 10 tầng yêu cầu động cơ kéo công suất lớn 5.5kW - 7.5kW và cáp tải cường độ cao chống dão.",
@@ -229,16 +245,36 @@ export default function AiVisionScanner({ onApplySpecs }) {
               "Chiều cao tầng trên cùng OH yêu cầu 4200 mm để đảm bảo khoảng cách an toàn bảo trì trên nóc cabin.",
               "Hệ thống điều khiển tín hiệu vi xử lý nhóm thông minh tối ưu thời gian chờ gọi tầng."
             ]
+          : (isFacade
+          ? [
+              "Thang lắp ngoài mặt tiền sử dụng kính dán an toàn 2 lớp 10mm-12mm chống tia UV và chịu áp lực gió ngoài trời.",
+              "Hệ khung định hình bọc hợp kim nhôm Anode cao cấp hoặc thép sơn tĩnh điện chống rỉ sét tuyệt đối.",
+              "Cửa tầng kính quan sát đồng bộ với cabin, tạo góc nhìn panorama thoáng đãng khi di chuyển.",
+              "Hệ thống điều hòa mini hoặc thông gió chuyên dụng bảo đảm cabin luôn mát mẻ dưới ánh nắng mặt trời."
+            ]
           : [
               "Hố giếng thang tiêu chuẩn chịu tải cao.",
               "Động cơ Fuji không hộp số tiết kiệm 40% điện năng.",
               "Hệ thống cảm biến photocell chống kẹt cửa đa điểm an toàn."
-            ],
-        suitableCabinStyles: [
-          "Inox 304 sọc nhuyễn kết hợp inox gương chống trầy xước",
-          "Màn hình LCD hiển thị tầng và chiều chạy",
-          "Trần đèn LED chiếu sáng vát gián tiếp cao cấp"
-        ]
+            ]),
+        suitableCabinStyles: isFacade
+          ? [
+              "🌟 ĐỀ XUẤT CHO MẶT TIỀN: Cabin Kính Cường Lực An Toàn 4 Mặt Panorama (View toàn cảnh phố)",
+              "Kính dán an toàn 2 lớp 10mm-12mm đón ánh sáng tự nhiên và mở rộng tầm nhìn mặt tiền",
+              "Khung nhôm định hình cao cấp mạ Anode màu Gold hoặc Đen mờ chống oxy hóa ngoài trời",
+              "Trần đèn LED dịu mắt và sàn đá hoa cương nguyên khối chịu lực cao cấp"
+            ]
+          : (is10
+          ? [
+              "Inox 304 sọc nhuyễn kết hợp inox gương chống trầy xước",
+              "Màn hình LCD hiển thị tầng và chiều chạy",
+              "Trần đèn LED chiếu sáng vát gián tiếp cao cấp"
+            ]
+          : [
+              "Inox 304 sọc nhuyễn kết hợp inox gương chống trầy xước",
+              "Màn hình LCD hiển thị tầng và chiều chạy",
+              "Trần đèn LED chiếu sáng vát gián tiếp cao cấp"
+            ])
       };
 
       setResult(fallbackResult);
@@ -484,6 +520,33 @@ export default function AiVisionScanner({ onApplySpecs }) {
                     </ul>
                   )}
                 </div>
+
+                {/* Tư vấn thiết kế cabin theo vị trí lắp đặt */}
+                {result.suitableCabinStyles?.length > 0 && (
+                  <div
+                    className="p-3 mb-3 rounded-3"
+                    style={{
+                      background: "rgba(217, 164, 65, 0.08)",
+                      border: "1px solid rgba(217, 164, 65, 0.35)"
+                    }}
+                  >
+                    <div className="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
+                      <span className="fw-bold text-warning small">
+                        <i className="bi bi-palette2 me-1"></i> TƯ VẤN MẪU CABIN & VỊ TRÍ LẮP ĐẶT PHÙ HỢP:
+                      </span>
+                      {result.suggestedElevatorType === "homelift-kinh" && (
+                        <span className="badge bg-info text-dark fw-bold" style={{ fontSize: "11px" }}>
+                          <i className="bi bi-eye-fill me-1"></i> Ưu tiên Kính Cường Lực Mặt Tiền
+                        </span>
+                      )}
+                    </div>
+                    <ul className="small text-light mb-0 ps-3">
+                      {result.suitableCabinStyles.map((styleItem, idx) => (
+                        <li key={idx} className="mb-1">{styleItem}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
 
                 <div className="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
                   <div>

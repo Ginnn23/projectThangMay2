@@ -81,29 +81,37 @@ public class ElevatorEstimatorService
         }
         else
         {
-            pitDepth = isRenovation ? 600 : 1100;
-            overheadH = isRenovation ? 3400 : 3800;
+            pitDepth = isRenovation ? 600 : (stops >= 7 ? 1400 : 1100);
+            overheadH = isRenovation ? 3400 : (stops >= 7 ? 4200 : 3800);
         }
 
-        // 2. Cost calculations
+        // 2. Cost calculations (Chuẩn thị trường thang máy Việt Nam)
+        bool isHighRise = stops >= 7;
+
         decimal motorMin, motorMax;
         string motorDesc;
         switch (req.MotorBrand.ToLowerInvariant())
         {
             case "mitsubishi":
-                motorMin = 135_000_000m;
-                motorMax = 155_000_000m;
-                motorDesc = "Động cơ không hộp số Mitsubishi (Thái Lan) + Biến tần Yaskawa Nhật Bản, vận hành siêu bền và tiết kiệm điện 40%.";
+                motorMin = isHighRise ? 230_000_000m : 135_000_000m;
+                motorMax = isHighRise ? 275_000_000m : 155_000_000m;
+                motorDesc = isHighRise
+                    ? "Động cơ Mitsubishi công suất lớn 5.5kW - 7.5kW tốc độ cao 1.5 - 1.75m/s + Biến tần Yaskawa Nhật Bản chuyên dụng cho cao ốc."
+                    : "Động cơ không hộp số Mitsubishi (Thái Lan) + Biến tần Yaskawa Nhật Bản, vận hành siêu bền và tiết kiệm điện 40%.";
                 break;
             case "montanari":
-                motorMin = 155_000_000m;
-                motorMax = 180_000_000m;
-                motorDesc = "Động cơ nhập khẩu nguyên chiếc Montanari (Ý) tiêu chuẩn châu Âu cao cấp, vận hành êm ái tuyệt đối.";
+                motorMin = isHighRise ? 250_000_000m : 155_000_000m;
+                motorMax = isHighRise ? 300_000_000m : 180_000_000m;
+                motorDesc = isHighRise
+                    ? "Động cơ cao cấp nhập khẩu nguyên chiếc Montanari (Ý) công suất lớn 7.5kW, biến tần châu Âu cao cấp vận hành êm ái tuyệt đối."
+                    : "Động cơ nhập khẩu nguyên chiếc Montanari (Ý) tiêu chuẩn châu Âu cao cấp, vận hành êm ái tuyệt đối.";
                 break;
             default: // Fuji
-                motorMin = 110_000_000m;
-                motorMax = 125_000_000m;
-                motorDesc = "Động cơ không hộp số Fuji (Công nghệ Nhật Bản) + Tủ điều khiển biến tần vi xử lý thế hệ mới, tối ưu chi phí.";
+                motorMin = isHighRise ? 195_000_000m : 110_000_000m;
+                motorMax = isHighRise ? 235_000_000m : 125_000_000m;
+                motorDesc = isHighRise
+                    ? "Động cơ không hộp số Fuji (Công nghệ Nhật Bản) 5.5kW tốc độ cao 1.5 - 1.75m/s + Tủ điều khiển vi xử lý nhóm thông minh cho tòa nhà cao tầng."
+                    : "Động cơ không hộp số Fuji (Công nghệ Nhật Bản) + Tủ điều khiển biến tần vi xử lý thế hệ mới, tối ưu chi phí.";
                 break;
         }
 
@@ -128,36 +136,60 @@ public class ElevatorEstimatorService
             cabinDesc = "Inox 304 sọc nhuyễn chống vân tay kết hợp inox gương hiện đại, sàn đá granite bền bỉ, quạt thông gió chuyên dụng.";
         }
 
-        // Additional stops beyond base 3 stops
-        var extraStops = Math.Max(0, stops - 3);
-        decimal stopCostMin = extraStops * 16_000_000m;
-        decimal stopCostMax = extraStops * 20_000_000m;
-        var stopDesc = $"Hệ thống ray dẫn hướng T78/T89, cáp tải chuyên dụng, {stops} bộ cửa tầng tự động và cụm nút gọi tầng LED hiển thị.";
+        // Additional stops beyond base 3 stops (with realistic high-rise scaling)
+        decimal stopCostMin, stopCostMax;
+        if (stops == 2)
+        {
+            stopCostMin = -20_000_000m;
+            stopCostMax = -25_000_000m;
+        }
+        else
+        {
+            var regularExtra = Math.Min(3, Math.Max(0, stops - 3)); // stops 4..6
+            var highRiseExtra = Math.Max(0, stops - 6);             // stops 7..10
+
+            stopCostMin = (regularExtra * 26_000_000m) + (highRiseExtra * 36_000_000m);
+            stopCostMax = (regularExtra * 32_000_000m) + (highRiseExtra * 45_000_000m);
+        }
+
+        var stopDesc = isHighRise
+            ? $"Hệ thống ray dẫn hướng thép chịu lực T89/T114, cáp tải cường độ cao chống dão, {stops} bộ cửa tầng tự động tốc độ cao và cụm nút gọi tầng LED hiển thị."
+            : $"Hệ thống ray dẫn hướng T78/T89, cáp tải chuyên dụng, {stops} bộ cửa tầng tự động và cụm nút gọi tầng LED hiển thị.";
 
         // Frame / Shaft structure cost
         decimal frameMin = 0m, frameMax = 0m;
         string frameDesc = "Hố thang tường gạch / cột bê tông có sẵn của công trình.";
         if (isGlassHomelift)
         {
-            frameMin = 50_000_000m + (stops * 5_000_000m);
-            frameMax = 65_000_000m + (stops * 6_000_000m);
+            frameMin = 50_000_000m + (stops * 6_000_000m);
+            frameMax = 65_000_000m + (stops * 8_000_000m);
             frameDesc = $"Hệ khung thép định hình sơn tĩnh điện cao cấp {stops} tầng, bọc kính cường lực an toàn thẩm mỹ cao.";
         }
         else if (isRenovation)
         {
-            frameMin = 35_000_000m + (stops * 3_500_000m);
-            frameMax = 48_000_000m + (stops * 4_500_000m);
+            frameMin = 35_000_000m + (stops * 4_000_000m);
+            frameMax = 48_000_000m + (stops * 5_000_000m);
             frameDesc = $"Gia cố kết cấu khung thép giếng thang cho nhà cải tạo {stops} tầng, không ảnh hưởng kết cấu móng nhà.";
         }
 
-        // Labor, installation, inspection and insurance
-        decimal laborMin = 35_000_000m + (stops * 2_000_000m);
-        decimal laborMax = 45_000_000m + (stops * 2_500_000m);
-        var laborDesc = "Thi công cơ khí, kéo cáp, đấu nối điện, kiểm định an toàn kỹ thuật nhà nước, bảo hiểm và vận chuyển tận nơi.";
+        // Labor, installation, hoisting, inspection and insurance
+        decimal laborMin = isHighRise
+            ? 55_000_000m + (stops * 4_500_000m)
+            : 35_000_000m + (stops * 2_500_000m);
+        decimal laborMax = isHighRise
+            ? 70_000_000m + (stops * 5_500_000m)
+            : 45_000_000m + (stops * 3_000_000m);
+        var laborDesc = isHighRise
+            ? "Kéo máy kéo tải trọng lớn, thả ray cao ốc 10 tầng, cân chỉnh quả rọi laser, đấu nối tủ vi xử lý, kiểm định an toàn kỹ thuật nhà nước và bảo hiểm công trình."
+            : "Thi công cơ khí, kéo cáp, đấu nối điện, kiểm định an toàn kỹ thuật nhà nước, bảo hiểm và vận chuyển tận nơi.";
+
+        // Base 3 stops fixture package
+        decimal baseFixtureMin = 65_000_000m;
+        decimal baseFixtureMax = 78_000_000m;
 
         // Total
-        var totalMin = motorMin + cabinMin + stopCostMin + frameMin + laborMin;
-        var totalMax = motorMax + cabinMax + stopCostMax + frameMax + laborMax;
+        var totalMin = motorMin + cabinMin + stopCostMin + frameMin + laborMin + baseFixtureMin;
+        var totalMax = motorMax + cabinMax + stopCostMax + frameMax + laborMax + baseFixtureMax;
 
         // Round to millions
         totalMin = Math.Round(totalMin / 1_000_000m) * 1_000_000m;
@@ -186,8 +218,8 @@ public class ElevatorEstimatorService
                 Category = "Hệ thống Cửa tầng & Thiết bị theo tầng",
                 Title = $"{stops} Điểm dừng (Stops) trọn gói",
                 Description = stopDesc,
-                MinPrice = stopCostMin + 25_000_000m,
-                MaxPrice = stopCostMax + 32_000_000m
+                MinPrice = Math.Max(25_000_000m, stopCostMin + baseFixtureMin),
+                MaxPrice = Math.Max(32_000_000m, stopCostMax + baseFixtureMax)
             }
         };
 
@@ -206,7 +238,7 @@ public class ElevatorEstimatorService
         breakdown.Add(new()
         {
             Category = "Lắp đặt, Kiểm định & Nghiệm thu",
-            Title = "Nhân công trọn gói & Kiểm định Nhà nước",
+            Title = isHighRise ? "Nhân công lắp đặt cao ốc 10 tầng & Kiểm định Nhà nước" : "Nhân công trọn gói & Kiểm định Nhà nước",
             Description = laborDesc,
             MinPrice = laborMin,
             MaxPrice = laborMax

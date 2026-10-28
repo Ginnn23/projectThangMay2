@@ -305,6 +305,23 @@ QUY TẮC NGUYÊN LÝ KỸ THUẬT BẮT BUỘC:
    - isElevatorDetected: true
    - Đề xuất tải trọng và kích thước phù hợp (300kg, 350kg, 450kg, 630kg).
 
+4. QUY TẮC TƯ VẤN MẪU CABIN THEO VỊ TRÍ & ĐẶC ĐIỂM CÔNG TRÌNH:
+   - NẾU THANG LẮP ĐẶT NGOÀI MẶT TIỀN ĐƯỜNG, VIEW NGOÀI TRỜI, HOẶC BAN CÔNG:
+     BẮT BUỘC ĐỀ XUẤT: 'Vách Cabin Kính Cường Lực An Toàn 4 Mặt (Panorama Glass Cabin)'.
+     Giải thích: Vách kính cường lực an toàn 10mm-12mm khung nhôm mạ Anode/thép sơn tĩnh điện chống tia UV, giúp ngắm trọn cảnh quan đường phố, tạo điểm nhấn kiến trúc sang trọng hiện đại cho mặt tiền công trình, đồng thời không chiếm diện tích sàn bên trong nhà.
+   - NẾU THANG NẰM TRONG GIẾNG TRỜI / LÒNG THANG BỘ:
+     Đề xuất Thang Kính Homelift để đón ánh sáng tự nhiên từ mái xuống các tầng.
+   - NẾU THANG NẰM TRONG HỐ BÊ TÔNG TRUYỀN THỐNG / TÒA NHÀ VĂN PHÒNG:
+     Đề xuất Cabin Inox 304 sọc nhuyễn (Hairline) kết hợp Inox Gương (Mirror) chống trầy xước, dễ lau chùi, bền bỉ với tần suất di chuyển cao.
+   - NẾU LÀ BIỆT THỰ / NHÀ PHỐ CAO CẤP:
+     Đề xuất Cabin Inox Gương Vàng PVD Hoàng Gia khắc hoa văn laser tân cổ điển.
+
+5. ĐỊNH GIÁ THỰC TẾ CHUẨN THỊ TRƯỜNG VIỆT NAM (Đơn vị: VNĐ):
+   - Thang 2 tầng (Homelift mini 300kg - 350kg): 280.000.000 đ - 340.000.000 đ
+   - Thang 3 - 5 tầng (Nhà phố 350kg - 450kg): 340.000.000 đ - 480.000.000 đ
+   - Thang 6 - 7 tầng (Biệt thự / Khách sạn mini 450kg - 630kg): 500.000.000 đ - 650.000.000 đ
+   - Thang 8 - 10 tầng (Tòa nhà cao tầng / Văn phòng tốc độ cao 630kg - 1000kg): 750.000.000 đ - 980.000.000 đ
+
 BẮT BUỘC trả về ĐÚNG MỘT đối tượng JSON (không thêm bất kỳ văn bản nào ngoài JSON) theo định dạng:
 {
   ""isElevatorDetected"": true,
@@ -470,7 +487,8 @@ BẮT BUỘC trả về ĐÚNG MỘT đối tượng JSON (không thêm bất k�
             };
         }
 
-        var isGlass = prompt.Contains("kinh") || prompt.Contains("homelift") || prompt.Contains("panorama");
+        var isFacade = prompt.Contains("mat tien") || prompt.Contains("mặt tiền") || prompt.Contains("ngoai troi") || prompt.Contains("ngoài trời") || prompt.Contains("ngoai nha") || prompt.Contains("ngoài nhà") || prompt.Contains("view") || prompt.Contains("pho") || prompt.Contains("phố");
+        var isGlass = isFacade || prompt.Contains("kinh") || prompt.Contains("homelift") || prompt.Contains("panorama");
         var isVilla = prompt.Contains("biet thu") || prompt.Contains("cao cap") || prompt.Contains("pvd") || prompt.Contains("vang");
         var isRenovation = prompt.Contains("cai tao") || prompt.Contains("nha cu") || prompt.Contains("long thang bo");
 
@@ -517,12 +535,14 @@ BẮT BUỘC trả về ĐÚNG MỘT đối tượng JSON (không thêm bất k�
             shaftD = 1750;
         }
 
-        var elevType = isVilla ? "biet-thu" : (isGlass ? "homelift-kinh" : "tieu-chuan");
+        var elevType = isFacade ? "homelift-kinh" : (isVilla ? "biet-thu" : (isGlass ? "homelift-kinh" : "tieu-chuan"));
         var buildingType = isCommercialHighRise ? "van-phong" : (isVilla ? "biet-thu" : (isRenovation ? "nha-pho-cai-tao" : "nha-pho-xay-moi"));
 
         var summary = isCommercialHighRise
             ? $"AI Vision đã nhận diện bản vẽ Tòa nhà cao tầng ({stops} tầng). Với công trình cao tầng có tần suất di chuyển liên tục, giải pháp tối ưu là lắp đặt Thang Máy Tải Khách Tiêu Chuẩn Inox 304 tốc độ cao (1.5 - 1.75 m/s) tải trọng {capacity}kg (8 - 9 người). Hố PIT yêu cầu từ {pit}mm và chiều cao OH {oh}mm để bố trí bộ giảm chấn thủy lực đạt chuẩn an toàn TCVN."
-            : $"AI Vision đã nhận diện cấu trúc giếng thang với kích thước lọt lòng ước tính khoảng {shaftW} x {shaftD} mm. Phương án tối ưu nhất là lắp đặt Thang Máy {(elevType == "homelift-kinh" ? "Kính Homelift Panorama" : (elevType == "biet-thu" ? "Biệt Thự Sang Trọng Inox Gương Vàng PVD" : "Gia Đình Tiêu Chuẩn Inox 304"))} tải trọng {capacity}kg.";
+            : (isFacade
+                ? $"AI Vision nhận diện vị trí hố thang bố trí ở MẶT TIỀN ĐƯỜNG / NGOÀI TRỜI ({stops} tầng, lọt lòng {shaftW}x{shaftD}mm). Khuyến nghị tối ưu 100% là lắp đặt Thang Máy Kính Cường Lực Panorama Quan Sát Phố. Giải pháp này giúp gia chủ ngắm trọn cảnh quan đường phố, tạo điểm nhấn kiến trúc sang trọng hiện đại cho mặt tiền mà không tốn diện tích sàn bên trong nhà."
+                : $"AI Vision đã nhận diện cấu trúc giếng thang với kích thước lọt lòng ước tính khoảng {shaftW} x {shaftD} mm. Phương án tối ưu nhất là lắp đặt Thang Máy {(elevType == "homelift-kinh" ? "Kính Homelift Panorama" : (elevType == "biet-thu" ? "Biệt Thự Sang Trọng Inox Gương Vàng PVD" : "Gia Đình Tiêu Chuẩn Inox 304"))} tải trọng {capacity}kg.");
 
         var highlights = isCommercialHighRise
             ? new List<string>
@@ -532,19 +552,122 @@ BẮT BUỘC trả về ĐÚNG MỘT đối tượng JSON (không thêm bất k�
                 $"Chiều cao tầng trên cùng OH yêu cầu {oh} mm để đảm bảo khoảng cách an toàn bảo trì trên nóc cabin.",
                 "Hệ thống điều khiển tín hiệu vi xử lý nhóm thông minh (Duplex/Triplex) tối ưu thời gian chờ gọi tầng."
             }
-            : new List<string>
+            : (isFacade
+                ? new List<string>
+                {
+                    "Thang lắp ngoài mặt tiền sử dụng kính dán an toàn 2 lớp 10mm-12mm chống tia UV và chịu áp lực gió ngoài trời.",
+                    "Hệ khung định hình bọc hợp kim nhôm Anode cao cấp hoặc thép sơn tĩnh điện chống rỉ sét tuyệt đối.",
+                    "Cửa tầng kính quan sát đồng bộ với cabin, tạo góc nhìn panorama thoáng đãng khi di chuyển.",
+                    "Hệ thống điều hòa mini hoặc thông gió chuyên dụng bảo đảm cabin luôn mát mẻ dưới ánh nắng mặt trời."
+                }
+                : new List<string>
+                {
+                    $"Kích thước lọt lòng hố {shaftW} x {shaftD} mm lý tưởng cho phương án thi công kết cấu khung thép bọc kính cường lực hoặc hố bê tông truyền thống.",
+                    $"Hố PIT yêu cầu tối thiểu {pit} mm, phù hợp hoàn hảo với hiện trạng mà không cần đục sâu ảnh hưởng móng nhà.",
+                    "Động cơ không hộp số Fuji (Nhật Bản/Hàn Quốc) tiết kiệm 40% điện năng và vận hành êm ái.",
+                    "Cửa tầng tự động êm dịu tích hợp photocell màng hồng ngoại an toàn đa điểm."
+                });
+
+        // Tính giá chuẩn thị trường Việt Nam theo số tầng thực tế
+        decimal priceMin, priceMax;
+        switch (stops)
+        {
+            case 2:
+                priceMin = 280_000_000m;
+                priceMax = 340_000_000m;
+                break;
+            case 3:
+                priceMin = 320_000_000m;
+                priceMax = 380_000_000m;
+                break;
+            case 4:
+                priceMin = 360_000_000m;
+                priceMax = 440_000_000m;
+                break;
+            case 5:
+                priceMin = 410_000_000m;
+                priceMax = 500_000_000m;
+                break;
+            case 6:
+                priceMin = 470_000_000m;
+                priceMax = 580_000_000m;
+                break;
+            case 7:
+                priceMin = 540_000_000m;
+                priceMax = 670_000_000m;
+                break;
+            case 8:
+                priceMin = 620_000_000m;
+                priceMax = 770_000_000m;
+                break;
+            case 9:
+                priceMin = 700_000_000m;
+                priceMax = 860_000_000m;
+                break;
+            default: // 10 tầng
+                priceMin = 780_000_000m;
+                priceMax = 960_000_000m;
+                break;
+        }
+
+        if (isGlass || isFacade)
+        {
+            priceMin += 40_000_000m;
+            priceMax += 55_000_000m;
+        }
+        else if (isVilla)
+        {
+            priceMin += 50_000_000m;
+            priceMax += 70_000_000m;
+        }
+
+        List<string> cabinStyles;
+        if (isFacade)
+        {
+            cabinStyles = new List<string>
             {
-                $"Kích thước lọt lòng hố {shaftW} x {shaftD} mm lý tưởng cho phương án thi công kết cấu khung thép bọc kính cường lực hoặc hố bê tông truyền thống.",
-                $"Hố PIT yêu cầu tối thiểu {pit} mm, phù hợp hoàn hảo với hiện trạng mà không cần đục sâu ảnh hưởng móng nhà.",
-                "Động cơ không hộp số Fuji (Nhật Bản/Hàn Quốc) tiết kiệm 40% điện năng và vận hành êm ái.",
-                "Cửa tầng tự động êm dịu tích hợp photocell màng hồng ngoại an toàn đa điểm."
+                "🌟 ĐỀ XUẤT CHO MẶT TIỀN: Cabin Kính Cường Lực An Toàn 4 Mặt Panorama (View toàn cảnh phố)",
+                "Kính dán an toàn 2 lớp 10mm-12mm đón ánh sáng tự nhiên và mở rộng tầm nhìn mặt tiền",
+                "Khung nhôm định hình cao cấp mạ Anode màu Gold hoặc Đen mờ chống oxy hóa ngoài trời",
+                "Trần đèn LED dịu mắt và sàn đá hoa cương nguyên khối chịu lực cao cấp"
             };
+        }
+        else if (isCommercialHighRise)
+        {
+            cabinStyles = new List<string>
+            {
+                "Inox 304 sọc nhuyễn (Hairline) kết hợp Inox Gương chống trầy xước, bền bỉ với tần suất đi lại cao",
+                "Màn hình hiển thị LCD đa phương tiện hiển thị tầng, chiều chạy và thông báo tòa nhà",
+                "Trần đèn LED chiếu sáng vát gián tiếp chống chói mắt",
+                "Sàn đá Granite tự nhiên nguyên khối chịu mài mòn cao"
+            };
+        }
+        else if (isVilla)
+        {
+            cabinStyles = new List<string>
+            {
+                "Cabin Inox Gương Vàng PVD Hoàng Gia khắc hoa văn laser tân cổ điển sang trọng",
+                "Trần ánh sao LED nghệ thuật phối ánh sáng gián tiếp hoàng gia",
+                "Sàn đá hoa văn thảm phong thủy ghép CNC tinh xảo",
+                "Tay vịn mạ vàng PVD đồng bộ hoa văn phào chỉ nội thất biệt thự"
+            };
+        }
+        else
+        {
+            cabinStyles = new List<string>
+            {
+                "Cabin Inox 304 sọc nhuyễn kết hợp inox gương tạo cảm giác không gian cabin rộng rãi",
+                "Nếu bố trí trong lòng thang bộ / giếng trời: Khuyên dùng vách kính Homelift để đón sáng",
+                "Trần đèn LED âm trần thẩm mỹ và hệ quạt thông gió đối lưu tự động ngắt tiết kiệm điện",
+                "Sàn đá hoa cương Granite chống trơn trượt"
+            };
+        }
 
         return new VisionAnalysisResponseDto
         {
             IsElevatorDetected = true,
             ConfidenceScore = 0.94,
-            ImageType = isCommercialHighRise ? $"Bản vẽ kiến trúc tòa nhà cao tầng ({stops} tầng)" : (isRenovation ? "Ảnh chụp hiện trạng ô thang thực tế" : "Bản vẽ mặt bằng kiến trúc & kết cấu"),
+            ImageType = isCommercialHighRise ? $"Bản vẽ kiến trúc tòa nhà cao tầng ({stops} tầng)" : (isFacade ? $"Bản vẽ thang máy mặt tiền quan sát phố ({stops} tầng)" : (isRenovation ? "Ảnh chụp hiện trạng ô thang thực tế" : "Bản vẽ mặt bằng kiến trúc & kết cấu")),
             ShaftWidthMm = shaftW,
             ShaftDepthMm = shaftD,
             PitDepthMm = pit,
@@ -556,17 +679,11 @@ BẮT BUỘC trả về ĐÚNG MỘT đối tượng JSON (không thêm bất k�
             SuggestedMotorBrand = "Fuji",
             SuggestedDoorType = shaftW < 1250 ? "2SO" : "2CO",
             CabinDimensions = $"{shaftW - 400} x {shaftD - 450} x 2200 mm",
-            EstimatedPriceMin = isCommercialHighRise ? 520000000 : 320000000,
-            EstimatedPriceMax = isCommercialHighRise ? 680000000 : 380000000,
+            EstimatedPriceMin = priceMin,
+            EstimatedPriceMax = priceMax,
             SummaryAnalysis = summary,
             TechnicalHighlights = highlights,
-            SuitableCabinStyles = new List<string>
-            {
-                "Inox 304 sọc nhuyễn kết hợp inox gương chống trầy xước, dễ vệ sinh",
-                "Màn hình hiển thị LCD đa phương tiện hiển thị tầng và chiều chạy",
-                "Trần đèn LED chiếu sáng vát gián tiếp chống chói mắt",
-                "Sàn đá Granite tự nhiên nguyên khối chịu mài mòn tần suất cao"
-            }
+            SuitableCabinStyles = cabinStyles
         };
     }
 

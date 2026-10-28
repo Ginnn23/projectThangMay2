@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { soDienThoaiCongTy, soDienThoaiLienKet } from "../data/contactInfo";
 
 const zaloUrl = `https://zalo.me/${soDienThoaiLienKet}`;
-const telegramUrl = "https://t.me/HaHongElevatorLeadBot";
+const telegramUrl = "https://t.me/HaHongElevatorLeadBot?start=tuvan";
 
 const thongBaoHoatDong = [
   {
