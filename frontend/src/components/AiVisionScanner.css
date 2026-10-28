@@ -1,0 +1,300 @@
+/* =============================================================================
+   AI VISION SCANNER STYLES - THANG MÁY HÀ HỒNG
+   Tone màu: Gold (#D9A441) & Navy (#0B1F3A)
+============================================================================= */
+
+.ai-vision-wrapper {
+  background: linear-gradient(145deg, #07192f 0%, #0d274c 100%);
+  border: 1px solid rgba(217, 164, 65, 0.35);
+  border-radius: 16px;
+  box-shadow: 0 12px 36px rgba(7, 25, 47, 0.25);
+  color: #f8fafc;
+  overflow: hidden;
+  position: relative;
+  margin-bottom: 2rem;
+}
+
+.ai-vision-header {
+  padding: 1.5rem 1.75rem 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.ai-vision-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(217, 164, 65, 0.15);
+  border: 1px solid rgba(217, 164, 65, 0.4);
+  color: #ffd875;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+}
+
+.ai-vision-pulse {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #10b981;
+  box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+  animation: vision-pulse-anim 1.8s infinite;
+}
+
+@keyframes vision-pulse-anim {
+  0% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 8px rgba(16, 185, 129, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+  }
+}
+
+.ai-vision-body {
+  padding: 1.75rem;
+}
+
+.ai-vision-dropzone {
+  border: 2px dashed rgba(217, 164, 65, 0.4);
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 14px;
+  padding: 2.5rem 1.5rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.ai-vision-dropzone:hover,
+.ai-vision-dropzone.drag-active {
+  border-color: #ffd875;
+  background: rgba(217, 164, 65, 0.08);
+  transform: translateY(-2px);
+}
+
+.ai-vision-icon-box {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(217, 164, 65, 0.25) 0%, rgba(217, 164, 65, 0.05) 100%);
+  border: 1px solid rgba(217, 164, 65, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.25rem;
+  color: #ffd875;
+  font-size: 2rem;
+  box-shadow: 0 0 20px rgba(217, 164, 65, 0.2);
+}
+
+.ai-vision-samples-label {
+  font-size: 0.85rem;
+  color: #94a3b8;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+  font-weight: 600;
+}
+
+.ai-vision-samples {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+.ai-vision-sample-btn {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #e2e8f0;
+  font-size: 0.8rem;
+  padding: 0.4rem 0.85rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.ai-vision-sample-btn:hover {
+  background: rgba(217, 164, 65, 0.2);
+  border-color: #ffd875;
+  color: #ffd875;
+}
+
+/* Radar Scan Animation */
+.ai-vision-scanning-container {
+  position: relative;
+  max-width: 480px;
+  margin: 0 auto;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(217, 164, 65, 0.4);
+}
+
+.ai-vision-scan-image {
+  width: 100%;
+  height: 280px;
+  object-fit: cover;
+  display: block;
+  filter: contrast(1.1) brightness(0.9);
+}
+
+.ai-vision-laser-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(90deg, rgba(217, 164, 65, 0) 0%, #ffd875 50%, rgba(217, 164, 65, 0) 100%);
+  box-shadow: 0 0 15px 4px rgba(255, 216, 117, 0.8), 0 0 30px 8px rgba(217, 164, 65, 0.4);
+  animation: laser-scan 2.2s ease-in-out infinite alternate;
+}
+
+@keyframes laser-scan {
+  0% {
+    top: 5%;
+  }
+  100% {
+    top: 92%;
+  }
+}
+
+.ai-vision-scan-overlay {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(217, 164, 65, 0.03) 0px,
+    rgba(217, 164, 65, 0.03) 2px,
+    transparent 2px,
+    transparent 6px
+  );
+  pointer-events: none;
+}
+
+.ai-vision-status-steps {
+  margin-top: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-width: 480px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.ai-vision-step-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.85rem;
+  color: #94a3b8;
+  padding: 0.4rem 0.75rem;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+}
+
+.ai-vision-step-item.active {
+  color: #ffd875;
+  background: rgba(217, 164, 65, 0.12);
+  font-weight: 600;
+}
+
+.ai-vision-step-item.completed {
+  color: #10b981;
+}
+
+/* Result Card */
+.ai-vision-result-card {
+  background: rgba(11, 31, 58, 0.65);
+  border: 1px solid rgba(217, 164, 65, 0.3);
+  border-radius: 14px;
+  padding: 1.5rem;
+}
+
+.ai-vision-specs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.ai-vision-spec-item {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+}
+
+.ai-vision-spec-item .label {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.25rem;
+}
+
+.ai-vision-spec-item .value {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.ai-vision-spec-item .highlight {
+  color: #ffd875;
+}
+
+.ai-vision-highlights-box {
+  background: rgba(255, 255, 255, 0.03);
+  border-left: 3px solid #ffd875;
+  padding: 1rem 1.25rem;
+  border-radius: 0 10px 10px 0;
+  margin-bottom: 1.25rem;
+}
+
+.ai-vision-highlights-box ul {
+  margin: 0;
+  padding-left: 1.2rem;
+  font-size: 0.875rem;
+  color: #cbd5e1;
+}
+
+.ai-vision-highlights-box li {
+  margin-bottom: 0.4rem;
+}
+
+.ai-vision-apply-btn {
+  background: linear-gradient(135deg, #d9a441 0%, #b88528 100%);
+  color: #07192f;
+  font-weight: 700;
+  font-size: 0.95rem;
+  border: none;
+  padding: 0.85rem 1.75rem;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 18px rgba(217, 164, 65, 0.35);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  width: 100%;
+}
+
+.ai-vision-apply-btn:hover {
+  background: linear-gradient(135deg, #eed07d 0%, #d9a441 100%);
+  box-shadow: 0 6px 24px rgba(217, 164, 65, 0.5);
+  transform: translateY(-2px);
+  color: #07192f;
+}

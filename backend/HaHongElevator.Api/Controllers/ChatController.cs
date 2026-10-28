@@ -66,6 +66,101 @@ $@"💬 <b>KHÁCH ĐANG HỎI TRỢ LÝ AI TRÊN WEBSITE:</b>
         return Ok(response);
     }
 
+    [HttpPost("vision-analyze")]
+    [EnableRateLimiting("public-read")]
+    public async Task<ActionResult<VisionAnalysisResponseDto>> AnalyzeVision(
+        [FromForm] IFormFile? file,
+        [FromForm] string? userPrompt,
+        [FromForm] string? customerPhone,
+        [FromForm] string? customerName,
+        [FromServices] IWebHostEnvironment environment,
+        [FromServices] IConfiguration configuration,
+        CancellationToken cancellationToken)
+    {
+        byte[] imageBytes = Array.Empty<byte>();
+        string mimeType = "image/jpeg";
+        string? savedImageUrl = null;
+
+        if (file != null && file.Length > 0)
+        {
+            if (file.Length > 15 * 1024 * 1024)
+            {
+                return BadRequest(new { message = "Kích thước ảnh không được vượt quá 15 MB." });
+            }
+
+            var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
+            mimeType = string.IsNullOrWhiteSpace(file.ContentType) ? "image/jpeg" : file.ContentType;
+
+            try
+            {
+                var uploadsPath = configuration["Uploads:Path"];
+                if (string.IsNullOrWhiteSpace(uploadsPath))
+                {
+                    uploadsPath = Path.Combine(environment.WebRootPath ?? Path.Combine(environment.ContentRootPath, "wwwroot"), "uploads");
+                }
+                Directory.CreateDirectory(uploadsPath);
+
+                var fileName = $"vision_{Guid.NewGuid():N}{extension}";
+                var filePath = Path.Combine(uploadsPath, fileName);
+
+                using (var fileStream = System.IO.File.Create(filePath))
+                {
+                    await file.CopyToAsync(fileStream, cancellationToken);
+                }
+
+                savedImageUrl = $"/uploads/{fileName}";
+            }
+            catch
+            {
+                // Fallback nếu không ghi được đĩa
+            }
+
+            using var memoryStream = new MemoryStream();
+            await file.CopyToAsync(memoryStream, cancellationToken);
+            imageBytes = memoryStream.ToArray();
+        }
+
+        var result = await _aiConsultantService.AnalyzeBlueprintVisionAsync(
+            imageBytes,
+            mimeType,
+            userPrompt,
+            customerPhone,
+            customerName,
+            savedImageUrl,
+            _dbContext,
+            cancellationToken);
+
+        // Bắn thông báo Telegram cho nhân viên kỹ thuật công ty
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                var escapedPhone = EscapeHtml(customerPhone ?? "Chưa để lại");
+                var escapedName = EscapeHtml(customerName ?? "Khách dùng AI Vision");
+                var escapedNote = EscapeHtml(string.IsNullOrWhiteSpace(userPrompt) ? "Không có ghi chú" : userPrompt);
+
+                var telegramText =
+$@"📸 <b>KHÁCH HÀNG TẢI BẢN VẼ / ẢNH Ô THANG LÊN AI VISION:</b>
+━━━━━━━━━━━━━━━━━━━
+📐 <b>Loại ảnh:</b> {EscapeHtml(result.ImageType)}
+📏 <b>Kích thước hố:</b> {result.ShaftWidthMm} x {result.ShaftDepthMm} mm
+🏢 <b>Đề xuất thang:</b> {EscapeHtml(result.SuggestedElevatorType)} ({result.SuggestedCapacityKg} kg, {result.Stops} tầng)
+💰 <b>Dự toán:</b> {result.EstimatedPriceMin:N0} - {result.EstimatedPriceMax:N0} đ
+👤 <b>Khách hàng:</b> {escapedName} • 📞 <b>SĐT:</b> {escapedPhone}
+📝 <b>Ghi chú:</b> <i>""{escapedNote}""</i>
+━━━━━━━━━━━━━━━━━━━
+🌐 <i>Thang Máy Hà Hồng • Module AI Vision</i>";
+
+                await _telegramService.SendTestNotificationAsync(telegramText);
+            }
+            catch
+            {
+            }
+        });
+
+        return Ok(result);
+    }
+
     [HttpGet("init")]
     [EnableRateLimiting("public-read")]
     public async Task<ActionResult> GetInitialState(CancellationToken cancellationToken)

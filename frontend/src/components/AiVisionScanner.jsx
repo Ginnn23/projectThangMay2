@@ -1,0 +1,421 @@
+import { useState, useRef } from "react";
+import { apiClient } from "../api/client";
+import "./AiVisionScanner.css";
+
+// Blueprint sample presets with SVG data URIs
+const SAMPLE_PRESETS = [
+  {
+    id: "homelift-nha-pho",
+    name: "Mặt bằng nhà phố hẹp (1350 x 1400 mm)",
+    badge: "Homelift Kính",
+    prompt: "Bản vẽ thiết kế ô thang lọt lòng thang bộ nhà phố 4 tầng, kích thước lọt lòng 1350x1400mm, hố PIT 350mm, thang kính Homelift quan sát.",
+    svgColor: "#0284c7"
+  },
+  {
+    id: "thang-tieu-chuan",
+    name: "Bản vẽ giếng thang tiêu chuẩn (1500 x 1550 mm)",
+    badge: "Inox 450kg",
+    prompt: "Bản vẽ kết cấu hố thang bê tông 5 tầng, kích thước lọt lòng 1500x1550mm, hố PIT 800mm, tải trọng 450kg động cơ Fuji.",
+    svgColor: "#d9a441"
+  },
+  {
+    id: "biet-thu-cao-cap",
+    name: "Mặt bằng biệt thự cao cấp (1750 x 1750 mm)",
+    badge: "Biệt thự PVD Gold",
+    prompt: "Bản vẽ kiến trúc biệt thự cao cấp 4 tầng, giếng thang 1750x1750mm, cabin vách kính hoặc inox gương vàng PVD hoàng gia 630kg.",
+    svgColor: "#10b981"
+  }
+];
+
+function generateBlueprintSvg(title, w, d, color = "#0284c7") {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="600" height="400" viewBox="0 0 600 400" style="background:#09192f;font-family:sans-serif;">
+    <defs>
+      <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+        <path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+      </pattern>
+    </defs>
+    <rect width="100%" height="100%" fill="url(#grid)" />
+    <!-- Outer building wall -->
+    <rect x="70" y="50" width="460" height="300" fill="none" stroke="#64748b" stroke-width="2" stroke-dasharray="6,4"/>
+    <text x="80" y="75" fill="#94a3b8" font-size="12" font-weight="bold">MẶT BẰNG BỐ TRÍ HỐ THANG MÁY - THANG MÁY HÀ HỒNG</text>
+    
+    <!-- Elevator Shaft -->
+    <rect x="180" y="100" width="240" height="200" fill="rgba(217,164,65,0.08)" stroke="${color}" stroke-width="3"/>
+    
+    <!-- Diagonal cross representing elevator shaft -->
+    <line x1="180" y1="100" x2="420" y2="300" stroke="${color}" stroke-width="1.5" stroke-dasharray="4,4" opacity="0.6"/>
+    <line x1="420" y1="100" x2="180" y2="300" stroke="${color}" stroke-width="1.5" stroke-dasharray="4,4" opacity="0.6"/>
+    
+    <!-- Cabin Inner Box -->
+    <rect x="220" y="130" width="160" height="140" fill="rgba(255,255,255,0.05)" stroke="#38bdf8" stroke-width="2"/>
+    <text x="250" y="205" fill="#38bdf8" font-size="14" font-weight="bold">CABIN THANG</text>
+    
+    <!-- Dimension arrows -->
+    <!-- Width W -->
+    <line x1="180" y1="85" x2="420" y2="85" stroke="#ffd875" stroke-width="2"/>
+    <circle cx="180" cy="85" r="3" fill="#ffd875"/>
+    <circle cx="420" cy="85" r="3" fill="#ffd875"/>
+    <text x="255" y="78" fill="#ffd875" font-size="13" font-weight="bold">W: ${w} mm</text>
+    
+    <!-- Depth D -->
+    <line x1="440" y1="100" x2="440" y2="300" stroke="#ffd875" stroke-width="2"/>
+    <circle cx="440" cy="100" r="3" fill="#ffd875"/>
+    <circle cx="440" cy="300" r="3" fill="#ffd875"/>
+    <text x="450" y="205" fill="#ffd875" font-size="13" font-weight="bold">D: ${d} mm</text>
+    
+    <!-- Title tag -->
+    <rect x="180" y="320" width="240" height="26" rx="4" fill="${color}" opacity="0.9"/>
+    <text x="300" y="338" fill="#ffffff" font-size="12" font-weight="bold" text-anchor="middle">${title}</text>
+  </svg>`;
+  return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+}
+
+export default function AiVisionScanner({ onApplySpecs }) {
+  const [file, setFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
+  const [scanning, setScanning] = useState(false);
+  const [stepIndex, setStepIndex] = useState(0);
+  const [result, setResult] = useState(null);
+  const [error, setError] = useState("");
+  const [isDragActive, setIsDragActive] = useState(false);
+  const fileInputRef = useRef(null);
+
+  const scanSteps = [
+    "Khởi tạo không gian bản vẽ & nhận diện khung kiến trúc...",
+    "Gemini Vision quét kết cấu ô chờ thang máy & giếng trời...",
+    "Trích xuất số đo kích thước lọt lòng giếng thang (W x D mm)...",
+    "Khớp nối tiêu chuẩn kỹ thuật & tính toán tải trọng tối ưu..."
+  ];
+
+  const runScanningAnimation = () => {
+    setScanning(true);
+    setStepIndex(0);
+
+    const interval = setInterval(() => {
+      setStepIndex((prev) => {
+        if (prev < scanSteps.length - 1) {
+          return prev + 1;
+        }
+        return prev;
+      });
+    }, 550);
+
+    return () => clearInterval(interval);
+  };
+
+  const handleFileSelect = async (selectedFile) => {
+    if (!selectedFile) return;
+
+    if (selectedFile.size > 15 * 1024 * 1024) {
+      setError("File quá lớn! Vui lòng chọn file ảnh dung lượng dưới 15 MB.");
+      return;
+    }
+
+    setFile(selectedFile);
+    setError("");
+    setResult(null);
+
+    const objectUrl = URL.createObjectURL(selectedFile);
+    setPreviewUrl(objectUrl);
+
+    await analyzeWithApi(selectedFile, "");
+  };
+
+  const handleSampleClick = async (sample) => {
+    setError("");
+    setResult(null);
+
+    let w = "1350", d = "1400";
+    if (sample.id === "thang-tieu-chuan") { w = "1500"; d = "1550"; }
+    if (sample.id === "biet-thu-cao-cap") { w = "1750"; d = "1750"; }
+
+    const svgUrl = generateBlueprintSvg(sample.name, w, d, sample.svgColor);
+    setPreviewUrl(svgUrl);
+    setFile(null);
+
+    // Convert SVG Data URL to Blob
+    try {
+      const res = await fetch(svgUrl);
+      const blob = await res.blob();
+      const sampleFile = new File([blob], `${sample.id}-blueprint.png`, { type: "image/png" });
+      await analyzeWithApi(sampleFile, sample.prompt);
+    } catch {
+      await analyzeWithApi(null, sample.prompt);
+    }
+  };
+
+  const analyzeWithApi = async (fileToUpload, promptText) => {
+    const clearAnim = runScanningAnimation();
+
+    try {
+      const formData = new FormData();
+      if (fileToUpload) {
+        formData.append("file", fileToUpload);
+      }
+      if (promptText) {
+        formData.append("userPrompt", promptText);
+      }
+
+      const res = await apiClient.post("/chat/vision-analyze", formData, {
+        headers: { "Content-Type": "multipart/form-data" }
+      });
+
+      // Wait brief moment for animation smoothness
+      await new Promise((r) => setTimeout(r, 1200));
+
+      if (res.data && res.data.success) {
+        setResult(res.data);
+      } else {
+        setError(res.data?.message || "Không thể phân tích bản vẽ lúc này.");
+      }
+    } catch (err) {
+      console.error("AI Vision scan error:", err);
+      setError(err.response?.data?.message || "Có lỗi phát sinh khi quét bản vẽ. Đã bật bộ phân tích dự phòng.");
+    } finally {
+      clearAnim();
+      setScanning(false);
+    }
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setIsDragActive(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    setIsDragActive(false);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setIsDragActive(false);
+    const droppedFile = e.dataTransfer.files?.[0];
+    if (droppedFile) {
+      handleFileSelect(droppedFile);
+    }
+  };
+
+  const handleApply = () => {
+    if (!result || !onApplySpecs) return;
+
+    onApplySpecs({
+      buildingType: result.buildingType || "nha-pho-xay-moi",
+      capacityKg: result.suggestedCapacityKg || 350,
+      elevatorType: result.suggestedElevatorType || "homelift-kinh",
+      motorBrand: result.suggestedMotorBrand || "Fuji",
+      doorType: result.suggestedDoorType || "2CO",
+      stops: result.stops || 4,
+      shaftWidth: result.shaftWidthMm || 1350,
+      shaftDepth: result.shaftDepthMm || 1400
+    });
+  };
+
+  const handleReset = () => {
+    setFile(null);
+    setPreviewUrl(null);
+    setResult(null);
+    setError("");
+  };
+
+  const formatVnd = (val) => (val ? new Intl.NumberFormat("vi-VN").format(val) + " đ" : "350.000.000 đ");
+
+  return (
+    <div className="ai-vision-wrapper" id="ai-vision-section">
+      <div className="ai-vision-header">
+        <div>
+          <div className="ai-vision-badge mb-2">
+            <span className="ai-vision-pulse"></span>
+            AI Vision Multimodal • Nhận Diện Bản Vẽ Kỹ Thuật
+          </div>
+          <h3 className="h5 fw-bold mb-1 text-white">
+            <i className="bi bi-camera-reels me-2 text-warning"></i>
+            Quét Bản Vẽ Mặt Bằng & Nhận Diện Kích Thước Hố Thang Tự Động
+          </h3>
+          <p className="text-secondary small mb-0">
+            Ứng dụng Google Gemini Vision đọc bản vẽ kiến trúc 2D, nhận diện kích thước ô thang và đề xuất cấu hình kỹ thuật chuẩn xác.
+          </p>
+        </div>
+        {result && (
+          <button type="button" className="btn btn-outline-light btn-sm" onClick={handleReset}>
+            <i className="bi bi-arrow-repeat me-1"></i> Quét bản vẽ khác
+          </button>
+        )}
+      </div>
+
+      <div className="ai-vision-body">
+        {error && (
+          <div className="alert alert-warning py-2 mb-3" style={{ fontSize: "13px" }}>
+            <i className="bi bi-exclamation-triangle-fill me-2"></i>
+            {error}
+          </div>
+        )}
+
+        {!previewUrl && !scanning && !result && (
+          <div>
+            <div
+              className={`ai-vision-dropzone ${isDragActive ? "drag-active" : ""}`}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <input
+                type="file"
+                ref={fileInputRef}
+                style={{ display: "none" }}
+                accept="image/jpeg,image/png,image/webp"
+                onChange={(e) => handleFileSelect(e.target.files?.[0])}
+              />
+              <div className="ai-vision-icon-box">
+                <i className="bi bi-cloud-arrow-up-fill"></i>
+              </div>
+              <h5 className="fw-bold text-white mb-2">Kéo thả ảnh bản vẽ hoặc bấm để tải lên</h5>
+              <p className="text-muted small mb-3">
+                Hỗ trợ ảnh chụp bản vẽ mặt bằng nhà, bản vẽ giếng thang, hoặc ảnh ô thang thực tế (JPG, PNG, WebP tối đa 15MB)
+              </p>
+              <button type="button" className="btn btn-outline-warning btn-sm px-4 fw-semibold">
+                <i className="bi bi-image me-2"></i> Chọn tệp ảnh từ thiết bị
+              </button>
+            </div>
+
+            <div className="ai-vision-samples-label text-center">
+              <span>HOẶC TRẢI NGHIỆM NHANH VỚI BẢN VẼ MẪU CÓ SẴN:</span>
+            </div>
+            <div className="ai-vision-samples">
+              {SAMPLE_PRESETS.map((sample) => (
+                <button
+                  key={sample.id}
+                  type="button"
+                  className="ai-vision-sample-btn"
+                  onClick={() => handleSampleClick(sample)}
+                >
+                  <i className="bi bi-file-earmark-code text-warning"></i>
+                  <span>{sample.name}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Scanning Radar Animation */}
+        {scanning && (
+          <div className="text-center py-4">
+            <div className="ai-vision-scanning-container">
+              {previewUrl && (
+                <img src={previewUrl} alt="Bản vẽ đang quét" className="ai-vision-scan-image" />
+              )}
+              <div className="ai-vision-laser-bar"></div>
+              <div className="ai-vision-scan-overlay"></div>
+            </div>
+
+            <div className="ai-vision-status-steps">
+              {scanSteps.map((step, idx) => (
+                <div
+                  key={idx}
+                  className={`ai-vision-step-item ${idx === stepIndex ? "active" : ""} ${idx < stepIndex ? "completed" : ""}`}
+                >
+                  <i
+                    className={`bi ${
+                      idx < stepIndex
+                        ? "bi-check-circle-fill text-success"
+                        : idx === stepIndex
+                        ? "bi-arrow-repeat spin text-warning"
+                        : "bi-circle"
+                    }`}
+                  ></i>
+                  <span>{step}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Scan Result */}
+        {!scanning && result && (
+          <div className="ai-vision-result-card">
+            <div className="row g-4 align-items-center">
+              <div className="col-lg-5 text-center">
+                <div className="position-relative d-inline-block rounded-3 overflow-hidden border border-warning shadow">
+                  <img
+                    src={result.imageUrl || previewUrl}
+                    alt="Kết quả phân tích bản vẽ"
+                    style={{ width: "100%", maxHeight: "260px", objectFit: "cover", display: "block" }}
+                  />
+                  <div className="position-absolute bottom-0 start-0 end-0 bg-dark bg-opacity-75 text-white py-1 px-2 small">
+                    <i className="bi bi-check2-circle text-success me-1"></i>
+                    {result.imageType || "Bản vẽ kỹ thuật"} (Độ tin cậy: {(result.confidenceScore * 100).toFixed(0)}%)
+                  </div>
+                </div>
+              </div>
+
+              <div className="col-lg-7">
+                <div className="d-flex align-items-center justify-content-between mb-2">
+                  <span className="badge bg-success-subtle text-success border border-success px-3 py-1">
+                    <i className="bi bi-shield-check me-1"></i> Đã nhận diện thành công
+                  </span>
+                  <span className="small text-muted">Mã giải pháp: HH-VISION-{Math.floor(1000 + Math.random() * 9000)}</span>
+                </div>
+
+                <h4 className="fw-bold text-white mb-3">
+                  Đề xuất: Thang Máy {result.suggestedElevatorType === "homelift-kinh" ? "Kính Homelift Panorama" : (result.suggestedElevatorType === "biet-thu" ? "Biệt Thự Sang Trọng PVD Gold" : "Gia Đình Tiêu Chuẩn")} ({result.suggestedCapacityKg} kg)
+                </h4>
+
+                <div className="ai-vision-specs-grid">
+                  <div className="ai-vision-spec-item">
+                    <div className="label">Kích thước hố lọt lòng (W x D)</div>
+                    <div className="value highlight">{result.shaftWidthMm} x {result.shaftDepthMm} mm</div>
+                  </div>
+                  <div className="ai-vision-spec-item">
+                    <div className="label">Tải trọng đề xuất</div>
+                    <div className="value">{result.suggestedCapacityKg} kg ({Math.round(result.suggestedCapacityKg / 70)} người)</div>
+                  </div>
+                  <div className="ai-vision-spec-item">
+                    <div className="label">Hố PIT & Chiều cao OH</div>
+                    <div className="value">Pit: {result.pitDepthMm} mm | OH: {result.overheadMm} mm</div>
+                  </div>
+                  <div className="ai-vision-spec-item">
+                    <div className="label">Động cơ & Cửa tầng</div>
+                    <div className="value">{result.suggestedMotorBrand} • Cửa {result.suggestedDoorType}</div>
+                  </div>
+                </div>
+
+                <div className="ai-vision-highlights-box">
+                  <div className="small fw-bold text-warning mb-1">
+                    <i className="bi bi-lightbulb me-1"></i> ĐÁNH GIÁ CHUYÊN MÔN KỸ SƯ HÀ HỒNG:
+                  </div>
+                  <p className="small text-light mb-2">{result.summaryAnalysis}</p>
+                  {result.technicalHighlights?.length > 0 && (
+                    <ul>
+                      {result.technicalHighlights.map((item, i) => (
+                        <li key={i}>{item}</li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+
+                <div className="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+                  <div>
+                    <small className="text-secondary d-block">Dự toán sơ bộ trọn gói:</small>
+                    <span className="fs-5 fw-bold text-danger">
+                      {formatVnd(result.estimatedPriceMin)} - {formatVnd(result.estimatedPriceMax)}
+                    </span>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  className="ai-vision-apply-btn"
+                  onClick={handleApply}
+                >
+                  <i className="bi bi-lightning-charge-fill fs-5"></i>
+                  ÁP DỤNG THÔNG SỐ NÀY VÀO BỘ DỰ TOÁN & XEM PHỐI CẢNH CABIN
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

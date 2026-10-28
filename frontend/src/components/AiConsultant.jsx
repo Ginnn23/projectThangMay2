@@ -57,6 +57,73 @@ function AiConsultant() {
   const [loading, setLoading] = useState(false);
   const [hasNewPrompt, setHasNewPrompt] = useState(true);
   const messagesEndRef = useRef(null);
+  const fileInputRef = useRef(null);
+
+  const handleImageUpload = async (file) => {
+    if (!file || loading) return;
+    if (file.size > 15 * 1024 * 1024) {
+      alert("Dung lượng ảnh tối đa 15 MB.");
+      return;
+    }
+
+    const preview = URL.createObjectURL(file);
+    const userMsg = {
+      id: `user-img-${Date.now()}`,
+      role: "user",
+      text: `[Đã gửi bản vẽ / ảnh hố thang: ${file.name}]`,
+      imageUrl: preview,
+    };
+    setMessages((prev) => [...prev, userMsg]);
+    setLoading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("userPrompt", inputValue.trim() || "Phân tích bản vẽ hố thang này");
+
+      const response = await apiClient.post("/chat/vision-analyze", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      const res = response.data;
+      const typeName =
+        res.suggestedElevatorType === "homelift-kinh"
+          ? "Thang Kính Homelift Panorama"
+          : res.suggestedElevatorType === "biet-thu"
+          ? "Thang Biệt Thự PVD Gold"
+          : "Thang Gia Đình Tiêu Chuẩn Inox";
+
+      const replyText =
+        `📸 **AI Vision đã phân tích bản vẽ của anh/chị:**\n\n` +
+        `• **Loại ảnh nhận diện:** ${res.imageType}\n` +
+        `• **Kích thước hố lọt lòng:** **${res.shaftWidthMm} x ${res.shaftDepthMm} mm**\n` +
+        `• **Tải trọng đề xuất:** **${res.suggestedCapacityKg} kg** (${Math.round(res.suggestedCapacityKg / 70)} người)\n` +
+        `• **Dòng thang tối ưu:** **${typeName}**\n` +
+        `• **Động cơ & Cửa:** ${res.suggestedMotorBrand} • Cửa ${res.suggestedDoorType}\n` +
+        `• **Dự toán sơ bộ:** **${res.estimatedPriceMin?.toLocaleString("vi-VN")} - ${res.estimatedPriceMax?.toLocaleString("vi-VN")} đ**\n\n` +
+        `💡 **Nhận xét chuyên môn:**\n${res.summaryAnalysis}\n\n` +
+        `👉 Anh/chị có thể để lại **Số điện thoại** để kỹ sư Hà Hồng gửi bản vẽ 2D/3D chi tiết hoặc mở trang **Dự toán thang máy** để xuất file PDF báo giá ạ!`;
+
+      const modelMsg = {
+        id: `model-${Date.now()}`,
+        role: "model",
+        text: replyText,
+        suggestions: ["Báo giá thang kính Homelift", "Tư vấn thêm về hố PIT", "Báo giá qua Zalo"],
+      };
+
+      setMessages((prev) => [...prev, modelMsg]);
+    } catch {
+      const errorMsg = {
+        id: `error-${Date.now()}`,
+        role: "model",
+        text: "Dạ, tạm thời hệ thống AI Vision đang bận. Anh/chị có thể gửi trực tiếp bản vẽ qua Hotline/Zalo: **0909 9333 58** để kỹ sư trưởng Hà Hồng kiểm tra trực tiếp nhé!",
+      };
+      setMessages((prev) => [...prev, errorMsg]);
+    } finally {
+      setLoading(false);
+      setInputValue("");
+    }
+  };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -228,6 +295,15 @@ function AiConsultant() {
                   </div>
                 )}
                 <div className="ai-msg-bubble">
+                  {m.imageUrl && (
+                    <div className="mb-2">
+                      <img
+                        src={m.imageUrl}
+                        alt="Ảnh bản vẽ đính kèm"
+                        style={{ maxWidth: "220px", maxHeight: "160px", borderRadius: "8px", objectFit: "cover", display: "block" }}
+                      />
+                    </div>
+                  )}
                   <div className="ai-msg-content">{formatAiMessage(m.text)}</div>
                   {m.suggestions && m.suggestions.length > 0 && (
                     <div className="ai-suggestions-wrap">
@@ -268,11 +344,31 @@ function AiConsultant() {
           <div className="ai-chat-footer">
             <div className="ai-input-wrap">
               <input
+                type="file"
+                ref={fileInputRef}
+                style={{ display: "none" }}
+                accept="image/jpeg,image/png,image/webp"
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  if (f) handleImageUpload(f);
+                }}
+              />
+              <button
+                type="button"
+                className="btn btn-link p-1 text-secondary me-1"
+                onClick={() => fileInputRef.current?.click()}
+                title="Gửi ảnh bản vẽ hoặc hiện trạng ô thang"
+                aria-label="Tải ảnh bản vẽ lên"
+                disabled={loading}
+              >
+                <i className="bi bi-camera-fill fs-5 text-warning"></i>
+              </button>
+              <input
                 type="text"
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="Nhập câu hỏi hoặc SĐT để nhận báo giá..."
+                placeholder="Nhập câu hỏi, SĐT hoặc gửi ảnh bản vẽ..."
                 aria-label="Nội dung chat"
                 disabled={loading}
               />

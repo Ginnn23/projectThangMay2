@@ -3,6 +3,7 @@ import { apiClient } from "../api/client";
 import { soDienThoaiCongTy, soDienThoaiLienKet, emailCongTy } from "../data/contactInfo";
 import SeoHead from "../components/SeoHead";
 import CabinVisualizer from "../components/CabinVisualizer";
+import AiVisionScanner from "../components/AiVisionScanner";
 import logoHaHong from "../assets/images/logo-ha-hong.jpg";
 import heroImage from "../assets/images/hero-elevator.jpg";
 
@@ -49,6 +50,58 @@ export default function DuToanThangMay() {
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [savedEstimateId, setSavedEstimateId] = useState(null);
   const [errorMsg, setErrorMsg] = useState("");
+  const [visionToast, setVisionToast] = useState("");
+
+  const handleApplyVisionSpecs = (specs) => {
+    if (!specs) return;
+    if (specs.buildingType) setBuildingType(specs.buildingType);
+    if (specs.capacityKg) setCapacityKg(specs.capacityKg);
+    if (specs.elevatorType) setElevatorType(specs.elevatorType);
+    if (specs.motorBrand) setMotorBrand(specs.motorBrand);
+    if (specs.stops) setStops(specs.stops);
+    if (specs.doorType) setDoorType(specs.doorType === "2SO" ? "SO" : "CO");
+
+    const typeLabel =
+      specs.elevatorType === "homelift-kinh"
+        ? "Thang Kính Homelift"
+        : specs.elevatorType === "biet-thu"
+        ? "Thang Biệt Thự PVD Gold"
+        : "Thang Gia Đình Tiêu Chuẩn";
+
+    setVisionToast(
+      `Đã áp dụng cấu hình từ AI Vision: ${specs.capacityKg}kg • ${specs.stops} Tầng • ${typeLabel} (${specs.shaftWidth}x${specs.shaftDepth}mm)!`
+    );
+    setTimeout(() => setVisionToast(""), 8000);
+
+    const calcCard = document.querySelector(".estimator-card");
+    if (calcCard) {
+      calcCard.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
+  const handleDownloadPdf = async () => {
+    if (savedEstimateId) {
+      try {
+        const response = await apiClient.get(`/estimates/${savedEstimateId}/pdf`, {
+          responseType: "blob",
+        });
+        const blob = new Blob([response.data], { type: "application/pdf" });
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.setAttribute("download", `Bang_Bao_Gia_Thang_May_Ha_Hong_HH-${savedEstimateId}.pdf`);
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(url);
+      } catch (err) {
+        console.error("Lỗi tải PDF từ API, dùng in trình duyệt fallback:", err);
+        window.print();
+      }
+    } else {
+      window.print();
+    }
+  };
 
   const printRef = useRef(null);
 
@@ -266,6 +319,19 @@ export default function DuToanThangMay() {
 
       <section className="estimator-content-section py-5">
         <div className="site-container">
+          {/* AI Vision Scanner */}
+          <AiVisionScanner onApplySpecs={handleApplyVisionSpecs} />
+
+          {visionToast && (
+            <div className="alert alert-success d-flex align-items-center justify-content-between mb-4 shadow-sm border border-success">
+              <div>
+                <i className="bi bi-check-circle-fill fs-5 me-2 text-success"></i>
+                <strong>{visionToast}</strong>
+              </div>
+              <button type="button" className="btn-close" onClick={() => setVisionToast("")}></button>
+            </div>
+          )}
+
           <div className="row g-4">
             {/* Left Column: Interactive Wizard Controls */}
             <div className="col-lg-7">
@@ -554,10 +620,10 @@ export default function DuToanThangMay() {
                           <button
                             type="button"
                             className="btn btn-outline-success btn-sm w-100 mb-2 fw-semibold"
-                            onClick={handlePrint}
+                            onClick={handleDownloadPdf}
                           >
-                            <i className="bi bi-printer me-2"></i>
-                            In / Tải ngay file Báo Giá PDF
+                            <i className="bi bi-file-earmark-pdf-fill me-2 text-danger"></i>
+                            Tải Ngay Bảng Báo Giá PDF Kỹ Thuật (Có Dấu & Chữ Ký)
                           </button>
                           <small className="text-muted d-block" style={{ fontSize: "11px" }}>
                             <i className="bi bi-envelope-check me-1 text-success"></i>

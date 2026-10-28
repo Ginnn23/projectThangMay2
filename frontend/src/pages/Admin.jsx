@@ -433,6 +433,37 @@ function DuToanAdmin({ onShowToast, onUpdateCount }) {
     }
   };
 
+  const handleDownloadPdf = async (id) => {
+    try {
+      let res;
+      try {
+        res = await apiClient.get(`/estimates/${id}/pdf`, { responseType: "blob" });
+      } catch {
+        res = await apiClient.get(`/admin/estimates/${id}/pdf`, { responseType: "blob" });
+      }
+      const blob = new Blob([res.data], { type: "application/pdf" });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `Bang_Bao_Gia_Thang_May_Ha_Hong_HH-${id}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+      onShowToast?.("Đã tải tệp PDF báo giá kỹ thuật thành công!");
+    } catch {
+      onShowToast?.("Không thể xuất file PDF lúc này.", "error");
+    }
+  };
+
+  const stats = useMemo(() => {
+    const total = estimates.length;
+    const newCount = estimates.filter((e) => e.status === "New").length;
+    const surveyCount = estimates.filter((e) => e.status === "SurveyScheduled").length;
+    const closedCount = estimates.filter((e) => e.status === "DealClosed").length;
+    return { total, newCount, surveyCount, closedCount };
+  }, [estimates]);
+
   const filtered = useMemo(() => {
     return estimates.filter((item) => {
       const matchStatus = statusFilter === "all" || item.status === statusFilter;
@@ -473,6 +504,34 @@ function DuToanAdmin({ onShowToast, onUpdateCount }) {
       </div>
 
       {error && <div className="alert alert-danger">{error}</div>}
+
+      {/* KPI Cards */}
+      <div className="row g-3 mb-4">
+        <div className="col-md-3 col-6">
+          <div className="p-3 bg-white rounded border shadow-sm">
+            <span className="text-muted small d-block">Tổng yêu cầu dự toán</span>
+            <span className="fs-4 fw-bold text-primary">{stats.total}</span>
+          </div>
+        </div>
+        <div className="col-md-3 col-6">
+          <div className="p-3 bg-white rounded border shadow-sm">
+            <span className="text-muted small d-block">Đơn mới cần tư vấn</span>
+            <span className="fs-4 fw-bold text-warning">{stats.newCount}</span>
+          </div>
+        </div>
+        <div className="col-md-3 col-6">
+          <div className="p-3 bg-white rounded border shadow-sm">
+            <span className="text-muted small d-block">Đã hẹn khảo sát</span>
+            <span className="fs-4 fw-bold text-info">{stats.surveyCount}</span>
+          </div>
+        </div>
+        <div className="col-md-3 col-6">
+          <div className="p-3 bg-white rounded border shadow-sm">
+            <span className="text-muted small d-block">Đã chốt hợp đồng</span>
+            <span className="fs-4 fw-bold text-success">{stats.closedCount}</span>
+          </div>
+        </div>
+      </div>
 
       <div className="d-flex gap-3 mb-3 flex-wrap">
         <div className="admin-search-box flex-grow-1" style={{ margin: 0 }}>
@@ -581,6 +640,14 @@ function DuToanAdmin({ onShowToast, onUpdateCount }) {
                       <button
                         type="button"
                         className="btn btn-outline-danger btn-sm"
+                        title="Tải bảng báo giá PDF chính thức (có dấu mộc)"
+                        onClick={() => handleDownloadPdf(item.id)}
+                      >
+                        <i className="bi bi-file-earmark-pdf"></i>
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-outline-danger btn-sm"
                         title="Xóa"
                         onClick={() => handleDelete(item.id)}
                       >
@@ -646,6 +713,13 @@ function DuToanAdmin({ onShowToast, onUpdateCount }) {
               </div>
               <div className="modal-footer">
                 <button type="button" className="btn btn-secondary" onClick={() => setSelectedEstimate(null)}>Đóng</button>
+                <button
+                  type="button"
+                  className="btn btn-outline-danger"
+                  onClick={() => handleDownloadPdf(selectedEstimate.id)}
+                >
+                  <i className="bi bi-file-earmark-pdf-fill me-1"></i> Tải Báo Giá PDF
+                </button>
                 <button
                   type="button"
                   className="btn btn-success"
