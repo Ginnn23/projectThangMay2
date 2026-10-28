@@ -14,6 +14,7 @@ import GioiThieu from "./pages/GioiThieu";
 import Home from "./pages/Home";
 import LienHe from "./pages/LienHe";
 import DuToanThangMay from "./pages/DuToanThangMay";
+import News from "./pages/News";
 
 function ScrollToTop() {
   const { hash, pathname } = useLocation();
@@ -55,6 +56,8 @@ function App() {
         <Route path="/dich-vu" element={<DichVu />} />
         <Route path="/du-an" element={<DuAn />} />
         <Route path="/du-an/:slug" element={<ChiTietDuAn />} />
+        <Route path="/tin-tuc" element={<News />} />
+        <Route path="/tin-tuc/:slug" element={<News />} />
         <Route path="/lien-he" element={<LienHe />} />
         <Route path="/du-toan" element={<DuToanThangMay />} />
         <Route path="/admin" element={<Admin />} />
