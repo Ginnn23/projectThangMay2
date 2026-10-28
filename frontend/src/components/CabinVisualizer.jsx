@@ -193,19 +193,43 @@ export default function CabinVisualizer({
   doorType = "CO",
   onChangeDoorType,
   onApplyConfig,
-  onRequestConsultation
+  onRequestConsultation,
+  selectedWallProp,
+  selectedFloorProp,
+  selectedCeilingProp,
+  selectedHandrailProp,
+  onMaterialChange
 }) {
   // Tabs: 'walls' (1) | 'flooring' (2) | 'ceiling' (3) | 'handrail' (4)
   const [activeTab, setActiveTab] = useState("walls");
 
   // State các tùy chọn vật liệu (Mặc định chọn mẫu cao cấp nhất từ ảnh thực tế của khách)
   const [selectedWallId, setSelectedWallId] = useState(
-    elevatorType === "inox-guong-vang" ? "inox-guong-vang" :
-    elevatorType === "inox-tieu-chuan" ? "inox-tieu-chuan" : "wood-walnut-mirror"
+    selectedWallProp || (
+      elevatorType === "inox-guong-vang" ? "inox-guong-vang" :
+      elevatorType === "inox-tieu-chuan" ? "inox-tieu-chuan" : "wood-walnut-mirror"
+    )
   );
-  const [selectedFloorId, setSelectedFloorId] = useState("floor-chevron-brass");
-  const [selectedCeilingId, setSelectedCeilingId] = useState("ceil-cove-warm");
-  const [selectedHandrailId, setSelectedHandrailId] = useState("wood-brass");
+  const [selectedFloorId, setSelectedFloorId] = useState(selectedFloorProp || "floor-chevron-brass");
+  const [selectedCeilingId, setSelectedCeilingId] = useState(selectedCeilingProp || "ceil-cove-warm");
+  const [selectedHandrailId, setSelectedHandrailId] = useState(selectedHandrailProp || "wood-brass");
+
+  // Đồng bộ props bên ngoài nếu có (dành cho Preset từ Studio)
+  useEffect(() => {
+    if (selectedWallProp) setSelectedWallId(selectedWallProp);
+  }, [selectedWallProp]);
+
+  useEffect(() => {
+    if (selectedFloorProp) setSelectedFloorId(selectedFloorProp);
+  }, [selectedFloorProp]);
+
+  useEffect(() => {
+    if (selectedCeilingProp) setSelectedCeilingId(selectedCeilingProp);
+  }, [selectedCeilingProp]);
+
+  useEffect(() => {
+    if (selectedHandrailProp) setSelectedHandrailId(selectedHandrailProp);
+  }, [selectedHandrailProp]);
 
   // State điều khiển Cửa & Đèn
   const [isDoorsOpen, setIsDoorsOpen] = useState(true);
@@ -431,6 +455,21 @@ export default function CabinVisualizer({
   const curFloorObj = FLOOR_OPTIONS.find(f => f.id === selectedFloorId) || FLOOR_OPTIONS[0];
   const curCeilObj = CEILING_OPTIONS.find(c => c.id === selectedCeilingId) || CEILING_OPTIONS[0];
   const curRailObj = HANDRAIL_OPTIONS.find(h => h.id === selectedHandrailId) || HANDRAIL_OPTIONS[0];
+
+  useEffect(() => {
+    if (onMaterialChange) {
+      onMaterialChange({
+        wall: curWallObj,
+        floor: curFloorObj,
+        ceiling: curCeilObj,
+        handrail: curRailObj,
+        wallId: selectedWallId,
+        floorId: selectedFloorId,
+        ceilingId: selectedCeilingId,
+        handrailId: selectedHandrailId
+      });
+    }
+  }, [selectedWallId, selectedFloorId, selectedCeilingId, selectedHandrailId]);
 
   return (
     <div className="cabin-visualizer-container">

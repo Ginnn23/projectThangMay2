@@ -14,6 +14,7 @@ import GioiThieu from "./pages/GioiThieu";
 import Home from "./pages/Home";
 import LienHe from "./pages/LienHe";
 import DuToanThangMay from "./pages/DuToanThangMay";
+import StudioCabin from "./pages/StudioCabin";
 import News from "./pages/News";
 
 function ScrollToTop() {
@@ -59,6 +60,8 @@ function App() {
         <Route path="/tin-tuc" element={<News />} />
         <Route path="/tin-tuc/:slug" element={<News />} />
         <Route path="/lien-he" element={<LienHe />} />
+        <Route path="/thiet-ke-cabin" element={<StudioCabin />} />
+        <Route path="/studio-cabin" element={<StudioCabin />} />
         <Route path="/du-toan" element={<DuToanThangMay />} />
         <Route path="/admin" element={<Admin />} />
       </Routes>

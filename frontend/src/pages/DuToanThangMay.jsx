@@ -1,14 +1,15 @@
 import { useEffect, useState, useRef } from "react";
+import { Link, useLocation } from "react-router-dom";
 import { apiClient } from "../api/client";
 import { soDienThoaiCongTy, soDienThoaiLienKet, emailCongTy } from "../data/contactInfo";
 import SeoHead from "../components/SeoHead";
-import CabinVisualizer from "../components/CabinVisualizer";
 import AiVisionScanner from "../components/AiVisionScanner";
 import logoHaHong from "../assets/images/logo-ha-hong.jpg";
 import heroImage from "../assets/images/hero-elevator.jpg";
 import "./DuToanThangMay.css";
 
 export default function DuToanThangMay() {
+  const location = useLocation();
   // Config state
   const [buildingType, setBuildingType] = useState("nha-pho-xay-moi");
   const [stops, setStops] = useState(4);
@@ -31,6 +32,38 @@ export default function DuToanThangMay() {
     ceiling: "Trần Vòm Âm LED",
     handrail: "Tay Vịn Tròn Mạ Vàng"
   });
+
+  // Tự động đồng bộ cấu hình nếu khách chuyển từ Studio Cabin 3D sang
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const pType = params.get("elevatorType");
+    const pCap = params.get("capacityKg");
+    const pStops = params.get("stops");
+    const pWall = params.get("wall");
+    const pFloor = params.get("floor");
+    const pCeil = params.get("ceiling");
+    const pRail = params.get("handrail");
+
+    if (pType) setElevatorType(pType);
+    if (pCap && !isNaN(Number(pCap))) setCapacityKg(Number(pCap));
+    if (pStops && !isNaN(Number(pStops))) setStops(Number(pStops));
+
+    if (pWall || pFloor || pCeil || pRail) {
+      setCabinSpecs((prev) => {
+        const next = {
+          wall: pWall || prev.wall,
+          floor: pFloor || prev.floor,
+          ceiling: pCeil || prev.ceiling,
+          handrail: pRail || prev.handrail
+        };
+        setCustomerNotes(
+          `Khách hàng thiết kế tại Studio Cabin 3D: Vách: ${next.wall}, Sàn: ${next.floor}, Trần: ${next.ceiling}, Tay vịn: ${next.handrail}.`
+        );
+        return next;
+      });
+      setVisionToast("Đã đồng bộ mẫu thiết kế nội thất từ Studio Cabin 3D!");
+    }
+  }, [location.search]);
 
   const handleCabinConsultation = (specs) => {
     if (specs) {
@@ -692,22 +725,49 @@ export default function DuToanThangMay() {
               </div>
             </div>
 
-            {/* CỘT BÊN PHẢI: CABIN Ở TRÊN CÙNG, TIẾP ĐẾN BẢNG GIÁ DỰ TOÁN & HOTLINE */}
+            {/* CỘT BÊN PHẢI: BANNER STUDIO CABIN 3D, BẢNG GIÁ DỰ TOÁN & HOTLINE */}
             <div className="col-lg-5">
               <div className="estimator-sticky-sidebar">
 
-                {/* 1. PHỐI CẢNH CABIN 2.5D (ĐẶT Ở TRÊN CÙNG THEO YÊU CẦU CỦA BẠN) */}
-                <div className="mb-4">
-                  <CabinVisualizer
-                    elevatorType={elevatorType}
-                    onChangeElevatorType={setElevatorType}
-                    capacityKg={Number(capacityKg)}
-                    stops={Number(stops)}
-                    doorType={doorType}
-                    onChangeDoorType={setDoorType}
-                    onApplyConfig={setCabinSpecs}
-                    onRequestConsultation={handleCabinConsultation}
-                  />
+                {/* 1. BANNER DẪN SANG STUDIO THIẾT KẾ CABIN 3D */}
+                <div className="cabin-studio-card mb-3">
+                  <div className="d-flex align-items-center justify-content-between mb-2">
+                    <span className="badge bg-warning text-dark fw-bold" style={{ fontSize: "11px" }}>
+                      <i className="bi bi-stars me-1"></i>
+                      STUDIO NỘI THẤT 3D
+                    </span>
+                    <span className="text-white-50" style={{ fontSize: "11px" }}>Trải nghiệm riêng biệt</span>
+                  </div>
+
+                  <h3 className="h6 fw-bold text-white mb-1">
+                    Tự Phối Màu &amp; Thiết Kế Cabin 3D
+                  </h3>
+                  <p className="text-white-50 small mb-3" style={{ fontSize: "12px", lineHeight: "1.45" }}>
+                    Khám phá vách Inox gương vàng hoàng gia, kính Panorama 360°, đá hoa cương nẹp đồng &amp; trần LED nghệ thuật trong Studio 3D riêng toàn màn hình.
+                  </p>
+
+                  {/* Hiển thị tóm tắt mẫu nếu khách đã chọn */}
+                  {cabinSpecs?.wall && (
+                    <div className="cabin-chosen-summary mb-3">
+                      <div className="chosen-spec-line">
+                        <i className="bi bi-check-circle-fill text-warning me-1"></i>
+                        <span>Vách: <strong>{cabinSpecs.wall}</strong></span>
+                      </div>
+                      <div className="chosen-spec-line">
+                        <i className="bi bi-check-circle-fill text-warning me-1"></i>
+                        <span>Sàn: <strong>{cabinSpecs.floor}</strong></span>
+                      </div>
+                    </div>
+                  )}
+
+                  <Link
+                    to={`/thiet-ke-cabin?elevatorType=${elevatorType}&stops=${stops}&capacityKg=${capacityKg}&wall=${encodeURIComponent(cabinSpecs.wall)}&floor=${encodeURIComponent(cabinSpecs.floor)}`}
+                    className="btn-open-cabin-studio"
+                  >
+                    <i className="bi bi-palette-fill me-1"></i>
+                    <span>Mở Studio Thiết Kế Cabin 3D</span>
+                    <i className="bi bi-arrow-right ms-auto"></i>
+                  </Link>
                 </div>
 
                 {/* 2. BẢNG DỰ TOÁN GIÁ TIỀN & THÔNG SỐ (GỌN GÀNG, SANG TRỌNG) */}
