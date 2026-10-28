@@ -371,14 +371,22 @@ export default function AiVisionScanner({ onApplySpecs }) {
 
               <div className="col-lg-7">
                 <div className="d-flex align-items-center justify-content-between mb-2">
-                  <span className="badge bg-success-subtle text-success border border-success px-3 py-1">
-                    <i className="bi bi-shield-check me-1"></i> Đã nhận diện thành công
-                  </span>
+                  {result.isElevatorDetected ? (
+                    <span className="badge bg-success-subtle text-success border border-success px-3 py-1">
+                      <i className="bi bi-shield-check me-1"></i> Đã nhận diện ô thang khả thi
+                    </span>
+                  ) : (
+                    <span className="badge bg-warning-subtle text-warning border border-warning px-3 py-1">
+                      <i className="bi bi-exclamation-triangle-fill me-1"></i> Lưu ý kỹ thuật: Thang máy cần tối thiểu 2 điểm dừng
+                    </span>
+                  )}
                   <span className="small text-muted">Mã giải pháp: HH-VISION-{Math.floor(1000 + Math.random() * 9000)}</span>
                 </div>
 
                 <h4 className="fw-bold text-white mb-3">
-                  Đề xuất: Thang Máy {result.suggestedElevatorType === "homelift-kinh" ? "Kính Homelift Panorama" : (result.suggestedElevatorType === "biet-thu" ? "Biệt Thự Sang Trọng PVD Gold" : "Gia Đình Tiêu Chuẩn")} ({result.suggestedCapacityKg} kg)
+                  {result.isElevatorDetected
+                    ? `Đề xuất: Thang Máy ${result.suggestedElevatorType === "homelift-kinh" ? "Kính Homelift Panorama" : (result.suggestedElevatorType === "biet-thu" ? "Biệt Thự Sang Trọng PVD Gold" : "Gia Đình Tiêu Chuẩn")} (${result.suggestedCapacityKg} kg)`
+                    : `Tư vấn kỹ thuật: ${result.imageType}`}
                 </h4>
 
                 <div className="ai-vision-specs-grid">

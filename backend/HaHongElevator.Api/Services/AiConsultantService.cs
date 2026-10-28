@@ -287,6 +287,24 @@ public class AiConsultantService
 
         var systemPrompt = @"Bạn là Kỹ sư Trưởng chuyên gia Phân tích Bản vẽ Thiết kế và Kết cấu Hố Thang Máy của Công ty Cổ phần Thương mại Dịch vụ Thang máy Hà Hồng (Hà Hồng Elevator - thangmayhahong.xyz - Hotline: 0909 9333 58).
 Nhiệm vụ: Phân tích hình ảnh đính kèm (bản vẽ mặt bằng kiến trúc, bản vẽ kết cấu hố thang, hoặc ảnh chụp hiện trạng ô thang).
+
+QUY TẮC NGUYÊN LÝ KỸ THUẬT BẮT BUỘC:
+1. Thang máy gia đình bắt buộc phải có TỐI THIỂU 2 ĐIỂM DỪNG (2 tầng trở lên, vd: Trệt - Lửng, Hầm - Trệt, hoặc Trệt - Lầu 1).
+2. Nếu bản vẽ hoặc ghi chú thể hiện NHÀ CẤP 4 (1 tầng trệt thuần túy, không có gác lửng, không có tầng hầm, không có tum/sân thượng):
+   - Đặt isElevatorDetected: false
+   - stops: 2
+   - imageType: 'Bản vẽ nhà cấp 4 (1 tầng trệt)'
+   - summaryAnalysis: '⚠️ CẢNH BÁO KỸ THUẬT: Bản vẽ được nhận diện là Nhà Cấp 4 (chỉ có 1 tầng trệt). Về mặt kỹ thuật, thang máy bắt buộc phải có tối thiểu 2 điểm dừng (2 tầng). Nếu ngôi nhà thuần 1 tầng trệt và không có gác lửng/tầng hầm thì KHÔNG KHẢ THI và KHÔNG CẦN THIẾT lắp đặt thang máy gia đình tiêu chuẩn. Trừ trường hợp nhà có gác lửng cao hoặc đang có kế hoạch cải tạo đúc thêm tầng!'
+   - technicalHighlights: [
+       'Thang máy chỉ hoạt động khi có tối thiểu 2 điểm dừng di chuyển giữa các cao độ tầng.',
+       'Nếu nhà cấp 4 có gác lửng hoặc bán hầm: Giải pháp tối ưu là dòng Thang Kính Homelift mini 2 tầng tải trọng 200kg - 300kg.',
+       'Nếu chuẩn bị cải tạo nâng tầng (lên 2 - 3 tầng): Nên bố trí ô chờ giếng thang khung thép 1200x1200mm.',
+       'Nếu chỉ cần hỗ trợ vượt bậc tam cấp chênh cốt thấp (<1.2m), nên sử dụng bàn nâng dốc (Ramp) hoặc bàn nâng thủy lực thay vì thang máy.'
+     ]
+3. Nếu là nhà phố, biệt thự, tòa nhà (2 tầng trở lên):
+   - isElevatorDetected: true
+   - Đề xuất tải trọng và kích thước phù hợp (300kg, 350kg, 450kg, 630kg).
+
 BẮT BUỘC trả về ĐÚNG MỘT đối tượng JSON (không thêm bất kỳ văn bản nào ngoài JSON) theo định dạng:
 {
   ""isElevatorDetected"": true,
@@ -408,6 +426,49 @@ BẮT BUỘC trả về ĐÚNG MỘT đối tượng JSON (không thêm bất k�
     private static VisionAnalysisResponseDto GenerateHeuristicVisionAnalysis(string? userPrompt, int fileSize)
     {
         var prompt = (userPrompt ?? "").ToLowerInvariant();
+
+        // Xử lý trường hợp Nhà Cấp 4
+        if (prompt.Contains("cap 4") || prompt.Contains("cấp 4") || prompt.Contains("1 tang") || prompt.Contains("1 tầng"))
+        {
+            var hasMezzanine = prompt.Contains("lung") || prompt.Contains("lửng") || prompt.Contains("gac") || prompt.Contains("gác") || prompt.Contains("ham") || prompt.Contains("hầm") || prompt.Contains("nang tang") || prompt.Contains("nâng tầng");
+
+            return new VisionAnalysisResponseDto
+            {
+                IsElevatorDetected = hasMezzanine,
+                ConfidenceScore = 0.96,
+                ImageType = "Bản vẽ nhà cấp 4 " + (hasMezzanine ? "(Có gác lửng/bán hầm)" : "(1 tầng trệt thuần túy)"),
+                ShaftWidthMm = 1200,
+                ShaftDepthMm = 1200,
+                PitDepthMm = 250,
+                OverheadMm = 2800,
+                Stops = 2,
+                BuildingType = "nha-pho-cai-tao",
+                SuggestedCapacityKg = 300,
+                SuggestedElevatorType = "homelift-kinh",
+                SuggestedMotorBrand = "Fuji",
+                SuggestedDoorType = "2SO",
+                CabinDimensions = "850 x 800 x 2100 mm",
+                EstimatedPriceMin = 280000000,
+                EstimatedPriceMax = 330000000,
+                SummaryAnalysis = hasMezzanine
+                    ? "Nhà cấp 4 có gác lửng hoặc bán hầm phù hợp lắp đặt dòng Thang Máy Kính Homelift Mini 2 điểm dừng (2 stops). Giúp người lớn tuổi lên xuống gác lửng an toàn với hố PIT siêu nông 250mm không cần đào móng sâu."
+                    : "⚠️ LƯU Ý KỸ THUẬT: Bản vẽ được nhận diện là Nhà Cấp 4 (1 tầng trệt). Về nguyên lý cơ học, thang máy bắt buộc phải có TỐI THIỂU 2 ĐIỂM DỪNG (2 tầng trở lên). Nếu ngôi nhà thuần 1 tầng trệt và không có gác lửng hay tầng hầm thì KHÔNG KHẢ THI và KHÔNG CẦN THIẾT lắp đặt thang máy gia đình tiêu chuẩn.",
+                TechnicalHighlights = new List<string>
+                {
+                    "Thang máy chỉ hoạt động khi có tối thiểu 2 điểm dừng di chuyển giữa các cao độ tầng.",
+                    hasMezzanine
+                        ? "Giải pháp Homelift mini 300kg 2 điểm dừng (Trệt - Lửng) với kích thước lọt lòng hố chỉ 1200x1200mm."
+                        : "Nếu nhà cấp 4 có gác lửng hoặc tầng bán hầm: Có thể lắp thang Homelift mini 2 điểm dừng (Hành trình nâng 2.5m - 3.2m).",
+                    "Trường hợp gia chủ chuẩn bị cải tạo nâng tầng (lên 2 - 3 lầu): Nên bố trí ô chờ giếng thang khung thép 1200x1200mm ngay từ bây giờ.",
+                    "Nếu chỉ cần hỗ trợ người lớn tuổi vượt bậc tam cấp chênh cốt thấp (<1.2m), nên sử dụng bàn nâng dốc (Ramp) hoặc bàn nâng thủy lực thay vì thang máy."
+                },
+                SuitableCabinStyles = new List<string>
+                {
+                    "Homelift kính cường lực 4 mặt đón sáng cho không gian gác lửng",
+                    "Cửa mở tự động lùa về một phía 2SO tối ưu diện tích hẹp"
+                }
+            };
+        }
 
         var isGlass = prompt.Contains("kinh") || prompt.Contains("homelift") || prompt.Contains("panorama");
         var isVilla = prompt.Contains("biet thu") || prompt.Contains("cao cap") || prompt.Contains("pvd") || prompt.Contains("vang");
