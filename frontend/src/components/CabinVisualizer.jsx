@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, forwardRef, useImperativeHandle } from "react";
 import "./CabinVisualizer.css";
 
 // =============================================================================
@@ -280,7 +280,7 @@ export const HANDRAIL_OPTIONS = [
   }
 ];
 
-export default function CabinVisualizer({
+const CabinVisualizer = forwardRef(function CabinVisualizer({
   elevatorType = "homelift-kinh",
   onChangeElevatorType,
   capacityKg = 450,
@@ -293,8 +293,9 @@ export default function CabinVisualizer({
   selectedFloorProp,
   selectedCeilingProp,
   selectedHandrailProp,
-  onMaterialChange
-}) {
+  onMaterialChange,
+  onElevatorStateChange
+}, ref) {
   // Tabs: 'walls' (1) | 'flooring' (2) | 'ceiling' (3) | 'handrail' (4)
   const [activeTab, setActiveTab] = useState("walls");
 
@@ -352,6 +353,21 @@ export default function CabinVisualizer({
       setTargetFloor(totalStops);
     }
   }, [totalStops, currentFloor]);
+
+  // Báo trạng thái lên component cha (đặc biệt là Studio Bảng điều khiển điện tử COP)
+  useEffect(() => {
+    if (onElevatorStateChange) {
+      onElevatorStateChange({
+        currentFloor,
+        targetFloor,
+        elevatorStatus,
+        moveDirection,
+        isDoorsOpen,
+        isLightOn,
+        stops: totalStops
+      });
+    }
+  }, [currentFloor, targetFloor, elevatorStatus, moveDirection, isDoorsOpen, isLightOn, totalStops, onElevatorStateChange]);
 
   // Đồng bộ với Bước 3 bên ngoài (Chỉ khi không có selectedWallProp để tránh ghi đè preset hoặc tùy chọn thủ công)
   const prevElevatorTypeRef = useRef(elevatorType);
@@ -484,6 +500,27 @@ export default function CabinVisualizer({
     setIsLightOn(next);
     triggerToast(next ? "Đèn cabin bật sáng" : "Đèn cabin tắt • Chế độ ban đêm");
   };
+
+  useImperativeHandle(ref, () => ({
+    callFloor: handleCallFloor,
+    toggleDoor: handleManualDoorToggle,
+    setDoorOpen: (open) => {
+      if (elevatorStatus === "moving") {
+        triggerToast("Thang máy đang di chuyển giữa các tầng, không thể đổi trạng thái cửa!");
+        return;
+      }
+      setIsDoorsOpen(open);
+      triggerToast(open ? "Cửa thang máy đang mở ra" : "Cửa thang máy đã đóng kín");
+    },
+    toggleLight: handleToggleLight,
+    setLightOn: (on) => {
+      setIsLightOn(on);
+      triggerToast(on ? "Đèn cabin bật sáng" : "Đèn cabin tắt");
+    },
+    triggerBell: () => {
+      triggerToast("🔔 Chuông cứu hộ khẩn cấp & Intercom 2 chiều đang kết nối kỹ thuật Hà Hồng!");
+    }
+  }));
 
   const handleSelectWall = (item) => {
     setSelectedWallId(item.id);
@@ -1252,4 +1289,6 @@ export default function CabinVisualizer({
       </div>
     </div>
   );
-}
+});
+
+export default CabinVisualizer;

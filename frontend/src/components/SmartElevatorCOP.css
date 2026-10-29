@@ -1,0 +1,516 @@
+/* =============================================================================
+   SMART ELEVATOR COP (CAR OPERATING PANEL) - BẢNG ĐIỀU KHIỂN ĐIỆN TỬ THANG MÁY
+   Mô phỏng màn hình LCD thông minh chuẩn KONE / Taza (Ảnh tham khảo 2)
+   Gọn gàng, vừa vặn cột bên phải, tương tác chân thực 100%
+   ============================================================================= */
+
+.smart-cop-wrapper {
+  margin-bottom: 0.85rem;
+  width: 100%;
+}
+
+.smart-cop-panel {
+  position: relative;
+  background: linear-gradient(155deg, #1b263b 0%, #0f172a 50%, #090e18 100%);
+  border: 1.5px solid rgba(217, 164, 65, 0.45);
+  border-top: 3px solid #d9a441;
+  border-radius: 12px;
+  padding: 0.85rem 0.95rem 0.65rem;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.05);
+  color: #f8fafc;
+  overflow: hidden;
+  transition: box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.smart-cop-panel.cop-alarm-flashing {
+  border-color: #ef4444;
+  box-shadow: 0 0 25px rgba(239, 68, 68, 0.6);
+  animation: copAlarmPulse 0.4s infinite alternate;
+}
+
+@keyframes copAlarmPulse {
+  0% { background-color: #0f172a; }
+  100% { background-color: #3b0707; }
+}
+
+/* Ốc vít lục giác 4 góc chuẩn công nghiệp */
+.cop-hex-screw {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  background: radial-gradient(circle, #94a3b8 30%, #334155 90%);
+  border-radius: 50%;
+  border: 1px solid #1e293b;
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.5);
+  pointer-events: none;
+}
+.screw-top-left { top: 5px; left: 6px; }
+.screw-top-right { top: 5px; right: 6px; }
+.screw-bottom-left { bottom: 5px; left: 6px; }
+.screw-bottom-right { bottom: 5px; right: 6px; }
+
+/* 1. Header Bar: Tiêu Đề Bảng Điều Khiển */
+.cop-top-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.55rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.cop-brand-title {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  color: #ffd875;
+  display: flex;
+  align-items: center;
+  text-transform: uppercase;
+}
+
+.cop-status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  letter-spacing: 0.3px;
+}
+
+.cop-pulse-dot {
+  width: 6px;
+  height: 6px;
+  background-color: #10b981;
+  border-radius: 50%;
+  box-shadow: 0 0 6px #10b981;
+  animation: copLiveDot 1.8s infinite;
+}
+
+@keyframes copLiveDot {
+  0% { transform: scale(0.9); opacity: 0.7; }
+  50% { transform: scale(1.3); opacity: 1; }
+  100% { transform: scale(0.9); opacity: 0.7; }
+}
+
+/* 2. MÀN HÌNH LCD ĐIỆN TỬ (TFT CHUẨN KONE / TAZA) */
+.cop-lcd-display {
+  background: #030712;
+  border: 1.5px solid #1e293b;
+  border-radius: 8px;
+  padding: 0.55rem 0.7rem;
+  margin-bottom: 0.65rem;
+  box-shadow: inset 0 0 16px rgba(0, 163, 255, 0.08), 0 2px 8px rgba(0, 0, 0, 0.6);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Kính phản quang màn hình */
+.cop-lcd-display::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 45%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, transparent 100%);
+  pointer-events: none;
+}
+
+/* Hàng trên màn hình: Giờ & Thời tiết */
+.lcd-status-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.66rem;
+  color: #94a3b8;
+  padding-bottom: 0.35rem;
+  margin-bottom: 0.35rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.lcd-time-box {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-family: monospace, sans-serif;
+}
+
+.lcd-time {
+  font-weight: 700;
+  color: #38bdf8;
+  font-size: 0.72rem;
+}
+
+.lcd-date {
+  color: #64748b;
+  font-size: 0.62rem;
+  margin-left: 0.2rem;
+}
+
+.lcd-weather-box {
+  display: flex;
+  align-items: center;
+  color: #cbd5e1;
+  font-size: 0.64rem;
+}
+
+/* Khối nội dung chính màn hình LCD */
+.lcd-main-content {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* Khối số tầng & mũi tên */
+.lcd-floor-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 52px;
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid #1e293b;
+  border-radius: 6px;
+  padding: 0.25rem 0.4rem;
+}
+
+.lcd-arrow-wrap {
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lcd-arrow {
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
+.arrow-up {
+  color: #facc15;
+  animation: arrowBlinkUp 0.7s infinite alternate;
+}
+
+.arrow-down {
+  color: #facc15;
+  animation: arrowBlinkDown 0.7s infinite alternate;
+}
+
+.arrow-idle {
+  color: #10b981;
+  font-size: 0.6rem;
+}
+
+@keyframes arrowBlinkUp {
+  0% { transform: translateY(1px); opacity: 0.5; }
+  100% { transform: translateY(-2px); opacity: 1; text-shadow: 0 0 6px #facc15; }
+}
+
+@keyframes arrowBlinkDown {
+  0% { transform: translateY(-1px); opacity: 0.5; }
+  100% { transform: translateY(2px); opacity: 1; text-shadow: 0 0 6px #facc15; }
+}
+
+.lcd-floor-val {
+  font-size: 1.55rem;
+  font-weight: 900;
+  line-height: 1;
+  color: #ffffff;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
+  display: flex;
+  align-items: baseline;
+}
+
+.lcd-floor-sub {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #38bdf8;
+  margin-left: 2px;
+}
+
+/* Khối thông tin chi tiết bên cạnh số tầng */
+.lcd-info-box {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.lcd-motion-badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.text-emerald {
+  color: #34d399;
+}
+
+.text-secondary-cyan {
+  color: #94a3b8;
+}
+
+.lcd-specs-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.4rem;
+  font-size: 0.62rem;
+  color: #cbd5e1;
+}
+
+.lcd-tag-spec {
+  color: #cbd5e1;
+}
+
+.lcd-door-tag {
+  font-size: 0.58rem;
+  font-weight: 800;
+  padding: 0.1rem 0.35rem;
+  border-radius: 3px;
+  letter-spacing: 0.4px;
+}
+
+.door-tag-open {
+  background: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.4);
+}
+
+.door-tag-closed {
+  background: rgba(100, 116, 139, 0.2);
+  color: #94a3b8;
+  border: 1px solid rgba(100, 116, 139, 0.3);
+}
+
+.lcd-next-stops {
+  font-size: 0.6rem;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.stops-label {
+  color: #64748b;
+}
+
+.stops-list {
+  color: #38bdf8;
+  font-weight: 700;
+}
+
+/* 3. BÀN PHÍM CẢM ỨNG ĐIỆN TỬ (KEYPAD SECTION) */
+.cop-keypad-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* Lưới nút bấm gọi tầng */
+.cop-floors-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: 0.45rem;
+}
+
+.cop-btn-touch {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #334155 0%, #1e293b 70%, #0f172a 100%);
+  border: 1.5px solid #475569;
+  color: #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease-out;
+  padding: 0;
+  outline: none;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.25);
+}
+
+.cop-btn-touch:hover {
+  border-color: #facc15;
+  color: #ffffff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(250, 204, 21, 0.25);
+}
+
+.cop-btn-touch:active {
+  transform: translateY(1px) scale(0.95);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.floor-digit {
+  font-size: 0.95rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.floor-tag {
+  font-size: 0.5rem;
+  font-weight: 600;
+  line-height: 1;
+  opacity: 0.65;
+  margin-top: 1px;
+}
+
+/* Trạng thái tầng hiện tại */
+.cop-btn-touch.btn-floor-current {
+  border-color: #10b981;
+  background: radial-gradient(circle at 35% 35%, #065f46 0%, #047857 70%, #022c22 100%);
+  color: #ffffff;
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.6), inset 0 1px 2px rgba(255, 255, 255, 0.4);
+}
+
+.cop-btn-touch.btn-floor-current .floor-tag {
+  opacity: 1;
+  color: #a7f3d0;
+}
+
+/* Trạng thái tầng đang được gọi (Calling Pulse) */
+.cop-btn-touch.btn-floor-calling {
+  border-color: #f59e0b;
+  color: #ffffff;
+  animation: callingPulse 0.6s infinite alternate;
+}
+
+@keyframes callingPulse {
+  0% {
+    box-shadow: 0 0 4px #f59e0b;
+    background-color: #1e293b;
+  }
+  100% {
+    box-shadow: 0 0 14px #f59e0b;
+    background-color: #78350f;
+  }
+}
+
+/* Hàng nút chức năng phụ trợ */
+.cop-aux-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.3rem;
+}
+
+.cop-aux-btn {
+  flex: 1;
+  height: 34px;
+  background: rgba(30, 41, 59, 0.6);
+  border: 1px solid #334155;
+  border-radius: 6px;
+  color: #cbd5e1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0.15rem;
+  transition: all 0.15s ease;
+  font-size: 0.62rem;
+  outline: none;
+}
+
+.cop-aux-btn:hover {
+  background: #334155;
+  border-color: #64748b;
+  color: #ffffff;
+}
+
+.cop-aux-btn:active {
+  transform: scale(0.94);
+}
+
+.aux-icon-sym {
+  font-size: 0.68rem;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -0.5px;
+}
+
+.aux-btn-text {
+  font-size: 0.54rem;
+  font-weight: 700;
+  margin-top: 1px;
+}
+
+.cop-aux-btn.aux-active-cyan {
+  border-color: #38bdf8;
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.15);
+  box-shadow: 0 0 8px rgba(56, 189, 248, 0.3);
+}
+
+.cop-aux-btn.aux-active-gold {
+  border-color: #facc15;
+  color: #facc15;
+  background: rgba(250, 204, 21, 0.15);
+  box-shadow: 0 0 8px rgba(250, 204, 21, 0.3);
+}
+
+.cop-aux-btn.aux-active-blue {
+  border-color: #60a5fa;
+  color: #60a5fa;
+  background: rgba(96, 165, 250, 0.15);
+}
+
+/* Nút chuông báo động cứu hộ */
+.cop-alarm-btn {
+  background: rgba(239, 68, 68, 0.12);
+  border-color: rgba(239, 68, 68, 0.4);
+  color: #f87171;
+}
+
+.cop-alarm-btn:hover {
+  background: #ef4444;
+  border-color: #ef4444;
+  color: #ffffff;
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.6);
+}
+
+/* Hoạt ảnh quạt quay */
+.spin-fan-anim {
+  display: inline-block;
+  animation: spinFan 1.2s linear infinite;
+}
+
+@keyframes spinFan {
+  100% { transform: rotate(360deg); }
+}
+
+/* 4. Footer Mini */
+.cop-bottom-bar {
+  margin-top: 0.4rem;
+  padding-top: 0.35rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  text-align: center;
+}
+
+.cop-meta-note {
+  font-size: 0.58rem;
+  color: #64748b;
+  display: block;
+}

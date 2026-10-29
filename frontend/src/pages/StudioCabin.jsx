@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import SeoHead from "../components/SeoHead";
 import CabinVisualizer from "../components/CabinVisualizer";
+import SmartElevatorCOP from "../components/SmartElevatorCOP";
 import { soDienThoaiCongTy, soDienThoaiLienKet } from "../data/contactInfo";
 import { apiClient } from "../api/client";
 import heroImage from "../assets/images/hero-elevator.jpg";
@@ -86,6 +87,19 @@ export default function StudioCabin() {
   const [selectedFloorId, setSelectedFloorId] = useState("floor-chevron-brass");
   const [selectedCeilingId, setSelectedCeilingId] = useState("ceil-cove-warm");
   const [selectedHandrailId, setSelectedHandrailId] = useState("wood-brass");
+
+  // Ref điều khiển CabinVisualizer trực tiếp từ Bảng điều khiển điện tử COP
+  const cabinVisualizerRef = useRef(null);
+
+  // State đồng bộ thời gian thực vận hành thang máy (Tầng, Hướng chạy, Trạng thái cửa, Đèn)
+  const [elevatorFlightState, setElevatorFlightState] = useState({
+    currentFloor: 1,
+    targetFloor: 1,
+    elevatorStatus: "idle",
+    moveDirection: null,
+    isDoorsOpen: true,
+    isLightOn: true
+  });
 
   // State thông tin chi tiết vật liệu do CabinVisualizer phản hồi lại
   const [materials, setMaterials] = useState({
@@ -268,6 +282,7 @@ export default function StudioCabin() {
                 {/* Component CabinVisualizer giữ nguyên đầy đủ tính năng gốc */}
                 <div className="p-3">
                   <CabinVisualizer
+                    ref={cabinVisualizerRef}
                     elevatorType={elevatorType}
                     onChangeElevatorType={setElevatorType}
                     capacityKg={Number(capacityKg)}
@@ -280,6 +295,7 @@ export default function StudioCabin() {
                     selectedHandrailProp={selectedHandrailId}
                     onMaterialChange={handleMaterialChange}
                     onRequestConsultation={handleGoToEstimator}
+                    onElevatorStateChange={setElevatorFlightState}
                   />
                 </div>
               </div>
@@ -398,6 +414,31 @@ export default function StudioCabin() {
                     </div>
                   </div>
                 </div>
+
+                {/* BẢNG ĐIỀU KHIỂN THANG MÁY ĐIỆN TỬ (SMART LCD COP - THAO TÁC ĐƯỢC) */}
+                <SmartElevatorCOP
+                  currentFloor={elevatorFlightState.currentFloor}
+                  targetFloor={elevatorFlightState.targetFloor}
+                  elevatorStatus={elevatorFlightState.elevatorStatus}
+                  moveDirection={elevatorFlightState.moveDirection}
+                  isDoorsOpen={elevatorFlightState.isDoorsOpen}
+                  isLightOn={elevatorFlightState.isLightOn}
+                  stops={Number(stops)}
+                  capacityKg={Number(capacityKg)}
+                  doorType={doorType}
+                  onCallFloor={(targetFloor) => {
+                    cabinVisualizerRef.current?.callFloor(targetFloor);
+                  }}
+                  onSetDoorOpen={(isOpen) => {
+                    cabinVisualizerRef.current?.setDoorOpen(isOpen);
+                  }}
+                  onToggleLight={() => {
+                    cabinVisualizerRef.current?.toggleLight();
+                  }}
+                  onTriggerBell={() => {
+                    cabinVisualizerRef.current?.triggerBell();
+                  }}
+                />
 
                 {/* 3. NÚT CHUYỂN DỰ TOÁN BÁO GIÁ (CTA CHÍNH) */}
                 <div className="studio-cta-box">
