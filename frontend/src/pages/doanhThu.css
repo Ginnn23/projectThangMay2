@@ -1,0 +1,285 @@
+/* ============================================================
+   DOANH THU ADMIN - Revenue Dashboard Styles
+   ============================================================ */
+
+.doanh-thu-admin {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Header */
+.dt-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.dt-header h2 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #0B1F3A;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+}
+.dt-header h2 i { color: #D9A441; }
+
+.dt-period-filter {
+  display: flex;
+  gap: 6px;
+}
+.dt-period-filter button {
+  padding: 6px 16px;
+  border-radius: 20px;
+  border: 2px solid #0B1F3A;
+  background: transparent;
+  color: #0B1F3A;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.2s;
+}
+.dt-period-filter button:hover {
+  background: #0B1F3A22;
+}
+.dt-period-filter button.active {
+  background: #0B1F3A;
+  color: #fff;
+}
+
+/* KPI Grid */
+.dt-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+}
+.dt-kpi-card {
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+}
+.dt-kpi-card i {
+  font-size: 2rem;
+  opacity: 0.85;
+  flex-shrink: 0;
+}
+.dt-kpi-card div {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.dt-kpi-card span {
+  font-size: 0.78rem;
+  opacity: 0.85;
+  white-space: nowrap;
+}
+.dt-kpi-card strong {
+  font-size: 1.2rem;
+  font-weight: 800;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dt-kpi-blue   { background: linear-gradient(135deg, #3a8ef6, #1a5fc8); }
+.dt-kpi-green  { background: linear-gradient(135deg, #27ae60, #1a7a42); }
+.dt-kpi-gold   { background: linear-gradient(135deg, #D9A441, #b87c1e); }
+.dt-kpi-purple { background: linear-gradient(135deg, #9b59b6, #6c3483); }
+.dt-kpi-navy   { background: linear-gradient(135deg, #0B1F3A, #162e55); }
+
+/* Section card */
+.dt-section {
+  padding: 24px !important;
+}
+.dt-section h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #0B1F3A;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 20px 0;
+}
+.dt-section h3 i { color: #D9A441; }
+
+.dt-empty {
+  color: #aaa;
+  font-style: italic;
+  text-align: center;
+  padding: 24px 0;
+}
+
+/* Bar chart */
+.dt-bar-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  height: 210px;
+  padding-bottom: 28px;
+  overflow-x: auto;
+}
+.dt-bar-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  min-width: 36px;
+  position: relative;
+}
+.dt-bar-col:hover .dt-bar-tooltip { opacity: 1; pointer-events: auto; }
+.dt-bar-tooltip {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #0B1F3A;
+  color: #fff;
+  font-size: 0.7rem;
+  padding: 6px 10px;
+  border-radius: 8px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+  z-index: 10;
+  text-align: center;
+  line-height: 1.4;
+}
+.dt-bar {
+  width: 100%;
+  border-radius: 4px 4px 0 0;
+  transition: height 0.4s ease;
+  min-height: 0;
+}
+.dt-bar-label {
+  font-size: 0.7rem;
+  color: #666;
+  margin-top: 4px;
+  white-space: nowrap;
+}
+
+/* Two column layout */
+.dt-two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+@media (max-width: 768px) {
+  .dt-two-col { grid-template-columns: 1fr; }
+}
+
+/* Funnel */
+.dt-funnel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.dt-funnel-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.dt-funnel-label {
+  width: 140px;
+  font-size: 0.82rem;
+  color: #444;
+  flex-shrink: 0;
+}
+.dt-funnel-bar-wrap {
+  flex: 1;
+  background: #f0f0f0;
+  border-radius: 4px;
+  height: 22px;
+  overflow: hidden;
+}
+.dt-funnel-bar {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.5s ease;
+  min-width: 0;
+}
+.dt-funnel-count {
+  width: 32px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+/* Type list */
+.dt-type-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.dt-type-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.dt-type-name {
+  width: 130px;
+  font-size: 0.82rem;
+  color: #444;
+  flex-shrink: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.dt-type-val {
+  width: 120px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #D9A441;
+  text-align: right;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+/* Table */
+.dt-table-wrap {
+  overflow-x: auto;
+}
+.dt-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+.dt-table th {
+  background: #0B1F3A;
+  color: #D9A441;
+  padding: 10px 12px;
+  text-align: left;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.dt-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #eee;
+  vertical-align: middle;
+}
+.dt-table tbody tr:hover { background: #f7f9fc; }
+.dt-table tbody tr:last-child td { border-bottom: none; }
+
+/* Loading spinner reuse */
+.admin-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 0;
+  gap: 16px;
+  color: #0B1F3A;
+}
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}

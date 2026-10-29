@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { API_BASE_URL, API_ORIGIN, apiClient } from "../api/client";
+import "./doanhThu.css";
 import AiTrainingAdmin from "../components/AiTrainingAdmin";
 import { boLocDuAn, chuanHoaPhanLoaiDuAn, layNhanPhanLoaiDuAn, phanLoaiDuAn } from "../data/projectCategories";
 import { anhDuAnMacDinh } from "../data/projectData";
@@ -309,6 +310,7 @@ function AdminToolbar({ activeTab, onChangeTab, user, onLogout }) {
     { key: "services", label: "Dịch vụ", icon: "bi-tools" },
     { key: "projects", label: "Dự án", icon: "bi-buildings" },
     { key: "ai", label: "Huấn luyện AI", icon: "bi-robot" },
+    { key: "revenue", label: "Doanh thu", icon: "bi-bar-chart-line" },
   ];
 
   return (
@@ -1966,8 +1968,297 @@ function Admin() {
         {activeTab === "estimates" && (
           <DuToanAdmin onShowToast={hienThongBao} />
         )}
+
+        {activeTab === "revenue" && (
+          <DoanhThuAdmin onShowToast={hienThongBao} />
+        )}
       </div>
     </main>
+  );
+}
+
+/* ===================== DOANH THU ADMIN ===================== */
+function DoanhThuAdmin({ onShowToast }) {
+  const [estimates, setEstimates] = useState([]);
+  const [contacts, setContacts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [period, setPeriod] = useState("all"); // "all" | "year" | "month"
+
+  const formatVND = (val) =>
+    new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(val);
+
+  useEffect(() => {
+    async function fetchData() {
+      setLoading(true);
+      setError("");
+      try {
+        const [estRes, conRes] = await Promise.all([
+          apiClient.get("/estimates/admin"),
+          apiClient.get("/contacts"),
+        ]);
+        setEstimates(estRes.data || []);
+        setContacts(conRes.data || []);
+      } catch (e) {
+        setError(layLoiApi(e));
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchData();
+  }, []);
+
+  // Filter by period
+  const now = new Date();
+  const filteredEstimates = estimates.filter((e) => {
+    if (period === "all") return true;
+    const d = new Date(e.createdAt);
+    if (period === "year") return d.getFullYear() === now.getFullYear();
+    if (period === "month") return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
+    return true;
+  });
+
+  // KPIs
+  const totalLeads = filteredEstimates.length + contacts.filter((c) => {
+    if (period === "all") return true;
+    const d = new Date(c.createdAt);
+    if (period === "year") return d.getFullYear() === now.getFullYear();
+    if (period === "month") return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
+    return true;
+  }).length;
+
+  const dealClosed = filteredEstimates.filter((e) => e.status === "DealClosed");
+  const totalRevenue = dealClosed.reduce((sum, e) => sum + ((e.estimatedPriceMin + e.estimatedPriceMax) / 2), 0);
+  const closedRate = filteredEstimates.length > 0 ? ((dealClosed.length / filteredEstimates.length) * 100).toFixed(1) : 0;
+
+  const today = new Date();
+  const newToday = estimates.filter((e) => {
+    const d = new Date(e.createdAt);
+    return d.getDate() === today.getDate() && d.getMonth() === today.getMonth() && d.getFullYear() === today.getFullYear();
+  }).length;
+
+  const pipelineValue = filteredEstimates
+    .filter((e) => e.status !== "DealClosed" && e.status !== "Cancelled")
+    .reduce((sum, e) => sum + ((e.estimatedPriceMin + e.estimatedPriceMax) / 2), 0);
+
+  // Monthly revenue chart data (last 12 months)
+  const monthlyData = (() => {
+    const map = {};
+    for (let i = 11; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const key = `${d.getMonth() + 1}/${d.getFullYear()}`;
+      map[key] = { label: `T${d.getMonth() + 1}`, value: 0, count: 0 };
+    }
+    estimates.forEach((e) => {
+      if (e.status !== "DealClosed") return;
+      const d = new Date(e.createdAt);
+      const key = `${d.getMonth() + 1}/${d.getFullYear()}`;
+      if (map[key]) {
+        map[key].value += (e.estimatedPriceMin + e.estimatedPriceMax) / 2;
+        map[key].count += 1;
+      }
+    });
+    return Object.values(map);
+  })();
+
+  const maxMonthly = Math.max(...monthlyData.map((m) => m.value), 1);
+
+  // Funnel by status
+  const statusOrder = ["New", "Contacted", "SurveyScheduled", "DealClosed", "Cancelled"];
+  const statusLabel = {
+    New: "Mới",
+    Contacted: "Đã liên hệ",
+    SurveyScheduled: "Lên lịch khảo sát",
+    DealClosed: "Chốt deal ✓",
+    Cancelled: "Đã huỷ",
+  };
+  const statusColor = {
+    New: "#4a9eff",
+    Contacted: "#f0a500",
+    SurveyScheduled: "#9b59b6",
+    DealClosed: "#27ae60",
+    Cancelled: "#e74c3c",
+  };
+  const funnelData = statusOrder.map((s) => ({
+    status: s,
+    label: statusLabel[s],
+    count: filteredEstimates.filter((e) => e.status === s).length,
+    color: statusColor[s],
+  }));
+  const maxFunnel = Math.max(...funnelData.map((f) => f.count), 1);
+
+  // Revenue by elevator type
+  const typeMap = {};
+  dealClosed.forEach((e) => {
+    const t = e.elevatorType || "Khác";
+    if (!typeMap[t]) typeMap[t] = 0;
+    typeMap[t] += (e.estimatedPriceMin + e.estimatedPriceMax) / 2;
+  });
+  const typeData = Object.entries(typeMap).sort((a, b) => b[1] - a[1]);
+  const maxType = Math.max(...typeData.map((t) => t[1]), 1);
+
+  // Recent deal closed
+  const recentDeals = [...dealClosed]
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+    .slice(0, 10);
+
+  if (loading) return <div className="admin-loading"><i className="bi bi-arrow-repeat" style={{ fontSize: 32, animation: "spin 1s linear infinite" }}></i><p>Đang tải dữ liệu doanh thu...</p></div>;
+  if (error) return <div className="admin-card" style={{ color: "#e74c3c", padding: 32 }}><i className="bi bi-exclamation-triangle"></i> {error}</div>;
+
+  return (
+    <div className="doanh-thu-admin">
+      {/* Header + Period Filter */}
+      <div className="dt-header">
+        <h2><i className="bi bi-bar-chart-line"></i> Báo cáo Doanh thu</h2>
+        <div className="dt-period-filter">
+          {[["all", "Tất cả"], ["year", "Năm nay"], ["month", "Tháng này"]].map(([val, lbl]) => (
+            <button
+              key={val}
+              className={period === val ? "active" : ""}
+              onClick={() => setPeriod(val)}
+              type="button"
+            >{lbl}</button>
+          ))}
+        </div>
+      </div>
+
+      {/* KPI Cards */}
+      <div className="dt-kpi-grid">
+        <div className="dt-kpi-card dt-kpi-blue">
+          <i className="bi bi-people-fill"></i>
+          <div>
+            <span>Tổng leads</span>
+            <strong>{totalLeads.toLocaleString("vi-VN")}</strong>
+          </div>
+        </div>
+        <div className="dt-kpi-card dt-kpi-green">
+          <i className="bi bi-cash-stack"></i>
+          <div>
+            <span>Doanh thu đã chốt</span>
+            <strong>{formatVND(totalRevenue)}</strong>
+          </div>
+        </div>
+        <div className="dt-kpi-card dt-kpi-gold">
+          <i className="bi bi-trophy-fill"></i>
+          <div>
+            <span>Tỷ lệ chốt deal</span>
+            <strong>{closedRate}%</strong>
+          </div>
+        </div>
+        <div className="dt-kpi-card dt-kpi-purple">
+          <i className="bi bi-funnel-fill"></i>
+          <div>
+            <span>Pipeline ước tính</span>
+            <strong>{formatVND(pipelineValue)}</strong>
+          </div>
+        </div>
+        <div className="dt-kpi-card dt-kpi-navy">
+          <i className="bi bi-plus-circle-fill"></i>
+          <div>
+            <span>Dự toán mới hôm nay</span>
+            <strong>{newToday}</strong>
+          </div>
+        </div>
+      </div>
+
+      {/* Monthly Revenue Bar Chart */}
+      <div className="admin-card dt-section">
+        <h3><i className="bi bi-bar-chart"></i> Doanh thu theo tháng (12 tháng gần nhất)</h3>
+        <div className="dt-bar-chart">
+          {monthlyData.map((m, i) => (
+            <div key={i} className="dt-bar-col">
+              <div className="dt-bar-tooltip">{formatVND(m.value)}<br />{m.count} deal</div>
+              <div
+                className="dt-bar"
+                style={{ height: `${Math.max((m.value / maxMonthly) * 180, m.value > 0 ? 4 : 0)}px`, background: m.value > 0 ? "linear-gradient(180deg, #4a9eff, #0B1F3A)" : "#e8edf3" }}
+              ></div>
+              <span className="dt-bar-label">{m.label}</span>
+            </div>
+          ))}
+        </div>
+        {dealClosed.length === 0 && <p className="dt-empty">Chưa có deal chốt nào trong dữ liệu.</p>}
+      </div>
+
+      {/* Funnel + Type side by side */}
+      <div className="dt-two-col">
+        {/* Funnel */}
+        <div className="admin-card dt-section">
+          <h3><i className="bi bi-funnel"></i> Phễu chuyển đổi</h3>
+          <div className="dt-funnel">
+            {funnelData.map((f) => (
+              <div key={f.status} className="dt-funnel-row">
+                <span className="dt-funnel-label">{f.label}</span>
+                <div className="dt-funnel-bar-wrap">
+                  <div
+                    className="dt-funnel-bar"
+                    style={{ width: `${Math.max((f.count / maxFunnel) * 100, f.count > 0 ? 2 : 0)}%`, background: f.color }}
+                  ></div>
+                </div>
+                <span className="dt-funnel-count" style={{ color: f.color }}>{f.count}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Revenue by type */}
+        <div className="admin-card dt-section">
+          <h3><i className="bi bi-pie-chart"></i> Doanh thu theo loại thang máy</h3>
+          {typeData.length === 0
+            ? <p className="dt-empty">Chưa có deal chốt.</p>
+            : <div className="dt-type-list">
+              {typeData.map(([type, val]) => (
+                <div key={type} className="dt-type-row">
+                  <span className="dt-type-name">{type}</span>
+                  <div className="dt-funnel-bar-wrap">
+                    <div className="dt-funnel-bar" style={{ width: `${(val / maxType) * 100}%`, background: "linear-gradient(90deg, #D9A441, #f0c060)" }}></div>
+                  </div>
+                  <span className="dt-type-val">{formatVND(val)}</span>
+                </div>
+              ))}
+            </div>
+          }
+        </div>
+      </div>
+
+      {/* Recent deals */}
+      <div className="admin-card dt-section">
+        <h3><i className="bi bi-check2-circle"></i> Deal đã chốt gần đây</h3>
+        {recentDeals.length === 0
+          ? <p className="dt-empty">Chưa có deal nào được chốt.</p>
+          : <div className="dt-table-wrap">
+            <table className="dt-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Khách hàng</th>
+                  <th>Loại thang</th>
+                  <th>Tầng</th>
+                  <th>Doanh thu ước tính</th>
+                  <th>Ngày chốt</th>
+                </tr>
+              </thead>
+              <tbody>
+                {recentDeals.map((e, i) => (
+                  <tr key={e.id}>
+                    <td>{i + 1}</td>
+                    <td>
+                      <strong>{e.customerName}</strong>
+                      <br /><small style={{ color: "#888" }}>{e.phoneNumber}</small>
+                    </td>
+                    <td>{e.elevatorType || "—"}</td>
+                    <td>{e.stops ? `${e.stops} tầng` : "—"}</td>
+                    <td style={{ fontWeight: 600, color: "#27ae60" }}>
+                      {formatVND((e.estimatedPriceMin + e.estimatedPriceMax) / 2)}
+                    </td>
+                    <td style={{ whiteSpace: "nowrap" }}>{dinhDangNgay(e.updatedAt || e.createdAt)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
+    </div>
   );
 }
 
