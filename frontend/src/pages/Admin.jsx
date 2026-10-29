@@ -301,7 +301,7 @@ function AdminLogin({ onLogin }) {
   );
 }
 
-function ChangePasswordModal({ isOpen, onClose, onShowToast }) {
+function ChangePasswordModal({ isOpen, onClose, onShowToast, onLogout }) {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -310,10 +310,16 @@ function ChangePasswordModal({ isOpen, onClose, onShowToast }) {
   const [showConfirm, setShowConfirm] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-
   const [resetting, setResetting] = useState(false);
+  const [success, setSuccess] = useState(false);
 
   if (!isOpen) return null;
+
+  const handleCloseModal = () => {
+    setSuccess(false);
+    setError("");
+    onClose();
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -350,7 +356,7 @@ function ChangePasswordModal({ isOpen, onClose, onShowToast }) {
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
-      onClose();
+      setSuccess(true);
     } catch (err) {
       setError(layLoiApi(err) || "Không thể đổi mật khẩu. Vui lòng kiểm tra lại mật khẩu hiện tại.");
     } finally {
@@ -374,8 +380,8 @@ function ChangePasswordModal({ isOpen, onClose, onShowToast }) {
   };
 
   return (
-    <div className="admin-modal-backdrop" onClick={onClose}>
-      <div className="admin-change-pwd-modal" onClick={(e) => e.stopPropagation()}>
+    <div className="admin-modal-backdrop">
+      <div className="admin-change-pwd-modal">
         <div className="admin-modal-header">
           <div className="admin-modal-title">
             <i className="bi bi-shield-lock-fill"></i>
@@ -384,124 +390,159 @@ function ChangePasswordModal({ isOpen, onClose, onShowToast }) {
               <p>Mật khẩu khởi tạo ban đầu của hệ thống là <strong>123</strong></p>
             </div>
           </div>
-          <button type="button" className="admin-modal-close" onClick={onClose} title="Đóng">
+          <button type="button" className="admin-modal-close" onClick={handleCloseModal} title="Đóng">
             <i className="bi bi-x-lg"></i>
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="admin-modal-body">
-          {error && (
-            <div className="admin-modal-alert">
-              <i className="bi bi-exclamation-triangle-fill"></i>
-              <span>{error}</span>
+        {success ? (
+          <div className="admin-modal-body" style={{ textAlign: "center", padding: "32px 24px" }}>
+            <div style={{ width: 68, height: 68, borderRadius: "50%", background: "#dcfce7", color: "#16a34a", display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: 36, marginBottom: 16 }}>
+              <i className="bi bi-check-lg"></i>
             </div>
-          )}
-
-          <div className="admin-pwd-field">
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <label style={{ margin: 0 }}>Mật khẩu hiện tại</label>
+            <h3 style={{ fontSize: 19, fontWeight: 800, color: "#0B1F3A", margin: "0 0 8px 0" }}>
+              Đổi Mật Khẩu Thành Công!
+            </h3>
+            <p style={{ color: "#64748b", fontSize: 14, margin: "0 0 24px 0", lineHeight: 1.6 }}>
+              Mật khẩu mới đã được lưu an toàn vào hệ thống. Bạn có thể tiếp tục làm việc hoặc đăng xuất để kiểm tra lại mật khẩu mới.
+            </p>
+            <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
               <button
                 type="button"
-                onClick={handleResetDefault}
-                disabled={resetting}
-                style={{
-                  background: "transparent",
-                  border: "none",
-                  color: "#d97706",
-                  fontSize: "12px",
-                  fontWeight: 700,
-                  cursor: "pointer",
-                  textDecoration: "underline"
+                className="btn-submit"
+                onClick={handleCloseModal}
+                style={{ padding: "10px 22px" }}
+              >
+                <i className="bi bi-check2-circle"></i> Tiếp Tục Quản Trị
+              </button>
+              <button
+                type="button"
+                className="btn-cancel"
+                onClick={() => {
+                  handleCloseModal();
+                  onLogout?.();
                 }}
-                title="Bấm nếu quên hoặc muốn đặt lại về 123"
+                style={{ color: "#dc2626", borderColor: "#fecaca", background: "#fef2f2", padding: "10px 20px" }}
               >
-                {resetting ? "Đang khôi phục..." : "Quên MK? Đặt về 123"}
-              </button>
-            </div>
-            <div className="admin-pwd-input-wrap">
-              <input
-                type={showCurrent ? "text" : "password"}
-                value={currentPassword}
-                onChange={(e) => setCurrentPassword(e.target.value)}
-                placeholder="Nhập mật khẩu hiện tại (mặc định: 123)"
-                autoComplete="current-password"
-                required
-              />
-              <button
-                type="button"
-                className="admin-pwd-toggle"
-                onClick={() => setShowCurrent(!showCurrent)}
-                tabIndex="-1"
-                title={showCurrent ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
-              >
-                <i className={`bi ${showCurrent ? "bi-eye-slash-fill" : "bi-eye-fill"}`}></i>
+                <i className="bi bi-box-arrow-right"></i> Đăng Xuất Kiểm Tra
               </button>
             </div>
           </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="admin-modal-body">
+            {error && (
+              <div className="admin-modal-alert">
+                <i className="bi bi-exclamation-triangle-fill"></i>
+                <span>{error}</span>
+              </div>
+            )}
 
-          <div className="admin-pwd-field">
-            <label>Mật khẩu mới (tối thiểu 3 ký tự)</label>
-            <div className="admin-pwd-input-wrap">
-              <input
-                type={showNew ? "text" : "password"}
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                placeholder="Nhập mật khẩu mới"
-                autoComplete="new-password"
-                required
-              />
-              <button
-                type="button"
-                className="admin-pwd-toggle"
-                onClick={() => setShowNew(!showNew)}
-                tabIndex="-1"
-                title={showNew ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
-              >
-                <i className={`bi ${showNew ? "bi-eye-slash-fill" : "bi-eye-fill"}`}></i>
+            <div className="admin-pwd-field">
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <label style={{ margin: 0 }}>Mật khẩu hiện tại</label>
+                <button
+                  type="button"
+                  onClick={handleResetDefault}
+                  disabled={resetting}
+                  style={{
+                    background: "transparent",
+                    border: "none",
+                    color: "#d97706",
+                    fontSize: "12px",
+                    fontWeight: 700,
+                    cursor: "pointer",
+                    textDecoration: "underline"
+                  }}
+                  title="Bấm nếu quên hoặc muốn đặt lại về 123"
+                >
+                  {resetting ? "Đang khôi phục..." : "Quên MK? Đặt về 123"}
+                </button>
+              </div>
+              <div className="admin-pwd-input-wrap">
+                <input
+                  type={showCurrent ? "text" : "password"}
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  placeholder="Nhập mật khẩu hiện tại (mặc định: 123)"
+                  autoComplete="current-password"
+                  required
+                />
+                <button
+                  type="button"
+                  className="admin-pwd-toggle"
+                  onClick={() => setShowCurrent(!showCurrent)}
+                  tabIndex="-1"
+                  title={showCurrent ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
+                >
+                  <i className={`bi ${showCurrent ? "bi-eye-slash-fill" : "bi-eye-fill"}`}></i>
+                </button>
+              </div>
+            </div>
+
+            <div className="admin-pwd-field">
+              <label>Mật khẩu mới (tối thiểu 3 ký tự)</label>
+              <div className="admin-pwd-input-wrap">
+                <input
+                  type={showNew ? "text" : "password"}
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="Nhập mật khẩu mới"
+                  autoComplete="new-password"
+                  required
+                />
+                <button
+                  type="button"
+                  className="admin-pwd-toggle"
+                  onClick={() => setShowNew(!showNew)}
+                  tabIndex="-1"
+                  title={showNew ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
+                >
+                  <i className={`bi ${showNew ? "bi-eye-slash-fill" : "bi-eye-fill"}`}></i>
+                </button>
+              </div>
+            </div>
+
+            <div className="admin-pwd-field">
+              <label>Xác nhận mật khẩu mới</label>
+              <div className="admin-pwd-input-wrap">
+                <input
+                  type={showConfirm ? "text" : "password"}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="Nhập lại mật khẩu mới"
+                  autoComplete="new-password"
+                  required
+                />
+                <button
+                  type="button"
+                  className="admin-pwd-toggle"
+                  onClick={() => setShowConfirm(!showConfirm)}
+                  tabIndex="-1"
+                  title={showConfirm ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
+                >
+                  <i className={`bi ${showConfirm ? "bi-eye-slash-fill" : "bi-eye-fill"}`}></i>
+                </button>
+              </div>
+            </div>
+
+            <div className="admin-modal-actions">
+              <button type="button" className="btn-cancel" onClick={handleCloseModal} disabled={loading}>
+                Hủy bỏ
+              </button>
+              <button type="submit" className="btn-submit" disabled={loading}>
+                {loading ? (
+                  <>
+                    <i className="bi bi-arrow-repeat spin"></i> Đang lưu...
+                  </>
+                ) : (
+                  <>
+                    <i className="bi bi-check2-circle"></i> Lưu mật khẩu mới
+                  </>
+                )}
               </button>
             </div>
-          </div>
-
-          <div className="admin-pwd-field">
-            <label>Xác nhận mật khẩu mới</label>
-            <div className="admin-pwd-input-wrap">
-              <input
-                type={showConfirm ? "text" : "password"}
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="Nhập lại mật khẩu mới"
-                autoComplete="new-password"
-                required
-              />
-              <button
-                type="button"
-                className="admin-pwd-toggle"
-                onClick={() => setShowConfirm(!showConfirm)}
-                tabIndex="-1"
-                title={showConfirm ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
-              >
-                <i className={`bi ${showConfirm ? "bi-eye-slash-fill" : "bi-eye-fill"}`}></i>
-              </button>
-            </div>
-          </div>
-
-          <div className="admin-modal-actions">
-            <button type="button" className="btn-cancel" onClick={onClose} disabled={loading}>
-              Hủy bỏ
-            </button>
-            <button type="submit" className="btn-submit" disabled={loading}>
-              {loading ? (
-                <>
-                  <i className="bi bi-arrow-repeat spin"></i> Đang lưu...
-                </>
-              ) : (
-                <>
-                  <i className="bi bi-check2-circle"></i> Lưu mật khẩu mới
-                </>
-              )}
-            </button>
-          </div>
-        </form>
+          </form>
+        )}
       </div>
     </div>
   );
@@ -2115,6 +2156,7 @@ function Admin() {
         isOpen={showChangePassword}
         onClose={() => setShowChangePassword(false)}
         onShowToast={hienThongBao}
+        onLogout={dangXuat}
       />
       <div className="admin-shell">
         <AdminToolbar
@@ -2658,21 +2700,8 @@ function DoanhThuAdmin({ onShowToast }) {
   return (
     <div className="doanh-thu-admin">
       {/* 1. HERO COMMAND HEADER */}
-      <div className="dt-hero-header">
-        <div className="dt-hero-info">
-          <span className="dt-hero-badge">
-            <i className="bi bi-shield-check"></i> Trung Tâm Chỉ Huy Bán Hàng & Doanh Thu
-          </span>
-          <h2 className="dt-hero-title">
-            <i className="bi bi-bar-chart-fill" style={{ color: "#D9A441" }}></i>
-            Hiệu Suất Kinh Doanh & Dòng Tiền
-          </h2>
-          <p className="dt-hero-subtitle">
-            Báo cáo tổng hợp số liệu doanh thu đã ký hợp đồng, tiềm năng pipeline và tỷ lệ chuyển đổi khách hàng Thang Máy Hà Hồng.
-          </p>
-        </div>
-
-        <div className="dt-hero-actions">
+      <div className="dt-hero-header dt-hero-header-compact">
+        <div className="dt-hero-actions" style={{ width: "100%", justifyContent: "space-between" }}>
           {/* Segmented Filter */}
           <div className="dt-period-segmented">
             {[
@@ -2693,23 +2722,25 @@ function DoanhThuAdmin({ onShowToast }) {
           </div>
 
           {/* Action Buttons */}
-          <button
-            type="button"
-            className="dt-action-btn btn-primary-action"
-            onClick={() => setShowCreateModal(true)}
-            title="Tạo dự toán / hợp đồng mới để tính doanh số"
-          >
-            <i className="bi bi-plus-circle-fill"></i> Tạo Hợp Đồng Mới
-          </button>
-          <button type="button" className="dt-action-btn" onClick={handleExportCSV} title="Xuất dữ liệu Excel">
-            <i className="bi bi-file-earmark-excel"></i> Xuất Excel
-          </button>
-          <button type="button" className="dt-action-btn" onClick={() => window.print()} title="In báo cáo">
-            <i className="bi bi-printer"></i> In
-          </button>
-          <button type="button" className="dt-action-btn" onClick={fetchData} title="Làm mới số liệu">
-            <i className="bi bi-arrow-clockwise"></i> Làm Mới
-          </button>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+            <button
+              type="button"
+              className="dt-action-btn btn-primary-action"
+              onClick={() => setShowCreateModal(true)}
+              title="Tạo dự toán / hợp đồng mới để tính doanh số"
+            >
+              <i className="bi bi-plus-circle-fill"></i> Tạo Hợp Đồng Mới
+            </button>
+            <button type="button" className="dt-action-btn" onClick={handleExportCSV} title="Xuất dữ liệu Excel">
+              <i className="bi bi-file-earmark-excel"></i> Xuất Excel
+            </button>
+            <button type="button" className="dt-action-btn" onClick={() => window.print()} title="In báo cáo">
+              <i className="bi bi-printer"></i> In
+            </button>
+            <button type="button" className="dt-action-btn" onClick={fetchData} title="Làm mới số liệu">
+              <i className="bi bi-arrow-clockwise"></i> Làm Mới
+            </button>
+          </div>
         </div>
       </div>
 
@@ -2818,14 +2849,6 @@ function DoanhThuAdmin({ onShowToast }) {
               <i className="bi bi-building-check"></i> Phân khúc dân dụng & biệt thự
             </p>
           </div>
-        </div>
-      </div>
-
-      {/* REVENUE GUIDE TIP */}
-      <div className="dt-revenue-tip">
-        <i className="bi bi-lightbulb-fill"></i>
-        <div>
-          <strong>Cách tính tiền Doanh Thu Ký Kết:</strong> Doanh thu chỉ được cộng khi hợp đồng đạt trạng thái <span className="dt-status-badge status-dealclosed" style={{ padding: "2px 8px" }}>Chốt deal ✓</span>. Bạn có thể chọn trực tiếp ô Trạng Thái trong bảng bên dưới thành <strong>"Chốt deal ✓ (Cộng Doanh Thu)"</strong> hoặc bấm <strong>"Tạo Hợp Đồng Mới"</strong> ở phía trên để ghi nhận số tiền ngay lập tức!
         </div>
       </div>
 

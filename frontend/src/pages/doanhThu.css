@@ -31,6 +31,10 @@
   overflow: hidden;
 }
 
+.dt-hero-header.dt-hero-header-compact {
+  padding: 14px 20px;
+}
+
 .dt-hero-header::before {
   content: "";
   position: absolute;
