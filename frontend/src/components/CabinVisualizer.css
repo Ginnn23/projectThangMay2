@@ -1448,3 +1448,128 @@
     flex-wrap: nowrap;
   }
 }
+
+
+/* ==========================================================================
+   CAC TUY CHON VAT LIEU MOI (VACH, SAN, TRAN DEN, TAY VIN)
+   ========================================================================== */
+
+/* 1. VACH MOI */
+/* Inox Guong Den Titanium Black 8K */
+.wall-inox-guong-den .panel-sub-left,
+.wall-inox-guong-den .panel-sub-right,
+.wall-inox-guong-den .side-wall-panel {
+  background: linear-gradient(135deg, #09090b 0%, #18181b 35%, #27272a 50%, #18181b 65%, #09090b 100%);
+  border-right: 1.5px solid #3f3f46;
+}
+.wall-inox-guong-den .panel-center-feature {
+  background: linear-gradient(135deg, #18181b 0%, #3f3f46 45%, #71717a 50%, #27272a 60%, #09090b 100%);
+  box-shadow: inset 0 0 25px rgba(0, 0, 0, 0.95);
+}
+
+/* Vach Da Y May Qua Tram Nep Chi Dong */
+.wall-da-leather-hermes .panel-sub-left,
+.wall-da-leather-hermes .panel-sub-right,
+.wall-da-leather-hermes .side-wall-panel {
+  background: radial-gradient(circle at 50% 50%, #9a3412 0%, #7c2d12 70%, #431407 100%);
+  border: 1.5px solid #d9a441;
+  box-shadow: inset 0 0 12px rgba(67, 20, 7, 0.8);
+}
+.wall-da-leather-hermes .panel-center-feature {
+  background: linear-gradient(135deg, #7c2d12 0%, #9a3412 40%, #c2410c 60%, #431407 100%);
+  border: 2px solid #eab308;
+  box-shadow: inset 0 0 18px rgba(0, 0, 0, 0.7);
+}
+
+/* Da Cam Thach Xuyen Sang Onyx Vang Hoang Gia */
+.wall-onyx-backlit .panel-sub-left,
+.wall-onyx-backlit .panel-sub-right,
+.wall-onyx-backlit .side-wall-panel {
+  background: radial-gradient(ellipse at 50% 50%, #fef08a 0%, #facc15 35%, #ca8a04 70%, #854d0e 100%);
+  box-shadow: 0 0 20px rgba(250, 204, 21, 0.45);
+  border: 1.5px solid #fef08a;
+}
+.wall-onyx-backlit .panel-center-feature {
+  background: radial-gradient(circle at 50% 50%, #ffffff 0%, #fef08a 25%, #eab308 60%, #a16207 100%);
+  box-shadow: inset 0 0 24px rgba(254, 240, 138, 0.8), 0 0 25px rgba(234, 179, 8, 0.5);
+}
+
+/* 2. SAN MOI */
+/* Da Trang Calacatta Gold Van May Vang */
+.surface-floor-calacatta-gold {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 35%, #f1f5f9 60%, #e2e8f0 100%);
+  position: relative;
+}
+.surface-floor-calacatta-gold::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 30% 40%, rgba(202, 138, 4, 0.22) 0%, transparent 60%),
+              radial-gradient(ellipse at 75% 70%, rgba(202, 138, 4, 0.18) 0%, transparent 55%);
+}
+
+/* San Go Cam Xe Xuong Ca Herringbone Co Dien */
+.surface-floor-herringbone-teak {
+  background: repeating-linear-gradient(45deg, #78350f, #78350f 12px, #92400e 12px, #92400e 24px);
+}
+
+/* 3. TRAN DEN MOI */
+/* Tran Bau Troi Sao Galaxy Rolls-Royce */
+.ceil-type-ceil-starlight-sky .cabin-ceiling-frame {
+  background: radial-gradient(circle at 20% 30%, #38bdf8 1.5px, transparent 2px),
+              radial-gradient(circle at 60% 70%, #ffffff 2px, transparent 2.5px),
+              radial-gradient(circle at 80% 20%, #facc15 1.5px, transparent 2px),
+              radial-gradient(circle at 40% 60%, #ffffff 1px, transparent 1.5px),
+              radial-gradient(circle at 70% 40%, #bae6fd 2px, transparent 2.5px),
+              radial-gradient(circle at 30% 80%, #ffffff 1.5px, transparent 2px),
+              #030712;
+  box-shadow: inset 0 0 20px rgba(56, 189, 248, 0.35);
+}
+.cabin-ambient-light.light-effect-ceil-starlight-sky {
+  background: radial-gradient(circle at 50% 0%, rgba(56, 189, 248, 0.25) 0%, transparent 75%);
+}
+
+/* Tran Cang Xuyen Sang Barrisol */
+.ceil-type-ceil-barrisol-glow .cabin-ceiling-frame {
+  background: #fef9c3;
+  box-shadow: 0 0 25px rgba(254, 240, 138, 0.8), inset 0 0 15px rgba(250, 204, 21, 0.3);
+}
+.cabin-ambient-light.light-effect-ceil-barrisol-glow {
+  background: radial-gradient(circle at 50% 0%, rgba(254, 249, 195, 0.5) 0%, transparent 80%);
+}
+
+/* 4. TAY VIN MOI */
+/* Tay vin dep den mo Anodized */
+.handrail-flat-matte-black .handrail-bar,
+.side-handrail.handrail-flat-matte-black {
+  background: #18181b;
+  border: 1px solid #3f3f46;
+  border-radius: 2px;
+  height: 15px;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.85);
+}
+
+/* Tay vin doi Inox song song */
+.handrail-dual-tier-inox .handrail-bar,
+.side-handrail.handrail-dual-tier-inox {
+  background: linear-gradient(180deg, #ffffff 0%, #cbd5e1 45%, #64748b 100%);
+  border-radius: 999px;
+  height: 11px;
+  border: 1.5px solid #e2e8f0;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.75), 0 16px 0 -3px #64748b;
+}
+
+/* 5. SWATCHES CHO CAC VAT LIEU MOI */
+.swatch-wall-inox-guong-den { background: linear-gradient(135deg, #09090b 0%, #3f3f46 50%, #09090b 100%); }
+.swatch-wall-da-leather-hermes { background: radial-gradient(circle, #c2410c 0%, #7c2d12 70%); }
+.swatch-wall-onyx-backlit { background: radial-gradient(circle, #fef08a 0%, #ca8a04 100%); }
+
+.swatch-floor-floor-calacatta-gold { background: linear-gradient(135deg, #ffffff 0%, #fef08a 40%, #e2e8f0 100%); }
+.swatch-floor-floor-herringbone-teak { background: repeating-linear-gradient(45deg, #78350f, #78350f 4px, #92400e 4px, #92400e 8px); }
+
+.swatch-ceil-ceil-starlight-sky { background: radial-gradient(circle at 30% 30%, #38bdf8 1.5px, #030712 2px); }
+.swatch-ceil-ceil-barrisol-glow { background: #fef9c3; }
+
+.swatch-rail-round-inox { background: linear-gradient(180deg, #ffffff 0%, #94a3b8 100%); }
+.swatch-rail-flat-matte-black { background: #18181b; }
+.swatch-rail-dual-tier-inox { background: linear-gradient(180deg, #ffffff 0%, #94a3b8 50%, #ffffff 51%, #64748b 100%); }

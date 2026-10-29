@@ -68,10 +68,40 @@ export const WALL_OPTIONS = [
     badge: "Homelift Panorama",
     syncValue: "homelift-kinh",
     type: "glass"
+  },
+  {
+    id: "inox-guong-den",
+    code: "HAHONG-W07",
+    name: "Inox Gương Đen Titanium Black 8K",
+    spec: "Titanium Black PVD 8K • Đánh bóng gương siêu sâu",
+    desc: "Vách Inox gương đen tuyền Titanium Black phản chiếu chiều sâu sang trọng, phong cách Penthouse hiện đại",
+    badge: "Titanium Đen 8K",
+    syncValue: "inox-tieu-chuan",
+    type: "black-mirror"
+  },
+  {
+    id: "da-leather-hermes",
+    code: "HAHONG-W08",
+    name: "Vách Da Ý May Quả Trám Nẹp Chỉ Đồng",
+    spec: "Da Microfiber Ý chần chỉ quả trám • Nẹp đồng vàng PVD",
+    desc: "Vách ốp da cao cấp chần chỉ quả trám thủ công phối nẹp đồng phong cách Hermès quý phái",
+    badge: "Da Thủ Công Luxury",
+    syncValue: "biet-thu-walnut",
+    type: "quilted-leather"
+  },
+  {
+    id: "onyx-backlit",
+    code: "HAHONG-W09",
+    name: "Đá Cẩm Thạch Xuyên Sáng Onyx Vàng Hoàng Gia",
+    spec: "Đá ngọc Onyx tự nhiên 12mm • Đèn LED xuyên sáng đều",
+    desc: "Đá cẩm thạch ngọc tự nhiên cho ánh sáng vàng ấm xuyên qua mặt đá lung linh, đẳng cấp thượng lưu",
+    badge: "Đá Ngọc Xuyên Sáng",
+    syncValue: "inox-guong-vang",
+    type: "onyx-alabaster"
   }
 ];
 
-// 2. SÀN ĐÁ & GỖ CABIN (5 TÙY CHỌN TỪ ẢNH CHỤP THỰC TẾ)
+// 2. SÀN ĐÁ & GỖ CABIN (7 TÙY CHỌN TỪ ẢNH CHỤP THỰC TẾ)
 export const FLOOR_OPTIONS = [
   {
     id: "floor-chevron-brass",
@@ -117,10 +147,28 @@ export const FLOOR_OPTIONS = [
     desc: "Cẩm thạch tự nhiên cắt CNC hoa văn tròn đối xứng vàng đen sang trọng chuẩn biệt thự",
     badge: "Tân cổ điển đẳng cấp",
     type: "royal-cnc"
+  },
+  {
+    id: "floor-calacatta-gold",
+    code: "HAHONG-F06",
+    name: "Đá Trắng Hy Lạp Calacatta Gold Vân Mây Vàng",
+    spec: "Cẩm thạch Calacatta trắng tinh • Đường vân mây vàng kim",
+    desc: "Nền đá trắng sáng tinh khiết với đường vân tia vàng đồng bộ cùng nội thất vách gương sang trọng",
+    badge: "Trắng Calacatta Gold",
+    type: "calacatta-gold"
+  },
+  {
+    id: "floor-herringbone-teak",
+    code: "HAHONG-F07",
+    name: "Sàn Gỗ Căm Xe Xương Cá Herringbone Cổ Điển",
+    spec: "Gỗ tự nhiên ghép xương cá chữ V • Sơn UV chống xước",
+    desc: "Gỗ tự nhiên màu nâu ấm ghép họa tiết xương cá Herringbone đem lại sự ấm cúng, gần gũi thiên nhiên",
+    badge: "Gỗ Xương Cá Cổ Điển",
+    type: "herringbone-teak"
   }
 ];
 
-// 3. TRẦN ĐÈN LED (3 KIỂU CHIẾU SÁNG KIẾN TRÚC THỰC TẾ)
+// 3. TRẦN ĐÈN LED (5 KIỂU CHIẾU SÁNG KIẾN TRÚC THỰC TẾ)
 export const CEILING_OPTIONS = [
   {
     id: "ceil-cove-warm",
@@ -151,10 +199,30 @@ export const CEILING_OPTIONS = [
     badge: "Ánh sáng trắng 5000K",
     lightType: "cool-spotlight",
     lightColor: "rgba(224, 242, 254, 0.6)"
+  },
+  {
+    id: "ceil-starlight-sky",
+    code: "HAHONG-C04",
+    name: "Trần Bầu Trời Sao Sợi Quang Galaxy (Rolls-Royce)",
+    spec: "Hệ sợi quang phát sáng ngẫu nhiên • LED RGBW đa sắc",
+    desc: "Trần bầu trời sao ngàn điểm sáng lung linh như vũ trụ trên các dòng xe siêu sang Rolls-Royce",
+    badge: "Bầu Trời Sao Galaxy",
+    lightType: "starlight",
+    lightColor: "rgba(186, 230, 253, 0.65)"
+  },
+  {
+    id: "ceil-barrisol-glow",
+    code: "HAHONG-C05",
+    name: "Trần Căng Xuyên Sáng Toàn Phần Barrisol (3500K)",
+    spec: "Màng căng Barrisol Pháp • Ánh sáng tán xạ đều 100%",
+    desc: "Mặt trần phát sáng đồng đều nguyên khối, chống chói lóa mắt tuyệt đối, phong cách resort 5 sao",
+    badge: "Xuyên Sáng 3500K",
+    lightType: "barrisol",
+    lightColor: "rgba(254, 249, 195, 0.6)"
   }
 ];
 
-// 4. TAY VỊN CABIN (4 TÙY CHỌN CHUẨN KIẾN TRÚC THỰC TẾ)
+// 4. TAY VỊN CABIN (6 TÙY CHỌN CHUẨN KIẾN TRÚC THỰC TẾ)
 export const HANDRAIL_OPTIONS = [
   {
     id: "round-inox",
@@ -191,6 +259,24 @@ export const HANDRAIL_OPTIONS = [
     desc: "Inox bóng bẩy mạ PVD vàng Champagne đồng bộ vách gương sang trọng (Như Ảnh 4)",
     badge: "Hoàng Gia PVD",
     type: "round-pvd"
+  },
+  {
+    id: "flat-matte-black",
+    code: "HAHONG-R05",
+    name: "Tay Vịn Dẹp Đen Mờ Anodized Cao Cấp",
+    spec: "Hợp kim nhôm Anodized đen mờ 40x10mm • Bát giấu vít",
+    desc: "Bản dẹp màu đen mờ chống xước, tạo điểm nhấn sắc nét và phong cách tối giản hiện đại",
+    badge: "Đen Mờ Anodized",
+    type: "flat-matte-black"
+  },
+  {
+    id: "dual-tier-inox",
+    code: "HAHONG-R06",
+    name: "Tay Vịn Đôi Inox Song Song (Người Lớn & Trẻ Nhỏ)",
+    spec: "2 thanh tròn phi 32mm song song • SUS 304 chải xước satin",
+    desc: "Thiết kế hai tầng tay vịn thông minh, tầng trên cho người lớn, tầng dưới hỗ trợ trẻ em và người ngồi xe lăn",
+    badge: "Tay Vịn Đôi Song Song",
+    type: "dual-tier-inox"
   }
 ];
 

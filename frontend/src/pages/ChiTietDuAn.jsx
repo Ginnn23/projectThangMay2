@@ -19,6 +19,8 @@ const noiDungChiTietTheoSlug = {
         title: "Máy Kéo & Động Cơ",
         badge: "Công Nghệ Nhật / Ý",
         summary: "Fuji Gearless không hộp số nam châm vĩnh cửu",
+        priceEstimate: "65 - 95 Triệu VNĐ",
+        priceNote: "Đã gồm bệ máy, biến tần, không cần phòng máy",
         specs: [
           "Công suất: 2.2kW - 3.7kW tiết kiệm 40% điện năng",
           "Vận hành êm ái dưới 50dB, không phát tiếng ồn",
@@ -30,6 +32,8 @@ const noiDungChiTietTheoSlug = {
         title: "Dây Cáp & Ray Dẫn Hướng",
         badge: "Chống Rung Lắc",
         summary: "Cáp thép dẻo bọc nhựa tổng hợp hoặc đai thép êm",
+        priceEstimate: "28 - 42 Triệu VNĐ",
+        priceNote: "Cáp thép bọc nhựa + Ray T75 gia công nguội",
         specs: [
           "Cáp chuyên dụng chịu lực kéo cao, tuổi thọ gấp 3 lần",
           "Ray dẫn hướng T-beam T75 gia công nguội chuẩn xác",
@@ -41,6 +45,9 @@ const noiDungChiTietTheoSlug = {
         title: "Kết Cấu Cabin & Khung Thang",
         badge: "Tùy Biến 2D",
         summary: "Khung hợp kim nhôm / thép mạ kẽm cường độ cao",
+        priceEstimate: "75 - 125 Triệu VNĐ",
+        priceNote: "Kính Panorama 10mm / Inox 304 / Gỗ Walnut",
+        isCabin: true,
         specs: [
           "Vách kính Panorama cường lực 10mm hoặc Inox 304 xước / Gương PVD",
           "Sàn đá Marble Nero Marquina nẹp đồng hoặc sàn gỗ tự nhiên",
@@ -52,6 +59,8 @@ const noiDungChiTietTheoSlug = {
         title: "Tủ Điều Khiển & Biến Tần",
         badge: "Vi Xử Lý 32-Bit",
         summary: "Tủ điều khiển vi xử lý thông minh & Biến tần VVVF",
+        priceEstimate: "45 - 65 Triệu VNĐ",
+        priceNote: "Vi xử lý 32-bit + Biến tần VVVF + COP/LOP Halo",
         specs: [
           "Biến tần VVVF điều khiển vô cấp điện áp & tần số siêu êm",
           "Dừng tầng chuẩn xác từng milimet, không giật khi tăng tốc",
@@ -63,6 +72,8 @@ const noiDungChiTietTheoSlug = {
         title: "Hệ Thống An Toàn Đa Tầng",
         badge: "Chuẩn Quốc Tế",
         summary: "Cứu hộ tự động ARD & Phanh hãm Governor",
+        priceEstimate: "25 - 35 Triệu VNĐ",
+        priceNote: "Bộ cứu hộ ARD tự động + Mành Photocell + Governor",
         specs: [
           "Bộ cứu hộ ARD tự động đưa cabin về tầng gần nhất khi mất điện",
           "Mành hồng ngoại Photocell đa điểm chống kẹp cửa toàn thân",
@@ -74,6 +85,8 @@ const noiDungChiTietTheoSlug = {
         title: "Yêu Cầu Hố Thang & Điện",
         badge: "Tối Ưu Diện Tích",
         summary: "Hố Pit siêu nông, không đụng móng bè",
+        priceEstimate: "Khảo sát hiện trạng",
+        priceNote: "Pit 200-450mm, OH 2800-3400mm, điện 1/3 pha",
         specs: [
           "Hố Pit nông: Chỉ từ 200mm - 450mm, bảo toàn móng nhà",
           "Chiều cao đỉnh tầng OH: Khoảng 2800mm - 3400mm",
@@ -122,6 +135,8 @@ const noiDungChiTietTheoSlug = {
         title: "Máy Kéo & Động Cơ",
         badge: "Tần Suất Cao",
         summary: "Động cơ công suất lớn 3.7kW - 7.5kW (Fuji / Montanari Ý)",
+        priceEstimate: "95 - 165 Triệu VNĐ",
+        priceNote: "Động cơ 3.7 - 7.5kW, tần suất cao liên tục 24/7",
         specs: [
           "Tốc độ vận hành nhanh: 1.0m/s đến 1.75m/s",
           "Chịu chu kỳ khởi động và dừng liên tục suốt 24/7",
@@ -133,6 +148,8 @@ const noiDungChiTietTheoSlug = {
         title: "Dây Cáp Tải & Ray Dẫn Hướng",
         badge: "Tiêu Chuẩn DIN EN",
         summary: "Cáp thép đa lõi chuyên dụng và ray dẫn hướng T-car hạng nặng",
+        priceEstimate: "45 - 75 Triệu VNĐ",
+        priceNote: "Ray T89 gia công nguội + Khối đối trọng cân bằng",
         specs: [
           "Cáp thép chuyên dụng nhiều tao chịu tải trọng giật và kéo căng cao",
           "Ray T89/T90 gia công máy chuẩn xác khử độ lắc ngang",
@@ -144,6 +161,9 @@ const noiDungChiTietTheoSlug = {
         title: "Kết Cấu Cabin & Cửa Tầng",
         badge: "Inox Chống Vân Tay",
         summary: "Inox SUS 304 xước hairline dày 1.5mm phối gương bỉ",
+        priceEstimate: "85 - 145 Triệu VNĐ",
+        priceNote: "Inox chống vân tay, tay vịn inox kép, trần LED 24/7",
+        isCabin: true,
         specs: [
           "Bề mặt chải xước satin chống trầy xước, dễ lau chùi vệ sinh",
           "Gương soi bỉ 8K mở rộng không gian và tạo độ sâu cabin",
@@ -155,6 +175,8 @@ const noiDungChiTietTheoSlug = {
         title: "Tủ Điều Khiển Thông Minh",
         badge: "Hệ Điều Khiển Nhóm",
         summary: "Hệ vi xử lý phân tầng thông minh & Thẻ từ RFID / FaceID",
+        priceEstimate: "65 - 95 Triệu VNĐ",
+        priceNote: "Hệ điều khiển nhóm Duplex, màn hình LCD tầng",
         specs: [
           "Thuật toán điều khiển Duplex/Simplex tối ưu thời gian chờ thang",
           "Tích hợp đầu đọc thẻ từ phân quyền tầng cho từng doanh nghiệp",
@@ -166,6 +188,8 @@ const noiDungChiTietTheoSlug = {
         title: "An Toàn & Cứu Hộ Độc Lập",
         badge: "Cấp An Toàn Tối Cao",
         summary: "Bộ lưu điện UPS công suất lớn & Rèm hồng ngoại",
+        priceEstimate: "35 - 55 Triệu VNĐ",
+        priceNote: "UPS tự động công suất lớn + Rèm hồng ngoại toàn cửa",
         specs: [
           "UPS cứu hộ tự động đưa cabin về tầng gần nhất khi mất điện lưới",
           "Cảm biến mành hồng ngoại 2 bên cửa chống va chạm hành khách",
@@ -177,6 +201,8 @@ const noiDungChiTietTheoSlug = {
         title: "Hố Thang & Yêu Cầu Xây Dựng",
         badge: "Hố Thang Tiêu Chuẩn",
         summary: "Hố bê tông cốt thép hoặc khung thép chịu lực",
+        priceEstimate: "Theo bản vẽ",
+        priceNote: "Pit 1200-1400mm, OH 4200-4500mm, điện 3 pha 380V",
         specs: [
           "Hố Pit: Từ 1200mm - 1400mm đảm bảo khoảng an toàn kỹ thuật",
           "Chiều cao tầng trên cùng OH: Khoảng 4200mm - 4500mm",
@@ -225,6 +251,8 @@ const noiDungChiTietTheoSlug = {
         title: "Máy Kéo Chịu Tải Lớn",
         badge: "Moment Xoắn Lớn",
         summary: "Động cơ chịu tải nặng từ 750kg đến 3000kg+",
+        priceEstimate: "110 - 210 Triệu VNĐ",
+        priceNote: "Mô-men xoắn lớn kéo pallet hàng, phanh hãm đôi",
         specs: [
           "Mô-men xoắn cực đại, kéo tải hàng hóa và pallet êm ru",
           "Hộp số giảm tốc chịu tải liên tục hoặc máy kéo gearless công suất cao",
@@ -236,6 +264,8 @@ const noiDungChiTietTheoSlug = {
         title: "Cáp Tải & Ray Hạng Nặng",
         badge: "Gia Cường Chịu Lực",
         summary: "Cáp tải cường độ cao & Ray dẫn hướng T-beam cỡ lớn",
+        priceEstimate: "55 - 95 Triệu VNĐ",
+        priceNote: "Ray dẫn hướng chịu va đập xe nâng, giảm chấn thủy lực",
         specs: [
           "Ray dẫn hướng bản dày chống vặn xoắn khi xe nâng đưa hàng vào",
           "Nhiều tao cáp thép đúc bôi trơn chuyên dụng chống mài mòn",
@@ -247,6 +277,9 @@ const noiDungChiTietTheoSlug = {
         title: "Cabin & Sàn Chống Trượt",
         badge: "Thép Chống Va Đập",
         summary: "Thép chấn dập gân dày 2-3mm hoặc Inox tấm chịu lực",
+        priceEstimate: "90 - 160 Triệu VNĐ",
+        priceNote: "Thép chấn dập gân 3mm, nẹp cao su chống va đập",
+        isCabin: true,
         specs: [
           "Sàn cabin thép tấm gân chống trượt hoặc tôn nhám siêu chịu tải",
           "Nẹp cản va cao su công nghiệp bảo vệ vách cabin không bị trầy móp",
@@ -258,6 +291,8 @@ const noiDungChiTietTheoSlug = {
         title: "Tủ Điều Khiển Chuyên Dụng",
         badge: "Chống Nhiễu Công Nghiệp",
         summary: "Tủ điện công nghiệp chịu bụi và chống ẩm tốt",
+        priceEstimate: "55 - 85 Triệu VNĐ",
+        priceNote: "Chế độ giữ cửa bốc dỡ hàng, chống bụi công nghiệp",
         specs: [
           "Linh kiện công nghiệp chịu nhiệt độ cao và độ ẩm nhà xưởng",
           "Chế độ giữ cửa mở lâu khi bốc dỡ hàng hóa thuận tiện",
@@ -269,6 +304,8 @@ const noiDungChiTietTheoSlug = {
         title: "Cảm Biến Quá Tải & Khóa Cửa",
         badge: "An Toàn Chở Hàng",
         summary: "Cân tải trọng điện tử & Khóa liên động cơ điện",
+        priceEstimate: "30 - 45 Triệu VNĐ",
+        priceNote: "Còi báo quá tải, khóa cơ điện liên động an toàn",
         specs: [
           "Bộ cảm biến cân tải: Báo còi và không chạy khi vượt tải trọng cho phép",
           "Khóa cơ điện liên động cửa tầng tuyệt đối an toàn khi cabin chưa tới",
@@ -280,6 +317,8 @@ const noiDungChiTietTheoSlug = {
         title: "Hố Thang Nhà Xưởng",
         badge: "Kết Cấu Bền Vững",
         summary: "Khung thép hình H hoặc giếng bê tông chịu lực lớn",
+        priceEstimate: "Khảo sát khẩu độ",
+        priceNote: "Hố giếng chịu lực móng xưởng, điện 3 pha công nghiệp",
         specs: [
           "Đáy hố Pit đổ bê tông chống thấm và chịu lực va đập lớn",
           "Chiều cao tầng trên cùng OH thiết kế linh hoạt theo khẩu độ mái kho",
@@ -328,6 +367,8 @@ const noiDungChiTietTheoSlug = {
         title: "Máy Kéo Êm Ái Chuẩn VDI 2566",
         badge: "Triệt Tiêu Rung Ồn",
         summary: "Động cơ đồng bộ nam châm vĩnh cửu tiêu chuẩn 5 sao",
+        priceEstimate: "105 - 175 Triệu VNĐ",
+        priceNote: "Độ ồn cực thấp < 45dB, đệm cao su kép bệ máy",
         specs: [
           "Độ ồn cực thấp dưới 45dB, đệm cao su giảm chấn kép dưới bệ máy",
           "Khởi động và dừng êm tuyệt đối, không gây tiếng vang vào phòng ngủ",
@@ -339,6 +380,8 @@ const noiDungChiTietTheoSlug = {
         title: "Cáp Tải & Puly Composite",
         badge: "Êm Ái Tuyệt Đối",
         summary: "Cáp kéo chuyên dụng êm ái kết hợp puly đúc chống ồn",
+        priceEstimate: "45 - 75 Triệu VNĐ",
+        priceNote: "Cáp thép bọc polymer giảm thiểu ma sát âm thanh",
         specs: [
           "Cáp thép dẻo bọc nhựa polymer giảm thiểu ma sát âm thanh",
           "Puly dẫn hướng bọc lớp giảm ồn cao cấp, khử rung dọc hố thang",
@@ -350,6 +393,9 @@ const noiDungChiTietTheoSlug = {
         title: "Cabin Hoàng Gia Luxury",
         badge: "Tùy Biến 2D",
         summary: "Inox gương vàng PVD 8K, ốp gỗ Walnut và sàn đá CNC",
+        priceEstimate: "120 - 220 Triệu VNĐ",
+        priceNote: "Inox mạ PVD 8K, đá cẩm thạch CNC, trần hắt LED",
+        isCabin: true,
         specs: [
           "Vách Inox gương vàng PVD 8K khắc hoa văn laser tinh xảo",
           "Sàn đá cẩm thạch CNC Mandala hoặc đá hoa cương nẹp chỉ đồng",
@@ -361,6 +407,8 @@ const noiDungChiTietTheoSlug = {
         title: "Hệ Điều Khiển Thẻ Phòng Khách Sạn",
         badge: "Bảo Mật Keycard",
         summary: "Tích hợp hệ thống khóa thẻ tầng RFID / thẻ từ phòng khách",
+        priceEstimate: "70 - 110 Triệu VNĐ",
+        priceNote: "Quẹt thẻ phòng đi đúng tầng, màn hình LCD phát nhạc",
         specs: [
           "Khách quẹt thẻ phòng chỉ bấm được đúng tầng lưu trú của mình",
           "Màn hình LCD hiển thị video quảng bá dịch vụ và phát nhạc nền êm dịu",
@@ -372,6 +420,8 @@ const noiDungChiTietTheoSlug = {
         title: "An Toàn & Cứu Hộ Độc Lập",
         badge: "An Toàn 24/7",
         summary: "Hệ thống cứu hộ tự động ARD kép & Camera cabin",
+        priceEstimate: "35 - 55 Triệu VNĐ",
+        priceNote: "Bộ ARD đưa cabin về tầng gần nhất khi mất điện",
         specs: [
           "Bộ ARD đưa cabin về tầng gần nhất và mở cửa ngay khi có sự cố điện",
           "Cảm biến cửa toàn chiều cao không kẹp hành lý và trẻ nhỏ",
@@ -383,6 +433,8 @@ const noiDungChiTietTheoSlug = {
         title: "Hố Thang & Mỹ Quan Sảnh",
         badge: "Đồng Bộ Kiến Trúc",
         summary: "Cửa tầng ốp Inox vàng đồng bộ với sảnh đón tiếp",
+        priceEstimate: "60 - 120 Triệu VNĐ",
+        priceNote: "Bao che cửa tầng inox vàng PVD sang trọng",
         specs: [
           "Bao che cửa tầng và chỉ viền mạ vàng PVD sang trọng",
           "Hố thang bê tông hoặc khung thép kính tùy biến theo phong cách sảnh",
@@ -431,6 +483,8 @@ const noiDungChiTietTheoSlug = {
         title: "Khung Thép & Vật Liệu",
         badge: "Thép / Inox 304",
         summary: "Thép mạ kẽm sơn tĩnh điện hoặc Inox SUS 304 chống gỉ",
+        priceEstimate: "15 - 30 Triệu VNĐ",
+        priceNote: "Thép mạ kẽm sơn tĩnh điện / Inox SUS 304 chống rỉ",
         specs: [
           "Khung thép chấn dày 2.5 - 4mm chịu lực giẫm đạp và tải trọng nặng",
           "Vật liệu chống oxy hóa, chống rỉ sét ngay cả khi đặt ngoài trời",
@@ -442,6 +496,8 @@ const noiDungChiTietTheoSlug = {
         title: "Cơ Chế Mở & Trợ Lực",
         badge: "Piston Trợ Lực",
         summary: "Hệ thống ty đẩy thủy lực hoặc lò xo trợ lực nhẹ nhàng",
+        priceEstimate: "8 - 18 Triệu VNĐ",
+        priceNote: "Ty đẩy thủy lực trợ lực nâng, mở nhẹ bằng 1 tay",
         specs: [
           "Piston thủy lực trợ lực nâng giúp mở cửa dễ dàng chỉ bằng một tay",
           "Cơ cấu chặn hành trình chống sập cửa đột ngột gây nguy hiểm",
@@ -453,6 +509,8 @@ const noiDungChiTietTheoSlug = {
         title: "Ron Cao Su Chống Nước",
         badge: "Kín Khít Chống Thấm",
         summary: "Hệ thống rãnh thoát nước và gioăng cao su EPDM",
+        priceEstimate: "4 - 8 Triệu VNĐ",
+        priceNote: "Ron EPDM đôi + Máng thu nước âm quanh miệng",
         specs: [
           "Gioăng cao su đôi EPDM ngăn nước mưa và bụi bẩn xâm nhập",
           "Máng thu nước âm quanh miệng khung xả ra ngoài trời",
@@ -464,6 +522,8 @@ const noiDungChiTietTheoSlug = {
         title: "Hệ Thống Khóa An Toàn",
         badge: "Bảo Mật Cao",
         summary: "Khóa âm chống cạy phá hoặc khóa chốt an toàn 2 mặt",
+        priceEstimate: "3 - 7 Triệu VNĐ",
+        priceNote: "Khóa cơ âm giấu lỗ chống cắt + Tay gạt thoát hiểm",
         specs: [
           "Khóa cơ âm giấu lỗ chống cắt và cạy phá từ bên ngoài",
           "Tay gạt mở khẩn cấp từ bên trong khi cần thoát hiểm",
@@ -475,6 +535,8 @@ const noiDungChiTietTheoSlug = {
         title: "Kích Thước May Đo Hiện Trạng",
         badge: "Gia Công Theo Yêu Cầu",
         summary: "Đo đạc và sản xuất chuẩn theo kích thước ô chờ công trình",
+        priceEstimate: "Khảo sát thực tế",
+        priceNote: "Đo đạc hiện trạng chuẩn milimet, lắp đặt trong ngày",
         specs: [
           "Khảo sát đo đạc hiện trạng ô chờ chính xác đến từng milimet",
           "Chế tạo theo tải trọng yêu cầu (chở người, xe máy hoặc máy móc)",
@@ -486,6 +548,8 @@ const noiDungChiTietTheoSlug = {
         title: "Bảo Trì & Thay Thế Phụ Kiện",
         badge: "Dễ Dàng Bảo Dưỡng",
         summary: "Bản lề cối và phụ kiện tiêu chuẩn dễ thay thế",
+        priceEstimate: "Trọn gói bảo hành",
+        priceNote: "Bản lề cối chịu lực, bảo hành cơ khí dài hạn",
         specs: [
           "Bản lề cối chịu lực mạ kẽm hoặc inox tuổi thọ cao",
           "Ty đẩy thủy lực dễ dàng thay mới định kỳ sau nhiều năm sử dụng",
@@ -534,6 +598,8 @@ const noiDungChiTietTheoSlug = {
         title: "Động Cơ & Hộp Số Thang Cuốn",
         badge: "Vận Hành Bền Bỉ",
         summary: "Động cơ công suất lớn chịu tải dòng người liên tục",
+        priceEstimate: "180 - 350 Triệu VNĐ",
+        priceNote: "Hộp số bánh răng xoắn, vận hành 16-24h/ngày",
         specs: [
           "Hộp số bánh răng xoắn hiệu suất cao, vận hành liên tục 16-24h/ngày",
           "Phanh phụ trợ tự động kích hoạt khi có sự cố đứt xích hoặc trôi thang",
@@ -545,6 +611,8 @@ const noiDungChiTietTheoSlug = {
         title: "Hệ Xích Tải & Bậc Thang",
         badge: "Hợp Kim Nhôm Đúc",
         summary: "Xích tải con lăn kép và bậc thang hợp kim nhôm định hình",
+        priceEstimate: "140 - 280 Triệu VNĐ",
+        priceNote: "Bậc nhôm đúc nguyên khối, rãnh chống trượt",
         specs: [
           "Bậc thang nhôm đúc nguyên khối chịu lực cao, rãnh chống trượt sắc nét",
           "Viền chỉ vàng cảnh báo an toàn quanh 3 cạnh bậc thang",
@@ -556,6 +624,8 @@ const noiDungChiTietTheoSlug = {
         title: "Tay Vịnh & Lan Can Kính",
         badge: "Kính Cường Lực",
         summary: "Tay vịn cao su tổng hợp đồng bộ tốc độ và lan can kính 10mm",
+        priceEstimate: "95 - 180 Triệu VNĐ",
+        priceNote: "Lan can kính cường lực an toàn 10mm siêu trong",
         specs: [
           "Tay vịn chuyển động đồng bộ chính xác với tốc độ bậc thang",
           "Lan can kính cường lực an toàn trong suốt 10mm sang trọng",
@@ -567,6 +637,8 @@ const noiDungChiTietTheoSlug = {
         title: "Tủ Điều Khiển Vi Xử Lý",
         badge: "Cảm Biến Tự Động",
         summary: "Hệ thống vi xử lý giám sát an toàn toàn diện",
+        priceEstimate: "75 - 130 Triệu VNĐ",
+        priceNote: "Mắt thần quang học tự động đảo chiều & tiết kiệm điện",
         specs: [
           "Màn hình chẩn đoán lỗi hiển thị mã số hỗ trợ bảo trì nhanh",
           "Mắt thần cảm biến quang học phát hiện người bước vào để tăng tốc",
@@ -578,6 +650,8 @@ const noiDungChiTietTheoSlug = {
         title: "Hệ Thống An Toàn Đa Điểm",
         badge: "30+ Cảm Biến",
         summary: "Nút dừng khẩn cấp, cảm biến kẹp váy và chổi an toàn",
+        priceEstimate: "45 - 85 Triệu VNĐ",
+        priceNote: "Chổi an toàn skirt brush, nút dừng khẩn cấp 2 đầu",
         specs: [
           "Chổi an toàn skirt brush chống kẹp giày dép vào khe hông",
           "Nút dừng khẩn cấp (Emergency Stop) bố trí ở cả 2 đầu thang",
@@ -589,6 +663,8 @@ const noiDungChiTietTheoSlug = {
         title: "Kết Cấu Giàn Thép Truss",
         badge: "Thép Chịu Lực Cao",
         summary: "Giàn thép kết cấu tam giác chịu lực võng cực nhỏ",
+        priceEstimate: "Khảo sát khẩu độ",
+        priceNote: "Giàn thép mạ kẽm sơn chống gỉ, tuổi thọ trên 30 năm",
         specs: [
           "Giàn thép mạ kẽm sơn chống gỉ tuổi thọ trên 30 năm",
           "Gối đỡ giảm chấn cách âm tiếp xúc với dầm bê tông sàn",
@@ -834,40 +910,60 @@ function ChiTietDuAn() {
           </div>
 
           {/* =====================================================================
-              1. CẤU HÌNH THIẾT BỊ & BỘ PHẬN CỐT LÕI (Loại thang máy này cần gì?)
-              Bento Grid 6 thẻ: Động cơ/Máy kéo, Cáp kéo, Cabin, Tủ điện, An toàn, Hố thang
+              1. BẢNG THIẾT BỊ CỐT LÕI TỪNG DÒNG (LINE-BY-LINE) KÈM GIÁ TIỀN MINH BẠCH
              ===================================================================== */}
           {noiDungChiTiet.cauHinhThietBi && (
             <div className="project-equip-section" data-aos="fade-up">
               <div className="project-equip-heading">
-                <span className="section-eyebrow">CẤU HÌNH KỸ THUẬT CỐT LÕI</span>
-                <h2>Dòng thang này cần trang bị những thiết bị gì?</h2>
+                <span className="section-eyebrow">CẤU HÌNH THIẾT BỊ &amp; BÁO GIÁ VẬT TƯ</span>
+                <h2>Dòng thang này cần những thiết bị gì &amp; Giá dự toán từng mục?</h2>
                 <p>
-                  Hà Hồng Elevator tuyển chọn các bộ phận cơ khí và điện tử chuẩn quốc tế, đảm bảo vận hành êm ái, bền bỉ và an toàn tuyệt đối cho người sử dụng.
+                  Hà Hồng Elevator công khai minh bạch danh mục thiết bị chính hãng và khoảng chi phí từng bộ phận để Quý khách dễ dàng dự toán ngân sách.
                 </p>
               </div>
 
-              <div className="project-equip-grid">
+              <div className="project-equip-list-wrap">
                 {noiDungChiTiet.cauHinhThietBi.map((item) => (
-                  <article className="project-equip-card" key={item.title}>
-                    <div className="equip-card-top">
-                      <div className="equip-card-icon">
+                  <article className="project-equip-row" key={item.title}>
+                    <div className="equip-row-left">
+                      <div className="equip-row-icon">
                         <i className={`bi ${item.icon}`}></i>
                       </div>
-                      <div className="equip-card-meta">
+                      <div className="equip-row-meta">
                         <h3>{item.title}</h3>
-                        <span className="equip-card-badge">{item.badge}</span>
+                        <span className="equip-row-badge">{item.badge}</span>
                       </div>
                     </div>
-                    <div className="equip-card-summary">{item.summary}</div>
-                    <ul className="equip-card-specs">
-                      {item.specs.map((spec, sIdx) => (
-                        <li key={sIdx}>
-                          <i className="bi bi-check2-circle"></i>
-                          <span>{spec}</span>
-                        </li>
-                      ))}
-                    </ul>
+
+                    <div className="equip-row-middle">
+                      <h4 className="equip-row-summary">{item.summary}</h4>
+                      <ul className="equip-row-specs">
+                        {item.specs.map((spec, sIdx) => (
+                          <li key={sIdx}>
+                            <i className="bi bi-check2-circle"></i>
+                            <span>{spec}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <div className="equip-row-right">
+                      <div className="equip-row-price-box">
+                        <span className="equip-row-price-label">Giá dự toán:</span>
+                        <span className="equip-row-price-val">{item.priceEstimate}</span>
+                        <span className="equip-row-price-note">{item.priceNote}</span>
+                      </div>
+                      {item.isCabin && (
+                        <Link
+                          to={`/thiet-ke-cabin?type=${noiDungChiTiet.studioType || "homelift-kinh"}`}
+                          className="btn-row-cabin-2d"
+                          title="Mở phối màu Cabin 2D trực tiếp"
+                        >
+                          <i className="bi bi-palette2"></i>
+                          <span>Xem Mẫu Cabin 2D</span>
+                        </Link>
+                      )}
+                    </div>
                   </article>
                 ))}
               </div>
