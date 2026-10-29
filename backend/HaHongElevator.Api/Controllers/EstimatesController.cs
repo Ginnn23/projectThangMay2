@@ -201,7 +201,6 @@ public class EstimatesController : ControllerBase
     [HttpPatch("{id:int}/status")]
     [HttpPatch("admin/{id:int}/status")]
     [HttpPatch("/api/admin/estimates/{id:int}/status")]
-    [HttpPatch("/api/estimates/{id:int}/status")]
     [Authorize(Roles = "Admin")]
     public async Task<ActionResult<EstimateResponse>> UpdateEstimateStatus(
         int id,
@@ -236,7 +235,6 @@ public class EstimatesController : ControllerBase
     [HttpDelete("{id:int}")]
     [HttpDelete("admin/{id:int}")]
     [HttpDelete("/api/admin/estimates/{id:int}")]
-    [HttpDelete("/api/estimates/{id:int}")]
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> DeleteEstimate(int id, CancellationToken cancellationToken)
     {
@@ -258,7 +256,6 @@ public class EstimatesController : ControllerBase
     [HttpPost("admin/{id:int}/resend-email")]
     [HttpPost("{id:int}/resend-email")]
     [HttpPost("/api/admin/estimates/{id:int}/resend-email")]
-    [HttpPost("/api/estimates/{id:int}/resend-email")]
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> ResendQuotationEmail(int id, CancellationToken cancellationToken)
     {

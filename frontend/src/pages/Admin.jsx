@@ -1884,12 +1884,14 @@ function Admin() {
       <div className="admin-shell">
         <AdminToolbar activeTab={activeTab} onChangeTab={doiTab} user={user} onLogout={dangXuat} />
 
-        <div className="admin-summary-grid">
-          <article><span>Liên hệ</span><strong>{thongKe.contacts}</strong></article>
-          <article><span>Khách bảo trì</span><strong>{thongKe.maintenance}</strong></article>
-          <article><span>Dịch vụ đang hiện</span><strong>{thongKe.services}</strong></article>
-          <article><span>Dự án</span><strong>{thongKe.projects}</strong></article>
-        </div>
+        {activeTab !== "revenue" && (
+          <div className="admin-summary-grid">
+            <article><span>Liên hệ</span><strong>{thongKe.contacts}</strong></article>
+            <article><span>Khách bảo trì</span><strong>{thongKe.maintenance}</strong></article>
+            <article><span>Dịch vụ đang hiện</span><strong>{thongKe.services}</strong></article>
+            <article><span>Dự án</span><strong>{thongKe.projects}</strong></article>
+          </div>
+        )}
 
         {activeTab === "contacts" && (
           <LienHeAdmin
@@ -1978,16 +1980,56 @@ function Admin() {
   );
 }
 
-/* ===================== DOANH THU ADMIN ===================== */
+/* ===================== DOANH THU ADMIN - EXECUTIVE DASHBOARD ===================== */
 function DoanhThuAdmin({ onShowToast }) {
   const [estimates, setEstimates] = useState([]);
   const [contacts, setContacts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [period, setPeriod] = useState("all"); // "all" | "year" | "month"
+  const [period, setPeriod] = useState("all"); // "all" | "year" | "quarter" | "month"
+  const [searchTerm, setSearchTerm] = useState("");
+  const [tableStatus, setTableStatus] = useState("all");
+  const [hoveredMonth, setHoveredMonth] = useState(null);
 
   const formatVND = (val) =>
-    new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(val);
+    new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(val || 0);
+
+  const formatShortVND = (val) => {
+    if (!val || val === 0) return "0 ₫";
+    if (val >= 1000000000) return (val / 1000000000).toFixed(2) + " Tỷ";
+    if (val >= 1000000) return (val / 1000000).toFixed(0) + " Tr";
+    return formatVND(val);
+  };
+
+  const mapElevatorTypeName = (type) => {
+    switch (type) {
+      case "homelift-kinh":
+        return "Homelift Kính Panorama";
+      case "inox-guong-vang":
+        return "Inox Gương Vàng Luxury";
+      case "inox-tieu-chuan":
+        return "Inox 304 Tiêu Chuẩn";
+      default:
+        return type || "Thang Máy Tiêu Chuẩn";
+    }
+  };
+
+  const getStatusInfo = (status) => {
+    switch (status) {
+      case "DealClosed":
+        return { label: "Chốt deal ✓", class: "status-dealclosed", dotColor: "#15803d" };
+      case "SurveyScheduled":
+        return { label: "Lên lịch khảo sát", class: "status-surveyscheduled", dotColor: "#7e22ce" };
+      case "Contacted":
+        return { label: "Đã liên hệ tư vấn", class: "status-contacted", dotColor: "#b45309" };
+      case "New":
+        return { label: "Mới gửi dự toán", class: "status-new", dotColor: "#1d4ed8" };
+      case "Cancelled":
+        return { label: "Đã huỷ", class: "status-cancelled", dotColor: "#b91c1c" };
+      default:
+        return { label: status, class: "status-new", dotColor: "#64748b" };
+    }
+  };
 
   const fetchData = async () => {
     setLoading(true);
@@ -2025,119 +2067,236 @@ function DoanhThuAdmin({ onShowToast }) {
 
   // Filter by period
   const now = new Date();
+  const currentQuarter = Math.floor(now.getMonth() / 3);
+
   const filteredEstimates = estimates.filter((e) => {
     if (period === "all") return true;
     const d = new Date(e.createdAt);
     if (period === "year") return d.getFullYear() === now.getFullYear();
-    if (period === "month") return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
+    if (period === "quarter") {
+      return d.getFullYear() === now.getFullYear() && Math.floor(d.getMonth() / 3) === currentQuarter;
+    }
+    if (period === "month") {
+      return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
+    }
     return true;
   });
 
-  // KPIs
-  const totalLeads = filteredEstimates.length + contacts.filter((c) => {
+  const filteredContacts = contacts.filter((c) => {
     if (period === "all") return true;
     const d = new Date(c.createdAt);
     if (period === "year") return d.getFullYear() === now.getFullYear();
-    if (period === "month") return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
+    if (period === "quarter") {
+      return d.getFullYear() === now.getFullYear() && Math.floor(d.getMonth() / 3) === currentQuarter;
+    }
+    if (period === "month") {
+      return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
+    }
     return true;
-  }).length;
+  });
 
+  // KPIs Calculations
   const dealClosed = filteredEstimates.filter((e) => e.status === "DealClosed");
   const totalRevenue = dealClosed.reduce((sum, e) => sum + ((e.estimatedPriceMin + e.estimatedPriceMax) / 2), 0);
   const closedRate = filteredEstimates.length > 0 ? ((dealClosed.length / filteredEstimates.length) * 100).toFixed(1) : 0;
+  
+  const pipelineEstimates = filteredEstimates.filter((e) => e.status !== "DealClosed" && e.status !== "Cancelled");
+  const pipelineValue = pipelineEstimates.reduce((sum, e) => sum + ((e.estimatedPriceMin + e.estimatedPriceMax) / 2), 0);
+  
+  const totalLeads = filteredEstimates.length + filteredContacts.length;
+  const avgDealValue = dealClosed.length > 0 ? totalRevenue / dealClosed.length : 0;
 
-  const today = new Date();
-  const newToday = estimates.filter((e) => {
-    const d = new Date(e.createdAt);
-    return d.getDate() === today.getDate() && d.getMonth() === today.getMonth() && d.getFullYear() === today.getFullYear();
-  }).length;
-
-  const pipelineValue = filteredEstimates
-    .filter((e) => e.status !== "DealClosed" && e.status !== "Cancelled")
-    .reduce((sum, e) => sum + ((e.estimatedPriceMin + e.estimatedPriceMax) / 2), 0);
-
-  // Monthly revenue chart data (last 12 months)
+  // Monthly Chart Data (Last 6 or 12 months)
   const monthlyData = (() => {
-    const map = {};
-    for (let i = 11; i >= 0; i--) {
+    const months = [];
+    for (let i = 5; i >= 0; i--) {
       const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
       const key = `${d.getMonth() + 1}/${d.getFullYear()}`;
-      map[key] = { label: `T${d.getMonth() + 1}`, value: 0, count: 0 };
+      months.push({
+        key,
+        label: `Tháng ${d.getMonth() + 1}`,
+        shortLabel: `T${d.getMonth() + 1}`,
+        actual: 0,
+        pipeline: 0,
+        count: 0
+      });
     }
     estimates.forEach((e) => {
-      if (e.status !== "DealClosed") return;
       const d = new Date(e.createdAt);
       const key = `${d.getMonth() + 1}/${d.getFullYear()}`;
-      if (map[key]) {
-        map[key].value += (e.estimatedPriceMin + e.estimatedPriceMax) / 2;
-        map[key].count += 1;
+      const item = months.find((m) => m.key === key);
+      if (item) {
+        const val = (e.estimatedPriceMin + e.estimatedPriceMax) / 2;
+        if (e.status === "DealClosed") {
+          item.actual += val;
+          item.count += 1;
+        } else if (e.status !== "Cancelled") {
+          item.pipeline += val;
+        }
       }
     });
-    return Object.values(map);
+    return months;
   })();
 
-  const maxMonthly = Math.max(...monthlyData.map((m) => m.value), 1);
+  const maxChartVal = Math.max(
+    ...monthlyData.map((m) => Math.max(m.actual, m.pipeline)),
+    100000000
+  );
 
-  // Funnel by status
-  const statusOrder = ["New", "Contacted", "SurveyScheduled", "DealClosed", "Cancelled"];
-  const statusLabel = {
-    New: "Mới",
-    Contacted: "Đã liên hệ",
-    SurveyScheduled: "Lên lịch khảo sát",
-    DealClosed: "Chốt deal ✓",
-    Cancelled: "Đã huỷ",
-  };
-  const statusColor = {
-    New: "#4a9eff",
-    Contacted: "#f0a500",
-    SurveyScheduled: "#9b59b6",
-    DealClosed: "#27ae60",
-    Cancelled: "#e74c3c",
-  };
-  const funnelData = statusOrder.map((s) => ({
-    status: s,
-    label: statusLabel[s],
-    count: filteredEstimates.filter((e) => e.status === s).length,
-    color: statusColor[s],
-  }));
-  const maxFunnel = Math.max(...funnelData.map((f) => f.count), 1);
-
-  // Revenue by elevator type
+  // Elevator Type Distribution
   const typeMap = {};
-  dealClosed.forEach((e) => {
-    const t = e.elevatorType || "Khác";
-    if (!typeMap[t]) typeMap[t] = 0;
-    typeMap[t] += (e.estimatedPriceMin + e.estimatedPriceMax) / 2;
+  filteredEstimates.forEach((e) => {
+    const rawType = e.elevatorType || "homelift-kinh";
+    const name = mapElevatorTypeName(rawType);
+    if (!typeMap[name]) {
+      typeMap[name] = { name, value: 0, count: 0, rawType };
+    }
+    const val = (e.estimatedPriceMin + e.estimatedPriceMax) / 2;
+    typeMap[name].value += val;
+    typeMap[name].count += 1;
   });
-  const typeData = Object.entries(typeMap).sort((a, b) => b[1] - a[1]);
-  const maxType = Math.max(...typeData.map((t) => t[1]), 1);
 
-  // Recent deal closed
-  const recentDeals = [...dealClosed]
-    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-    .slice(0, 10);
+  const typeList = Object.values(typeMap).sort((a, b) => b.value - a.value);
+  const totalTypeVal = typeList.reduce((acc, t) => acc + t.value, 0) || 1;
 
-  if (loading) return <div className="admin-loading"><i className="bi bi-arrow-repeat" style={{ fontSize: 32, animation: "spin 1s linear infinite" }}></i><p>Đang tải dữ liệu doanh thu...</p></div>;
+  const typeColors = [
+    "#0EA5E9", // Sky Blue for Homelift
+    "#D9A441", // Luxury Gold for Inox Vàng
+    "#10B981", // Emerald Green for Inox 304
+    "#8B5CF6", // Purple for others
+    "#F59E0B"  // Amber
+  ];
+
+  // Donut SVG geometry (Radius 65, Circumference = 2 * PI * 65 = 408.4)
+  const donutRadius = 65;
+  const donutCircumference = 2 * Math.PI * donutRadius;
+  let accumulatedOffset = 0;
+  const donutSegments = typeList.map((t, idx) => {
+    const percentage = t.value / totalTypeVal;
+    const strokeDash = percentage * donutCircumference;
+    const offset = accumulatedOffset;
+    accumulatedOffset -= strokeDash;
+    return {
+      ...t,
+      color: typeColors[idx % typeColors.length],
+      strokeDash,
+      offset,
+      percentage: Math.round(percentage * 100)
+    };
+  });
+
+  // Funnel Data
+  const funnelStages = [
+    { key: "New", name: "Dự toán mới", color: "#3B82F6" },
+    { key: "Contacted", name: "Đã liên hệ tư vấn", color: "#F59E0B" },
+    { key: "SurveyScheduled", name: "Lên lịch khảo sát", color: "#8B5CF6" },
+    { key: "DealClosed", name: "Hợp đồng đã chốt", color: "#10B981" },
+    { key: "Cancelled", name: "Đã hủy / Tạm dừng", color: "#EF4444" }
+  ];
+
+  const funnelCounts = funnelStages.map((stage, idx) => {
+    const count = filteredEstimates.filter((e) => e.status === stage.key).length;
+    const total = filteredEstimates.length || 1;
+    const pct = Math.round((count / total) * 100);
+    return { ...stage, count, pct, step: idx + 1 };
+  });
+
+  // Filtered Table Deals
+  const tableData = filteredEstimates
+    .filter((e) => {
+      if (tableStatus !== "all" && e.status !== tableStatus) return false;
+      if (!searchTerm.trim()) return true;
+      const term = searchTerm.toLowerCase();
+      return (
+        (e.customerName || "").toLowerCase().includes(term) ||
+        (e.phoneNumber || "").toLowerCase().includes(term) ||
+        (e.address || "").toLowerCase().includes(term) ||
+        (mapElevatorTypeName(e.elevatorType) || "").toLowerCase().includes(term)
+      );
+    })
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+  // Export CSV
+  const handleExportCSV = () => {
+    if (estimates.length === 0) {
+      onShowToast?.("Chưa có dữ liệu dự toán để xuất.", "warning");
+      return;
+    }
+    const headers = [
+      "Mã ID",
+      "Khách Hàng",
+      "Số Điện Thoại",
+      "Email",
+      "Địa Chỉ",
+      "Loại Thang Máy",
+      "Tải Trọng (kg)",
+      "Số Tầng",
+      "Giá Dự Toán Min (VND)",
+      "Giá Dự Toán Max (VND)",
+      "Trạng Thái",
+      "Ngày Tạo",
+      "Ghi Chú"
+    ];
+    const rows = estimates.map((e) => [
+      e.id,
+      `"${(e.customerName || "").replace(/"/g, '""')}"`,
+      `"${e.phoneNumber || ""}"`,
+      `"${e.email || ""}"`,
+      `"${(e.address || "").replace(/"/g, '""')}"`,
+      `"${mapElevatorTypeName(e.elevatorType)}"`,
+      e.capacityKg || "",
+      e.stops || "",
+      e.estimatedPriceMin || 0,
+      e.estimatedPriceMax || 0,
+      `"${getStatusInfo(e.status).label}"`,
+      `"${new Date(e.createdAt).toLocaleDateString("vi-VN")}"`,
+      `"${(e.adminNotes || "").replace(/"/g, '""')}"`
+    ]);
+    const csvContent = "\uFEFF" + [headers.join(","), ...rows.map((r) => r.join(","))].join("\r\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", `Bao_Cao_Doanh_Thu_Ha_Hong_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    onShowToast?.("Đã xuất file báo cáo Excel (CSV) thành công!", "success");
+  };
+
+  if (loading) {
+    return (
+      <div className="admin-loading" style={{ minHeight: "360px" }}>
+        <i className="bi bi-arrow-repeat" style={{ fontSize: 36, animation: "spin 1s linear infinite", color: "#D9A441" }}></i>
+        <p style={{ fontWeight: 600, color: "#0B1F3A", marginTop: 12 }}>Đang kết nối trung tâm điều hành doanh thu...</p>
+      </div>
+    );
+  }
+
   if (error) {
     return (
-      <div className="admin-card" style={{ color: "#e74c3c", padding: 32, textAlign: "center" }}>
-        <p><i className="bi bi-exclamation-triangle" style={{ fontSize: 32 }}></i></p>
-        <p style={{ fontWeight: 600, fontSize: "1.05rem" }}>{error}</p>
+      <div className="admin-card" style={{ color: "#e74c3c", padding: 40, textAlign: "center", borderRadius: 16 }}>
+        <p><i className="bi bi-exclamation-octagon-fill" style={{ fontSize: 36, color: "#e74c3c" }}></i></p>
+        <p style={{ fontWeight: 700, fontSize: "1.1rem", margin: "8px 0" }}>{error}</p>
+        <p style={{ color: "#64748b", fontSize: "0.85rem", maxWidth: 450, margin: "0 auto 16px auto" }}>
+          Hệ thống không thể tải báo cáo doanh thu từ máy chủ. Vui lòng bấm thử lại hoặc kiểm tra kết nối API.
+        </p>
         <button
           type="button"
           onClick={fetchData}
           style={{
-            marginTop: 12,
-            padding: "8px 24px",
+            padding: "9px 24px",
             background: "#0B1F3A",
             color: "#fff",
             border: "none",
-            borderRadius: 6,
+            borderRadius: 10,
             cursor: "pointer",
-            fontWeight: 600
+            fontWeight: 700,
+            fontSize: "0.88rem"
           }}
         >
-          <i className="bi bi-arrow-clockwise me-1"></i> Thử lại
+          <i className="bi bi-arrow-clockwise me-1"></i> Thử lại kết nối
         </button>
       </div>
     );
@@ -2145,174 +2304,567 @@ function DoanhThuAdmin({ onShowToast }) {
 
   return (
     <div className="doanh-thu-admin">
-      {/* Header + Period Filter */}
-      <div className="dt-header">
-        <h2><i className="bi bi-bar-chart-line"></i> Báo cáo Doanh thu</h2>
-        <div className="dt-period-filter">
-          {[["all", "Tất cả"], ["year", "Năm nay"], ["month", "Tháng này"]].map(([val, lbl]) => (
-            <button
-              key={val}
-              className={period === val ? "active" : ""}
-              onClick={() => setPeriod(val)}
-              type="button"
-            >{lbl}</button>
-          ))}
-          <button
-            type="button"
-            className="dt-period-filter-btn"
-            onClick={fetchData}
-            title="Tải lại dữ liệu"
-            style={{
-              padding: "6px 14px",
-              borderRadius: "20px",
-              border: "2px solid #0B1F3A",
-              background: "#0B1F3A",
-              color: "#fff",
-              cursor: "pointer",
-              fontWeight: 600,
-              fontSize: "0.85rem"
-            }}
-          >
-            <i className="bi bi-arrow-clockwise"></i> Làm mới
+      {/* 1. HERO COMMAND HEADER */}
+      <div className="dt-hero-header">
+        <div className="dt-hero-info">
+          <span className="dt-hero-badge">
+            <i className="bi bi-shield-check"></i> Trung Tâm Chỉ Huy Bán Hàng & Doanh Thu
+          </span>
+          <h2 className="dt-hero-title">
+            <i className="bi bi-bar-chart-fill" style={{ color: "#D9A441" }}></i>
+            Hiệu Suất Kinh Doanh & Dòng Tiền
+          </h2>
+          <p className="dt-hero-subtitle">
+            Báo cáo tổng hợp số liệu doanh thu đã ký hợp đồng, tiềm năng pipeline và tỷ lệ chuyển đổi khách hàng Thang Máy Hà Hồng.
+          </p>
+        </div>
+
+        <div className="dt-hero-actions">
+          {/* Segmented Filter */}
+          <div className="dt-period-segmented">
+            {[
+              ["all", "Toàn Bộ"],
+              ["year", "Năm 2026"],
+              ["quarter", `Quý ${currentQuarter + 1}`],
+              ["month", "Tháng Này"]
+            ].map(([val, lbl]) => (
+              <button
+                key={val}
+                className={period === val ? "active" : ""}
+                onClick={() => setPeriod(val)}
+                type="button"
+              >
+                {lbl}
+              </button>
+            ))}
+          </div>
+
+          {/* Action Buttons */}
+          <button type="button" className="dt-action-btn" onClick={handleExportCSV} title="Xuất dữ liệu Excel">
+            <i className="bi bi-file-earmark-excel"></i> Xuất Excel
+          </button>
+          <button type="button" className="dt-action-btn" onClick={() => window.print()} title="In báo cáo">
+            <i className="bi bi-printer"></i> In
+          </button>
+          <button type="button" className="dt-action-btn btn-primary-action" onClick={fetchData} title="Làm mới số liệu">
+            <i className="bi bi-arrow-clockwise"></i> Làm Mới
           </button>
         </div>
       </div>
 
-      {/* KPI Cards */}
-      <div className="dt-kpi-grid">
-        <div className="dt-kpi-card dt-kpi-blue">
-          <i className="bi bi-people-fill"></i>
-          <div>
-            <span>Tổng leads</span>
-            <strong>{totalLeads.toLocaleString("vi-VN")}</strong>
+      {/* 2. EXECUTIVE METRIC KPI CARDS */}
+      <div className="dt-metrics-grid">
+        {/* Card 1: Doanh thu chốt */}
+        <div className="dt-metric-card card-emerald">
+          <div className="dt-metric-top">
+            <div className="dt-metric-icon-wrap icon-emerald">
+              <i className="bi bi-cash-coin"></i>
+            </div>
+            <span className="dt-metric-badge badge-emerald">
+              <i className="bi bi-check-circle-fill"></i> Đã Chốt
+            </span>
+          </div>
+          <div className="dt-metric-body">
+            <span className="dt-metric-label">Doanh Thu Ký Kết</span>
+            <strong className="dt-metric-value" style={{ color: "#15803d" }}>
+              {formatShortVND(totalRevenue)}
+            </strong>
+            <p className="dt-metric-subtext">
+              <i className="bi bi-check2"></i> {dealClosed.length} hợp đồng chốt thành công
+            </p>
           </div>
         </div>
-        <div className="dt-kpi-card dt-kpi-green">
-          <i className="bi bi-cash-stack"></i>
-          <div>
-            <span>Doanh thu đã chốt</span>
-            <strong>{formatVND(totalRevenue)}</strong>
+
+        {/* Card 2: Pipeline */}
+        <div className="dt-metric-card card-sapphire">
+          <div className="dt-metric-top">
+            <div className="dt-metric-icon-wrap icon-sapphire">
+              <i className="bi bi-graph-up-arrow"></i>
+            </div>
+            <span className="dt-metric-badge badge-sapphire">
+              <i className="bi bi-clock-history"></i> Pipeline
+            </span>
+          </div>
+          <div className="dt-metric-body">
+            <span className="dt-metric-label">Dòng Tiền Tiềm Năng</span>
+            <strong className="dt-metric-value" style={{ color: "#1d4ed8" }}>
+              {formatShortVND(pipelineValue)}
+            </strong>
+            <p className="dt-metric-subtext">
+              <i className="bi bi-hourglass-split"></i> {pipelineEstimates.length} cơ hội đang theo đuổi
+            </p>
           </div>
         </div>
-        <div className="dt-kpi-card dt-kpi-gold">
-          <i className="bi bi-trophy-fill"></i>
-          <div>
-            <span>Tỷ lệ chốt deal</span>
-            <strong>{closedRate}%</strong>
+
+        {/* Card 3: Win Rate */}
+        <div className="dt-metric-card card-gold">
+          <div className="dt-metric-top">
+            <div className="dt-metric-icon-wrap icon-gold">
+              <i className="bi bi-trophy-fill"></i>
+            </div>
+            <span className="dt-metric-badge badge-gold">
+              <i className="bi bi-stars"></i> Hiệu Quả
+            </span>
+          </div>
+          <div className="dt-metric-body">
+            <span className="dt-metric-label">Tỷ Lệ Chốt Hợp Đồng</span>
+            <strong className="dt-metric-value" style={{ color: "#b45309" }}>
+              {closedRate}%
+            </strong>
+            <p className="dt-metric-subtext">
+              <i className="bi bi-percent"></i> {dealClosed.length}/{filteredEstimates.length || 1} dự toán chuyển đổi
+            </p>
           </div>
         </div>
-        <div className="dt-kpi-card dt-kpi-purple">
-          <i className="bi bi-funnel-fill"></i>
-          <div>
-            <span>Pipeline ước tính</span>
-            <strong>{formatVND(pipelineValue)}</strong>
+
+        {/* Card 4: Tổng Leads */}
+        <div className="dt-metric-card card-purple">
+          <div className="dt-metric-top">
+            <div className="dt-metric-icon-wrap icon-purple">
+              <i className="bi bi-people-fill"></i>
+            </div>
+            <span className="dt-metric-badge badge-purple">
+              <i className="bi bi-funnel"></i> Nguồn Khách
+            </span>
+          </div>
+          <div className="dt-metric-body">
+            <span className="dt-metric-label">Tổng Khách Quan Tâm</span>
+            <strong className="dt-metric-value" style={{ color: "#7e22ce" }}>
+              {totalLeads} Leads
+            </strong>
+            <p className="dt-metric-subtext">
+              <i className="bi bi-chat-left-dots"></i> {filteredEstimates.length} báo giá + {filteredContacts.length} liên hệ
+            </p>
           </div>
         </div>
-        <div className="dt-kpi-card dt-kpi-navy">
-          <i className="bi bi-plus-circle-fill"></i>
-          <div>
-            <span>Dự toán mới hôm nay</span>
-            <strong>{newToday}</strong>
+
+        {/* Card 5: Giá trị trung bình AOV */}
+        <div className="dt-metric-card card-teal">
+          <div className="dt-metric-top">
+            <div className="dt-metric-icon-wrap icon-teal">
+              <i className="bi bi-award-fill"></i>
+            </div>
+            <span className="dt-metric-badge badge-teal">
+              <i className="bi bi-gem"></i> Giá Trị Đơn
+            </span>
+          </div>
+          <div className="dt-metric-body">
+            <span className="dt-metric-label">Trung Bình / Thang</span>
+            <strong className="dt-metric-value" style={{ color: "#0f766e" }}>
+              {formatShortVND(avgDealValue)}
+            </strong>
+            <p className="dt-metric-subtext">
+              <i className="bi bi-building-check"></i> Phân khúc dân dụng & biệt thự
+            </p>
           </div>
         </div>
       </div>
 
-      {/* Monthly Revenue Bar Chart */}
-      <div className="admin-card dt-section">
-        <h3><i className="bi bi-bar-chart"></i> Doanh thu theo tháng (12 tháng gần nhất)</h3>
-        <div className="dt-bar-chart">
-          {monthlyData.map((m, i) => (
-            <div key={i} className="dt-bar-col">
-              <div className="dt-bar-tooltip">{formatVND(m.value)}<br />{m.count} deal</div>
-              <div
-                className="dt-bar"
-                style={{ height: `${Math.max((m.value / maxMonthly) * 180, m.value > 0 ? 4 : 0)}px`, background: m.value > 0 ? "linear-gradient(180deg, #4a9eff, #0B1F3A)" : "#e8edf3" }}
-              ></div>
-              <span className="dt-bar-label">{m.label}</span>
+      {/* 3. TWO COLUMN VISUALIZATION (Chart & Donut) */}
+      <div className="dt-charts-grid">
+        {/* Left: Monthly Revenue SVG Chart */}
+        <div className="dt-chart-card">
+          <div className="dt-chart-card-header">
+            <div className="dt-chart-title-group">
+              <h3>
+                <i className="bi bi-bar-chart-line" style={{ color: "#D9A441" }}></i>
+                Xu Hướng Doanh Số Ký Kết & Dự Phóng (6 Tháng Gần Nhất)
+              </h3>
+              <p>So sánh doanh thu thực tế đã ký hợp đồng so với dòng tiền dự án đang tư vấn</p>
+            </div>
+            <div className="dt-chart-legend">
+              <div className="dt-legend-item">
+                <span className="dt-legend-dot dot-actual"></span>
+                <span>Doanh Thu Thực Tế</span>
+              </div>
+              <div className="dt-legend-item">
+                <span className="dt-legend-dot dot-pipeline"></span>
+                <span>Tiềm Năng Pipeline</span>
+              </div>
+            </div>
+          </div>
+
+          {/* SVG Chart */}
+          <div className="dt-svg-chart-wrap">
+            <svg viewBox="0 0 600 240" className="dt-svg-chart" preserveAspectRatio="none">
+              {/* Gridlines */}
+              <line x1="40" y1="40" x2="580" y2="40" className="dt-grid-line" />
+              <line x1="40" y1="90" x2="580" y2="90" className="dt-grid-line" />
+              <line x1="40" y1="140" x2="580" y2="140" className="dt-grid-line" />
+              <line x1="40" y1="190" x2="580" y2="190" stroke="#cbd5e1" strokeWidth="1.5" />
+
+              {/* Y-axis labels */}
+              <text x="32" y="44" textAnchor="end" className="dt-axis-text">{formatShortVND(maxChartVal)}</text>
+              <text x="32" y="94" textAnchor="end" className="dt-axis-text">{formatShortVND(maxChartVal * 0.66)}</text>
+              <text x="32" y="144" textAnchor="end" className="dt-axis-text">{formatShortVND(maxChartVal * 0.33)}</text>
+              <text x="32" y="194" textAnchor="end" className="dt-axis-text">0</text>
+
+              {/* Dual Bars for Each Month */}
+              {monthlyData.map((m, idx) => {
+                const groupWidth = (580 - 60) / monthlyData.length;
+                const groupX = 60 + idx * groupWidth;
+                const barWidth = 24;
+
+                const actualHeight = Math.max((m.actual / maxChartVal) * 150, m.actual > 0 ? 8 : 2);
+                const actualY = 190 - actualHeight;
+
+                const pipelineHeight = Math.max((m.pipeline / maxChartVal) * 150, m.pipeline > 0 ? 8 : 2);
+                const pipelineY = 190 - pipelineHeight;
+
+                const isHovered = hoveredMonth === idx;
+
+                return (
+                  <g
+                    key={m.key}
+                    onMouseEnter={() => setHoveredMonth(idx)}
+                    onMouseLeave={() => setHoveredMonth(null)}
+                    style={{ cursor: "pointer" }}
+                  >
+                    {/* Actual Bar */}
+                    <rect
+                      x={groupX + groupWidth / 2 - barWidth - 2}
+                      y={actualY}
+                      width={barWidth}
+                      height={actualHeight}
+                      rx="4"
+                      fill={m.actual > 0 ? "url(#actualGradient)" : "#e2e8f0"}
+                      className="dt-bar-actual"
+                    />
+
+                    {/* Pipeline Bar */}
+                    <rect
+                      x={groupX + groupWidth / 2 + 2}
+                      y={pipelineY}
+                      width={barWidth}
+                      height={pipelineHeight}
+                      rx="4"
+                      fill={m.pipeline > 0 ? "url(#pipelineGradient)" : "#f1f5f9"}
+                      className="dt-bar-pipeline"
+                    />
+
+                    {/* X-axis Label */}
+                    <text
+                      x={groupX + groupWidth / 2}
+                      y="214"
+                      textAnchor="middle"
+                      className="dt-axis-text"
+                      fill={isHovered ? "#0B1F3A" : "#64748b"}
+                      fontWeight={isHovered ? "700" : "500"}
+                    >
+                      {m.label}
+                    </text>
+
+                    {/* Hover Tooltip Box */}
+                    {isHovered && (
+                      <g>
+                        <rect
+                          x={Math.min(Math.max(groupX + groupWidth / 2 - 70, 45), 450)}
+                          y="10"
+                          width="140"
+                          height="44"
+                          rx="8"
+                          fill="#0B1F3A"
+                          opacity="0.95"
+                        />
+                        <text
+                          x={Math.min(Math.max(groupX + groupWidth / 2, 115), 520)}
+                          y="26"
+                          textAnchor="middle"
+                          fill="#ffffff"
+                          fontSize="11"
+                          fontWeight="700"
+                        >
+                          {m.label}: {formatVND(m.actual)}
+                        </text>
+                        <text
+                          x={Math.min(Math.max(groupX + groupWidth / 2, 115), 520)}
+                          y="42"
+                          textAnchor="middle"
+                          fill="#F6D389"
+                          fontSize="10"
+                        >
+                          Pipeline: {formatVND(m.pipeline)} ({m.count} chốt)
+                        </text>
+                      </g>
+                    )}
+                  </g>
+                );
+              })}
+
+              {/* Gradients */}
+              <defs>
+                <linearGradient id="actualGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#10B981" />
+                  <stop offset="100%" stopColor="#047857" />
+                </linearGradient>
+                <linearGradient id="pipelineGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#FBBF24" />
+                  <stop offset="100%" stopColor="#D97706" />
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
+        </div>
+
+        {/* Right: Revenue by Elevator Type Donut Chart */}
+        <div className="dt-chart-card">
+          <div className="dt-chart-card-header">
+            <div className="dt-chart-title-group">
+              <h3>
+                <i className="bi bi-pie-chart-fill" style={{ color: "#D9A441" }}></i>
+                Cơ Cấu Doanh Số Theo Dòng Thang
+              </h3>
+              <p>Tỷ trọng doanh thu theo từng thiết kế thang máy</p>
+            </div>
+          </div>
+
+          <div className="dt-donut-layout">
+            {/* SVG Donut */}
+            <div className="dt-donut-svg-wrap">
+              <svg viewBox="0 0 180 180" className="dt-donut-svg">
+                <circle cx="90" cy="90" r={donutRadius} className="dt-donut-circle-bg" />
+                {donutSegments.map((seg, i) => (
+                  <circle
+                    key={i}
+                    cx="90"
+                    cy="90"
+                    r={donutRadius}
+                    className="dt-donut-segment"
+                    stroke={seg.color}
+                    strokeDasharray={`${seg.strokeDash} ${donutCircumference}`}
+                    strokeDashoffset={seg.offset}
+                  />
+                ))}
+              </svg>
+              <div className="dt-donut-center-info">
+                <span>Tổng Số</span>
+                <strong>{formatShortVND(totalTypeVal)}</strong>
+              </div>
+            </div>
+
+            {/* Donut Legend List */}
+            <div className="dt-donut-list">
+              {donutSegments.length === 0 ? (
+                <p style={{ color: "#94a3b8", fontSize: "0.82rem", fontStyle: "italic", textAlign: "center" }}>
+                  Chưa có dữ liệu dự toán
+                </p>
+              ) : (
+                donutSegments.map((seg, i) => (
+                  <div key={i} className="dt-donut-list-item">
+                    <div className="dt-donut-item-header">
+                      <span className="dt-donut-item-label">
+                        <span className="dt-donut-bullet" style={{ background: seg.color }}></span>
+                        {seg.name}
+                      </span>
+                      <span className="dt-donut-item-val">{seg.percentage}%</span>
+                    </div>
+                    <div className="dt-donut-progress-track">
+                      <div
+                        className="dt-donut-progress-bar"
+                        style={{ width: `${seg.percentage}%`, background: seg.color }}
+                      ></div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* 4. VISUAL SALES FUNNEL */}
+      <div className="dt-funnel-card">
+        <div className="dt-chart-title-group">
+          <h3 style={{ fontSize: "1.05rem", fontWeight: 700, color: "#0B1F3A", margin: 0, display: "flex", alignItems: "center", gap: 8 }}>
+            <i className="bi bi-funnel-fill" style={{ color: "#D9A441" }}></i>
+            Phễu Chuyển Đổi Kinh Doanh & Tỷ Lệ Giữ Chân Khách Hàng
+          </h3>
+          <p style={{ fontSize: "0.78rem", color: "#64748b", margin: "4px 0 0 0" }}>
+            Tiến trình chuyển đổi từ lúc khách gửi thông tin khảo sát đến khi ký hợp đồng thi công bàn giao
+          </p>
+        </div>
+
+        <div className="dt-funnel-stages-row">
+          {funnelCounts.map((stage) => (
+            <div key={stage.key} className="dt-funnel-step">
+              <div className="dt-funnel-step-header">
+                <span className="dt-funnel-step-num">{stage.step}</span>
+                <span className="dt-metric-badge" style={{ background: `${stage.color}20`, color: stage.color }}>
+                  {stage.pct}%
+                </span>
+              </div>
+              <span className="dt-funnel-step-name">{stage.name}</span>
+              <strong className="dt-funnel-step-count">{stage.count}</strong>
+              <div className="dt-funnel-bar-track">
+                <div
+                  className="dt-funnel-bar-fill"
+                  style={{ width: `${Math.max(stage.pct, 4)}%`, background: stage.color }}
+                ></div>
+              </div>
+              <div className="dt-funnel-step-meta">
+                <span>Trạng thái</span>
+                <strong style={{ color: stage.color }}>{stage.count} yêu cầu</strong>
+              </div>
             </div>
           ))}
         </div>
-        {dealClosed.length === 0 && <p className="dt-empty">Chưa có deal chốt nào trong dữ liệu.</p>}
       </div>
 
-      {/* Funnel + Type side by side */}
-      <div className="dt-two-col">
-        {/* Funnel */}
-        <div className="admin-card dt-section">
-          <h3><i className="bi bi-funnel"></i> Phễu chuyển đổi</h3>
-          <div className="dt-funnel">
-            {funnelData.map((f) => (
-              <div key={f.status} className="dt-funnel-row">
-                <span className="dt-funnel-label">{f.label}</span>
-                <div className="dt-funnel-bar-wrap">
-                  <div
-                    className="dt-funnel-bar"
-                    style={{ width: `${Math.max((f.count / maxFunnel) * 100, f.count > 0 ? 2 : 0)}%`, background: f.color }}
-                  ></div>
-                </div>
-                <span className="dt-funnel-count" style={{ color: f.color }}>{f.count}</span>
-              </div>
+      {/* 5. MODERN EXECUTIVE DEALS TABLE */}
+      <div className="dt-table-card">
+        <div className="dt-chart-card-header">
+          <div className="dt-chart-title-group">
+            <h3>
+              <i className="bi bi-journal-text" style={{ color: "#D9A441" }}></i>
+              Danh Sách Dự Toán & Hợp Đồng Bán Hàng
+            </h3>
+            <p>Toàn bộ danh sách khách hàng gửi yêu cầu dự toán, phân theo trạng thái và giá trị hợp đồng</p>
+          </div>
+        </div>
+
+        {/* Table Controls (Search & Status Pills) */}
+        <div className="dt-table-controls">
+          <div className="dt-search-box">
+            <i className="bi bi-search"></i>
+            <input
+              type="text"
+              placeholder="Tìm theo tên khách, SĐT, địa chỉ, loại thang..."
+              className="dt-search-input"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+
+          <div className="dt-status-filter-pills">
+            {[
+              ["all", "Tất Cả"],
+              ["DealClosed", "Đã Chốt Deal"],
+              ["SurveyScheduled", "Lên Lịch Khảo Sát"],
+              ["Contacted", "Đã Liên Hệ"],
+              ["New", "Mới"]
+            ].map(([val, lbl]) => (
+              <button
+                key={val}
+                type="button"
+                className={`dt-status-pill ${tableStatus === val ? "active" : ""}`}
+                onClick={() => setTableStatus(val)}
+              >
+                {lbl}
+              </button>
             ))}
           </div>
         </div>
 
-        {/* Revenue by type */}
-        <div className="admin-card dt-section">
-          <h3><i className="bi bi-pie-chart"></i> Doanh thu theo loại thang máy</h3>
-          {typeData.length === 0
-            ? <p className="dt-empty">Chưa có deal chốt.</p>
-            : <div className="dt-type-list">
-              {typeData.map(([type, val]) => (
-                <div key={type} className="dt-type-row">
-                  <span className="dt-type-name">{type}</span>
-                  <div className="dt-funnel-bar-wrap">
-                    <div className="dt-funnel-bar" style={{ width: `${(val / maxType) * 100}%`, background: "linear-gradient(90deg, #D9A441, #f0c060)" }}></div>
-                  </div>
-                  <span className="dt-type-val">{formatVND(val)}</span>
-                </div>
-              ))}
+        {/* Table Content */}
+        <div className="dt-table-responsive">
+          {tableData.length === 0 ? (
+            <div className="dt-empty-state">
+              <i className="bi bi-inbox"></i>
+              <p style={{ fontWeight: 600, color: "#475569" }}>Không tìm thấy dự toán nào phù hợp với bộ lọc hiện tại.</p>
+              <button
+                type="button"
+                className="dt-action-btn"
+                onClick={() => { setSearchTerm(""); setTableStatus("all"); }}
+                style={{ background: "#0B1F3A", color: "#fff" }}
+              >
+                Xóa Bộ Lọc
+              </button>
             </div>
-          }
-        </div>
-      </div>
-
-      {/* Recent deals */}
-      <div className="admin-card dt-section">
-        <h3><i className="bi bi-check2-circle"></i> Deal đã chốt gần đây</h3>
-        {recentDeals.length === 0
-          ? <p className="dt-empty">Chưa có deal nào được chốt.</p>
-          : <div className="dt-table-wrap">
-            <table className="dt-table">
+          ) : (
+            <table className="dt-modern-table">
               <thead>
                 <tr>
-                  <th>#</th>
-                  <th>Khách hàng</th>
-                  <th>Loại thang</th>
-                  <th>Tầng</th>
-                  <th>Doanh thu ước tính</th>
-                  <th>Ngày chốt</th>
+                  <th>Khách Hàng</th>
+                  <th>Dòng Thang Máy</th>
+                  <th>Thông Số</th>
+                  <th>Giá Dự Toán</th>
+                  <th>Trạng Thái</th>
+                  <th>Ngày Tạo</th>
+                  <th>Ghi Chú</th>
                 </tr>
               </thead>
               <tbody>
-                {recentDeals.map((e, i) => (
-                  <tr key={e.id}>
-                    <td>{i + 1}</td>
-                    <td>
-                      <strong>{e.customerName}</strong>
-                      <br /><small style={{ color: "#888" }}>{e.phoneNumber}</small>
-                    </td>
-                    <td>{e.elevatorType || "—"}</td>
-                    <td>{e.stops ? `${e.stops} tầng` : "—"}</td>
-                    <td style={{ fontWeight: 600, color: "#27ae60" }}>
-                      {formatVND((e.estimatedPriceMin + e.estimatedPriceMax) / 2)}
-                    </td>
-                    <td style={{ whiteSpace: "nowrap" }}>{dinhDangNgay(e.updatedAt || e.createdAt)}</td>
-                  </tr>
-                ))}
+                {tableData.map((e) => {
+                  const statusInfo = getStatusInfo(e.status);
+                  const initials = (e.customerName || "KH")
+                    .split(" ")
+                    .filter(Boolean)
+                    .slice(-2)
+                    .map((w) => w[0]?.toUpperCase())
+                    .join("");
+                  const midPrice = (e.estimatedPriceMin + e.estimatedPriceMax) / 2;
+
+                  return (
+                    <tr key={e.id}>
+                      {/* Customer Info */}
+                      <td>
+                        <div className="dt-customer-cell">
+                          <div className="dt-avatar-circle">{initials}</div>
+                          <div className="dt-customer-details">
+                            <span className="dt-customer-name">{e.customerName}</span>
+                            <span className="dt-customer-meta">
+                              <i className="bi bi-telephone-fill" style={{ fontSize: "10px" }}></i> {e.phoneNumber}
+                              {e.address ? ` • ${e.address}` : ""}
+                            </span>
+                          </div>
+                        </div>
+                      </td>
+
+                      {/* Elevator Type */}
+                      <td>
+                        <span style={{ fontWeight: 600, color: "#0B1F3A" }}>
+                          {mapElevatorTypeName(e.elevatorType)}
+                        </span>
+                        <br />
+                        <small style={{ color: "#64748b" }}>{e.motorBrand || "Động cơ tiêu chuẩn"}</small>
+                      </td>
+
+                      {/* Specs */}
+                      <td>
+                        <span style={{ fontWeight: 600 }}>{e.stops ? `${e.stops} tầng` : "—"}</span>
+                        <br />
+                        <small style={{ color: "#64748b" }}>{e.capacityKg ? `${e.capacityKg} kg` : "—"}</small>
+                      </td>
+
+                      {/* Estimated Price */}
+                      <td>
+                        <div className="dt-price-cell">{formatVND(midPrice)}</div>
+                        <small style={{ color: "#94a3b8", fontSize: "0.72rem" }}>
+                          {formatShortVND(e.estimatedPriceMin)} - {formatShortVND(e.estimatedPriceMax)}
+                        </small>
+                      </td>
+
+                      {/* Status */}
+                      <td>
+                        <span className={`dt-status-badge ${statusInfo.class}`}>
+                          <span
+                            style={{
+                              width: 6,
+                              height: 6,
+                              borderRadius: "50%",
+                              background: statusInfo.dotColor
+                            }}
+                          ></span>
+                          {statusInfo.label}
+                        </span>
+                      </td>
+
+                      {/* Date */}
+                      <td style={{ whiteSpace: "nowrap", color: "#64748b", fontSize: "0.78rem" }}>
+                        {dinhDangNgay(e.createdAt)}
+                      </td>
+
+                      {/* Admin Notes */}
+                      <td style={{ maxWidth: 200, color: "#475569", fontSize: "0.78rem" }}>
+                        {e.adminNotes || "—"}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
-          </div>
-        }
+          )}
+        </div>
       </div>
     </div>
   );
