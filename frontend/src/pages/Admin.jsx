@@ -301,37 +301,226 @@ function AdminLogin({ onLogin }) {
   );
 }
 
-function AdminToolbar({ activeTab, onChangeTab, user, onLogout }) {
+function ChangePasswordModal({ isOpen, onClose, onShowToast }) {
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showCurrent, setShowCurrent] = useState(false);
+  const [showNew, setShowNew] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  if (!isOpen) return null;
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+
+    if (!currentPassword) {
+      setError("Vui lòng nhập mật khẩu hiện tại.");
+      return;
+    }
+    if (!newPassword) {
+      setError("Vui lòng nhập mật khẩu mới.");
+      return;
+    }
+    if (newPassword.length < 6) {
+      setError("Mật khẩu mới phải có tối thiểu 6 ký tự để bảo đảm an toàn.");
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setError("Mật khẩu xác nhận không khớp với mật khẩu mới.");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const res = await apiClient.post("/auth/change-password", {
+        currentPassword,
+        newPassword
+      });
+      onShowToast?.(res?.data?.message || "Đã đổi mật khẩu quản trị thành công!", "success");
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+      onClose();
+    } catch (err) {
+      setError(layLoiApi(err) || "Không thể đổi mật khẩu. Vui lòng kiểm tra lại mật khẩu hiện tại.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="admin-modal-backdrop" onClick={onClose}>
+      <div className="admin-change-pwd-modal" onClick={(e) => e.stopPropagation()}>
+        <div className="admin-modal-header">
+          <div className="admin-modal-title">
+            <i className="bi bi-shield-lock-fill"></i>
+            <div>
+              <h3>Đổi Mật Khẩu Quản Trị</h3>
+              <p>Bảo vệ website, thay đổi mật khẩu mặc định 123</p>
+            </div>
+          </div>
+          <button type="button" className="admin-modal-close" onClick={onClose} title="Đóng">
+            <i className="bi bi-x-lg"></i>
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="admin-modal-body">
+          {error && (
+            <div className="admin-modal-alert">
+              <i className="bi bi-exclamation-triangle-fill"></i>
+              <span>{error}</span>
+            </div>
+          )}
+
+          <div className="admin-pwd-field">
+            <label>Mật khẩu hiện tại</label>
+            <div className="admin-pwd-input-wrap">
+              <input
+                type={showCurrent ? "text" : "password"}
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                placeholder="Nhập mật khẩu hiện tại (ví dụ: 123)"
+                autoComplete="current-password"
+                required
+              />
+              <button
+                type="button"
+                className="admin-pwd-toggle"
+                onClick={() => setShowCurrent(!showCurrent)}
+                tabIndex="-1"
+                title={showCurrent ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
+              >
+                <i className={`bi ${showCurrent ? "bi-eye-slash-fill" : "bi-eye-fill"}`}></i>
+              </button>
+            </div>
+          </div>
+
+          <div className="admin-pwd-field">
+            <label>Mật khẩu mới (tối thiểu 6 ký tự)</label>
+            <div className="admin-pwd-input-wrap">
+              <input
+                type={showNew ? "text" : "password"}
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="Nhập mật khẩu mới an toàn"
+                autoComplete="new-password"
+                required
+              />
+              <button
+                type="button"
+                className="admin-pwd-toggle"
+                onClick={() => setShowNew(!showNew)}
+                tabIndex="-1"
+                title={showNew ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
+              >
+                <i className={`bi ${showNew ? "bi-eye-slash-fill" : "bi-eye-fill"}`}></i>
+              </button>
+            </div>
+          </div>
+
+          <div className="admin-pwd-field">
+            <label>Xác nhận mật khẩu mới</label>
+            <div className="admin-pwd-input-wrap">
+              <input
+                type={showConfirm ? "text" : "password"}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Nhập lại mật khẩu mới"
+                autoComplete="new-password"
+                required
+              />
+              <button
+                type="button"
+                className="admin-pwd-toggle"
+                onClick={() => setShowConfirm(!showConfirm)}
+                tabIndex="-1"
+                title={showConfirm ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
+              >
+                <i className={`bi ${showConfirm ? "bi-eye-slash-fill" : "bi-eye-fill"}`}></i>
+              </button>
+            </div>
+          </div>
+
+          <div className="admin-modal-actions">
+            <button type="button" className="btn-cancel" onClick={onClose} disabled={loading}>
+              Hủy bỏ
+            </button>
+            <button type="submit" className="btn-submit" disabled={loading}>
+              {loading ? (
+                <>
+                  <i className="bi bi-arrow-repeat spin"></i> Đang lưu...
+                </>
+              ) : (
+                <>
+                  <i className="bi bi-check2-circle"></i> Lưu mật khẩu mới
+                </>
+              )}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+function AdminToolbar({ activeTab, onChangeTab, user, onLogout, onOpenChangePassword }) {
   const tabs = [
-    { key: "revenue", label: "Doanh thu", icon: "bi-bar-chart-line" },
-    { key: "contacts", label: "Liên hệ", icon: "bi-inbox" },
-    { key: "estimates", label: "Dự toán báo giá", icon: "bi-calculator" },
-    { key: "maintenance", label: "Bảo trì", icon: "bi-calendar-check" },
-    { key: "home", label: "Trang chủ", icon: "bi-house-gear" },
+    { key: "revenue", label: "Doanh thu", icon: "bi-bar-chart-fill" },
+    { key: "contacts", label: "Liên hệ", icon: "bi-inbox-fill" },
+    { key: "estimates", label: "Dự toán báo giá", icon: "bi-calculator-fill" },
+    { key: "maintenance", label: "Bảo trì", icon: "bi-calendar-check-fill" },
+    { key: "home", label: "Trang chủ", icon: "bi-house-gear-fill" },
     { key: "services", label: "Dịch vụ", icon: "bi-tools" },
-    { key: "projects", label: "Dự án", icon: "bi-buildings" },
+    { key: "projects", label: "Dự án", icon: "bi-buildings-fill" },
     { key: "ai", label: "Huấn luyện AI", icon: "bi-robot" },
   ];
 
   return (
-    <div className="admin-toolbar">
-      <div>
-        <span>Quản trị website</span>
-        <strong>{user?.fullName || user?.username || "Admin"}</strong>
+    <header className="admin-toolbar">
+      <div className="admin-toolbar-left">
+        <div className="admin-avatar-badge" title="Tài khoản quản trị">
+          <i className="bi bi-shield-check"></i>
+        </div>
+        <div className="admin-user-block">
+          <span className="admin-user-sub">Quản trị website</span>
+          <strong className="admin-user-name">{user?.fullName || user?.username || "Admin"}</strong>
+        </div>
+        <button
+          type="button"
+          className="admin-change-pwd-btn"
+          onClick={onOpenChangePassword}
+          title="Đổi mật khẩu tài khoản Admin"
+        >
+          <i className="bi bi-key-fill"></i>
+          <span>Đổi MK</span>
+        </button>
       </div>
-      <nav aria-label="Admin tabs">
+
+      <nav className="admin-toolbar-nav" aria-label="Admin tabs">
         {tabs.map((tab) => (
-          <button className={activeTab === tab.key ? "active" : ""} type="button" key={tab.key} onClick={() => onChangeTab(tab.key)}>
+          <button
+            key={tab.key}
+            type="button"
+            className={`admin-tab-btn ${activeTab === tab.key ? "active" : ""}`}
+            onClick={() => onChangeTab(tab.key)}
+          >
             <i className={`bi ${tab.icon}`}></i>
-            {tab.label}
+            <span>{tab.label}</span>
           </button>
         ))}
       </nav>
-      <button className="admin-logout-button" type="button" onClick={onLogout}>
-        <i className="bi bi-box-arrow-right"></i>
-        Đăng xuất
-      </button>
-    </div>
+
+      <div className="admin-toolbar-right">
+        <button className="admin-logout-button" type="button" onClick={onLogout} title="Đăng xuất khỏi hệ thống">
+          <i className="bi bi-box-arrow-right"></i>
+          <span>Đăng xuất</span>
+        </button>
+      </div>
+    </header>
   );
 }
 
@@ -1353,6 +1542,7 @@ function Admin() {
     }
   });
   const [activeTab, setActiveTab] = useState("revenue");
+  const [showChangePassword, setShowChangePassword] = useState(false);
   const [contacts, setContacts] = useState([]);
   const [maintenanceCustomers, setMaintenanceCustomers] = useState([]);
   const [services, setServices] = useState([]);
@@ -1881,8 +2071,19 @@ function Admin() {
     <main className="admin-page">
       <AdminToast toast={adminToast} onClose={() => setAdminToast(null)} />
       <AdminConfirmModal confirm={xacNhanAdmin} onClose={() => setXacNhanAdmin(null)} />
+      <ChangePasswordModal
+        isOpen={showChangePassword}
+        onClose={() => setShowChangePassword(false)}
+        onShowToast={hienThongBao}
+      />
       <div className="admin-shell">
-        <AdminToolbar activeTab={activeTab} onChangeTab={doiTab} user={user} onLogout={dangXuat} />
+        <AdminToolbar
+          activeTab={activeTab}
+          onChangeTab={doiTab}
+          user={user}
+          onLogout={dangXuat}
+          onOpenChangePassword={() => setShowChangePassword(true)}
+        />
 
         {activeTab !== "revenue" && (
           <div className="admin-summary-grid">

@@ -3391,60 +3391,357 @@ body.ai-chat-open .floating-contact {
 }
 
 .admin-toolbar {
-  padding: 18px;
-  display: grid;
-  grid-template-columns: minmax(180px, 260px) 1fr auto;
-  align-items: center;
-  gap: 18px;
-}
-
-.admin-toolbar span,
-.admin-summary-grid span,
-.admin-manage-card span {
-  display: block;
-  color: var(--muted);
-  font-size: 13px;
-  font-weight: 700;
-}
-
-.admin-toolbar strong {
-  color: var(--ink);
-  font-size: 20px;
-}
-
-.admin-toolbar nav {
+  position: sticky;
+  top: 14px;
+  z-index: 40;
   display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 18px;
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(217, 164, 65, 0.25);
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(11, 31, 58, 0.08), 0 2px 6px rgba(0, 0, 0, 0.03);
 }
 
-.admin-toolbar nav button,
-.admin-logout-button,
-.admin-secondary-button,
-.admin-card-actions button,
-.admin-icon-button {
-  min-height: 42px;
-  padding: 10px 14px;
+.admin-toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.admin-avatar-badge {
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+  background: linear-gradient(135deg, #0B1F3A 0%, #1565C0 100%);
+  color: #D9A441;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 17px;
+  box-shadow: 0 3px 8px rgba(11, 31, 58, 0.18);
+}
+
+.admin-user-block {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.admin-user-sub {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: #64748b;
+}
+
+.admin-user-name {
+  font-size: 14px;
+  font-weight: 800;
+  color: #0B1F3A;
+}
+
+.admin-change-pwd-btn {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  gap: 8px;
-  color: #263346;
-  background: #f5f8fb;
-  border: 1px solid var(--line);
+  gap: 4px;
+  padding: 5px 9px;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #92400e;
+  background: #fef3c7;
+  border: 1px solid #fde68a;
   border-radius: 6px;
-  font-weight: 800;
-  transition: color 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
 }
 
-.admin-toolbar nav button:hover,
-.admin-toolbar nav button.active,
-.admin-card-actions button:hover {
+.admin-change-pwd-btn:hover {
+  background: #fde047;
+  color: #78350f;
+  transform: translateY(-1px);
+}
+
+.admin-toolbar-nav {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  background: #f1f5f9;
+  padding: 3px 4px;
+  border-radius: 9px;
+  border: 1px solid #e2e8f0;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  flex-wrap: nowrap;
+}
+
+.admin-toolbar-nav::-webkit-scrollbar {
+  display: none;
+}
+
+.admin-tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 10px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #475569;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.admin-tab-btn i {
+  font-size: 13px;
+}
+
+.admin-tab-btn:hover {
+  background: rgba(255, 255, 255, 0.9);
+  color: #0B1F3A;
+}
+
+.admin-tab-btn.active {
+  background: #0B1F3A;
   color: #ffffff;
-  background: var(--blue);
-  border-color: var(--blue);
-  transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(11, 31, 58, 0.22);
+}
+
+.admin-tab-btn.active i {
+  color: #D9A441;
+}
+
+.admin-toolbar-right {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.admin-toolbar .admin-logout-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #dc2626;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.admin-toolbar .admin-logout-button:hover {
+  background: #dc2626;
+  color: #ffffff;
+  border-color: #dc2626;
+  transform: translateY(-1px);
+}
+
+/* ===================== CHANGE PASSWORD MODAL ===================== */
+.admin-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(11, 31, 58, 0.68);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  animation: fadeIn 0.2s ease;
+}
+
+.admin-change-pwd-modal {
+  width: 100%;
+  max-width: 440px;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 25px 60px rgba(11, 31, 58, 0.3);
+  border: 1px solid rgba(217, 164, 65, 0.35);
+  overflow: hidden;
+  animation: slideUp 0.25s ease;
+}
+
+.admin-modal-header {
+  padding: 18px 22px;
+  background: linear-gradient(135deg, #0B1F3A 0%, #17375E 100%);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.admin-modal-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.admin-modal-title i {
+  font-size: 26px;
+  color: #D9A441;
+}
+
+.admin-modal-title h3 {
+  font-size: 16px;
+  font-weight: 800;
+  margin: 0;
+  color: #ffffff;
+}
+
+.admin-modal-title p {
+  font-size: 12px;
+  color: #cbd5e1;
+  margin: 2px 0 0;
+}
+
+.admin-modal-close {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 4px;
+  line-height: 1;
+  border-radius: 6px;
+  transition: all 0.15s;
+}
+
+.admin-modal-close:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.admin-modal-body {
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.admin-modal-alert {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 8px;
+}
+
+.admin-pwd-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.admin-pwd-field label {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+}
+
+.admin-pwd-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.admin-pwd-input-wrap input {
+  width: 100%;
+  padding: 10px 42px 10px 14px;
+  font-size: 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.admin-pwd-input-wrap input:focus {
+  border-color: #1565C0;
+  box-shadow: 0 0 0 3px rgba(21, 101, 192, 0.15);
+}
+
+.admin-pwd-toggle {
+  position: absolute;
+  right: 10px;
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.admin-pwd-toggle:hover {
+  color: #475569;
+}
+
+.admin-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.admin-modal-actions .btn-cancel {
+  padding: 9px 16px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #64748b;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.admin-modal-actions .btn-cancel:hover {
+  background: #e2e8f0;
+  color: #1e293b;
+}
+
+.admin-modal-actions .btn-submit {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 18px;
+  font-size: 13px;
+  font-weight: 800;
+  color: #ffffff;
+  background: linear-gradient(135deg, #0B1F3A 0%, #1565C0 100%);
+  border: 1px solid #0B1F3A;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(11, 31, 58, 0.2);
+  transition: all 0.2s;
+}
+
+.admin-modal-actions .btn-submit:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(11, 31, 58, 0.3);
+}
+
+.admin-modal-actions .btn-submit:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
 }
 
 .admin-card-actions button.danger:hover {
@@ -4181,17 +4478,19 @@ body.ai-chat-open .floating-contact {
 }
 
 @media (max-width: 991px) {
-  .admin-toolbar,
-  .admin-section-heading {
-    grid-template-columns: 1fr;
-    align-items: stretch;
+  .admin-toolbar {
+    flex-wrap: wrap;
   }
 
-  .admin-toolbar nav {
+  .admin-toolbar-nav {
+    order: 3;
+    width: 100%;
     justify-content: flex-start;
   }
 
   .admin-section-heading {
+    grid-template-columns: 1fr;
+    align-items: stretch;
     flex-direction: column;
   }
 
@@ -4218,8 +4517,6 @@ body.ai-chat-open .floating-contact {
     grid-template-columns: 1fr;
   }
 
-  .admin-toolbar nav button,
-  .admin-logout-button,
   .admin-section-heading .btn,
   .admin-form-actions .btn,
   .admin-home-save {
