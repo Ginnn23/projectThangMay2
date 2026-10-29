@@ -602,7 +602,9 @@
 
 /* 2. Inox bản dẹp xước satin (Như Ảnh 2) */
 .handrail-flat-satin .handrail-bar,
-.side-handrail.handrail-flat-satin {
+.handrail-flat-inox .handrail-bar,
+.side-handrail.handrail-flat-satin,
+.side-handrail.handrail-flat-inox {
   background: linear-gradient(180deg, #ffffff 0%, #cbd5e1 45%, #64748b 100%);
   border-radius: 2px;
   height: 16px;

@@ -165,7 +165,6 @@ public class EstimatesController : ControllerBase
     /// </summary>
     [HttpGet("admin")]
     [HttpGet("/api/admin/estimates")]
-    [HttpGet("/api/estimates/admin")]
     [Authorize(Roles = "Admin")]
     public async Task<ActionResult<List<EstimateResponse>>> GetAdminEstimates(
         [FromQuery] string? status,
@@ -289,7 +288,6 @@ public class EstimatesController : ControllerBase
     [HttpGet("{id:int}/pdf")]
     [HttpGet("admin/{id:int}/pdf")]
     [HttpGet("/api/admin/estimates/{id:int}/pdf")]
-    [HttpGet("/api/estimates/{id:int}/pdf")]
     public async Task<IActionResult> DownloadEstimatePdf(int id, CancellationToken cancellationToken)
     {
         var estimate = await _dbContext.ElevatorEstimates

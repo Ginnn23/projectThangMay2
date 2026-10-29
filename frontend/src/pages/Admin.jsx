@@ -1352,7 +1352,7 @@ function Admin() {
       return null;
     }
   });
-  const [activeTab, setActiveTab] = useState("contacts");
+  const [activeTab, setActiveTab] = useState("revenue");
   const [contacts, setContacts] = useState([]);
   const [maintenanceCustomers, setMaintenanceCustomers] = useState([]);
   const [services, setServices] = useState([]);
@@ -1451,6 +1451,7 @@ function Admin() {
   const xuLyDangNhap = (data) => {
     setToken(data.token);
     setUser(data.user);
+    setActiveTab("revenue");
     taiLienHe();
   };
 
@@ -1988,23 +1989,37 @@ function DoanhThuAdmin({ onShowToast }) {
   const formatVND = (val) =>
     new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(val);
 
-  useEffect(() => {
-    async function fetchData() {
-      setLoading(true);
-      setError("");
+  const fetchData = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      let estData = [];
       try {
-        const [estRes, conRes] = await Promise.all([
-          apiClient.get("/estimates/admin"),
-          apiClient.get("/contacts"),
-        ]);
-        setEstimates(estRes.data || []);
-        setContacts(conRes.data || []);
-      } catch (e) {
-        setError(layLoiApi(e));
-      } finally {
-        setLoading(false);
+        const estRes = await apiClient.get("/estimates/admin");
+        estData = Array.isArray(estRes?.data) ? estRes.data : [];
+      } catch {
+        const estRes = await apiClient.get("/admin/estimates");
+        estData = Array.isArray(estRes?.data) ? estRes.data : [];
       }
+
+      let conData = [];
+      try {
+        const conRes = await apiClient.get("/contacts");
+        conData = Array.isArray(conRes?.data) ? conRes.data : [];
+      } catch {
+        conData = [];
+      }
+
+      setEstimates(estData);
+      setContacts(conData);
+    } catch (e) {
+      setError(layLoiApi(e));
+    } finally {
+      setLoading(false);
     }
+  };
+
+  useEffect(() => {
     fetchData();
   }, []);
 
@@ -2103,7 +2118,30 @@ function DoanhThuAdmin({ onShowToast }) {
     .slice(0, 10);
 
   if (loading) return <div className="admin-loading"><i className="bi bi-arrow-repeat" style={{ fontSize: 32, animation: "spin 1s linear infinite" }}></i><p>Đang tải dữ liệu doanh thu...</p></div>;
-  if (error) return <div className="admin-card" style={{ color: "#e74c3c", padding: 32 }}><i className="bi bi-exclamation-triangle"></i> {error}</div>;
+  if (error) {
+    return (
+      <div className="admin-card" style={{ color: "#e74c3c", padding: 32, textAlign: "center" }}>
+        <p><i className="bi bi-exclamation-triangle" style={{ fontSize: 32 }}></i></p>
+        <p style={{ fontWeight: 600, fontSize: "1.05rem" }}>{error}</p>
+        <button
+          type="button"
+          onClick={fetchData}
+          style={{
+            marginTop: 12,
+            padding: "8px 24px",
+            background: "#0B1F3A",
+            color: "#fff",
+            border: "none",
+            borderRadius: 6,
+            cursor: "pointer",
+            fontWeight: 600
+          }}
+        >
+          <i className="bi bi-arrow-clockwise me-1"></i> Thử lại
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="doanh-thu-admin">
@@ -2119,6 +2157,24 @@ function DoanhThuAdmin({ onShowToast }) {
               type="button"
             >{lbl}</button>
           ))}
+          <button
+            type="button"
+            className="dt-period-filter-btn"
+            onClick={fetchData}
+            title="Tải lại dữ liệu"
+            style={{
+              padding: "6px 14px",
+              borderRadius: "20px",
+              border: "2px solid #0B1F3A",
+              background: "#0B1F3A",
+              color: "#fff",
+              cursor: "pointer",
+              fontWeight: 600,
+              fontSize: "0.85rem"
+            }}
+          >
+            <i className="bi bi-arrow-clockwise"></i> Làm mới
+          </button>
         </div>
       </div>
 

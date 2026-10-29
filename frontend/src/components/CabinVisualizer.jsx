@@ -203,6 +203,8 @@ export default function CabinVisualizer({
   // Tabs: 'walls' (1) | 'flooring' (2) | 'ceiling' (3) | 'handrail' (4)
   const [activeTab, setActiveTab] = useState("walls");
 
+  const normalizeRailId = (id) => (id === "flat-inox" ? "flat-satin" : id);
+
   // State các tùy chọn vật liệu (Mặc định chọn mẫu cao cấp nhất từ ảnh thực tế của khách)
   const [selectedWallId, setSelectedWallId] = useState(
     selectedWallProp || (
@@ -212,7 +214,9 @@ export default function CabinVisualizer({
   );
   const [selectedFloorId, setSelectedFloorId] = useState(selectedFloorProp || "floor-chevron-brass");
   const [selectedCeilingId, setSelectedCeilingId] = useState(selectedCeilingProp || "ceil-cove-warm");
-  const [selectedHandrailId, setSelectedHandrailId] = useState(selectedHandrailProp || "wood-brass");
+  const [selectedHandrailId, setSelectedHandrailId] = useState(
+    normalizeRailId(selectedHandrailProp) || "wood-brass"
+  );
 
   // Đồng bộ props bên ngoài nếu có (dành cho Preset từ Studio)
   useEffect(() => {
@@ -228,7 +232,7 @@ export default function CabinVisualizer({
   }, [selectedCeilingProp]);
 
   useEffect(() => {
-    if (selectedHandrailProp) setSelectedHandrailId(selectedHandrailProp);
+    if (selectedHandrailProp) setSelectedHandrailId(normalizeRailId(selectedHandrailProp));
   }, [selectedHandrailProp]);
 
   // State điều khiển Cửa & Đèn
@@ -254,16 +258,20 @@ export default function CabinVisualizer({
     }
   }, [totalStops, currentFloor]);
 
-  // Đồng bộ với Bước 3 bên ngoài
+  // Đồng bộ với Bước 3 bên ngoài (Chỉ khi không có selectedWallProp để tránh ghi đè preset hoặc tùy chọn thủ công)
+  const prevElevatorTypeRef = useRef(elevatorType);
   useEffect(() => {
-    if (elevatorType === "inox-guong-vang") {
-      setSelectedWallId("inox-guong-vang");
-    } else if (elevatorType === "inox-tieu-chuan") {
-      setSelectedWallId("inox-tieu-chuan");
-    } else if (elevatorType === "homelift-kinh") {
-      setSelectedWallId("kinh-cuong-luc");
+    if (!selectedWallProp && prevElevatorTypeRef.current !== elevatorType) {
+      if (elevatorType === "inox-guong-vang") {
+        setSelectedWallId("inox-guong-vang");
+      } else if (elevatorType === "inox-tieu-chuan") {
+        setSelectedWallId("inox-tieu-chuan");
+      } else if (elevatorType === "homelift-kinh") {
+        setSelectedWallId("kinh-cuong-luc");
+      }
     }
-  }, [elevatorType]);
+    prevElevatorTypeRef.current = elevatorType;
+  }, [elevatorType, selectedWallProp]);
 
   useEffect(() => {
     return () => {

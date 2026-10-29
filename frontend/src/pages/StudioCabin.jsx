@@ -35,7 +35,7 @@ const PRESET_COLLECTIONS = [
       wallId: "kinh-cuong-luc",
       floorId: "floor-terrazzo-sand",
       ceilingId: "ceil-cove-warm",
-      handrailId: "flat-inox",
+      handrailId: "flat-satin",
       elevatorType: "homelift-kinh"
     }
   },
@@ -65,7 +65,7 @@ const PRESET_COLLECTIONS = [
       wallId: "wood-oak-scandi",
       floorId: "floor-wood-plank",
       ceilingId: "ceil-coffered-linear",
-      handrailId: "flat-inox",
+      handrailId: "flat-satin",
       elevatorType: "inox-tieu-chuan"
     }
   }
@@ -108,7 +108,8 @@ export default function StudioCabin() {
     setSelectedWallId(preset.specs.wallId);
     setSelectedFloorId(preset.specs.floorId);
     setSelectedCeilingId(preset.specs.ceilingId);
-    setSelectedHandrailId(preset.specs.handrailId);
+    const railId = preset.specs.handrailId === "flat-inox" ? "flat-satin" : preset.specs.handrailId;
+    setSelectedHandrailId(railId);
     setElevatorType(preset.specs.elevatorType);
   };
 
@@ -119,6 +120,10 @@ export default function StudioCabin() {
       ceiling: data.ceiling,
       handrail: data.handrail
     });
+    if (data.wallId) setSelectedWallId(data.wallId);
+    if (data.floorId) setSelectedFloorId(data.floorId);
+    if (data.ceilingId) setSelectedCeilingId(data.ceilingId);
+    if (data.handrailId) setSelectedHandrailId(data.handrailId);
   };
 
   // Chuyển sang trang Dự toán báo giá với đầy đủ cấu hình cabin đã chọn
