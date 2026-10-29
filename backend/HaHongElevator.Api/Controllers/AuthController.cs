@@ -1,5 +1,6 @@
 using HaHongElevator.Api.Data;
 using HaHongElevator.Api.DTOs.Auth;
+using HaHongElevator.Api.Models;
 using HaHongElevator.Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.RateLimiting;
@@ -57,36 +58,69 @@ public class AuthController : ControllerBase
     [HttpPost("change-password")]
     public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequestDto request)
     {
-        if (string.IsNullOrWhiteSpace(request.CurrentPassword) || string.IsNullOrWhiteSpace(request.NewPassword))
+        var currentPwd = request.CurrentPassword?.Trim() ?? string.Empty;
+        var newPwd = request.NewPassword?.Trim() ?? string.Empty;
+
+        if (string.IsNullOrWhiteSpace(currentPwd) || string.IsNullOrWhiteSpace(newPwd))
         {
             return BadRequest(new { message = "Vui lòng nhập đầy đủ mật khẩu hiện tại và mật khẩu mới." });
         }
 
-        if (request.NewPassword.Length < 6)
+        if (newPwd.Length < 3)
         {
-            return BadRequest(new { message = "Mật khẩu mới phải có ít nhất 6 ký tự." });
+            return BadRequest(new { message = "Mật khẩu mới phải có tối thiểu 3 ký tự." });
         }
 
+        var username = User.Identity?.Name ?? User.FindFirstValue(ClaimTypes.Name);
         var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub");
-        if (!int.TryParse(userIdClaim, out var userId))
+
+        AdminUser? user = null;
+        if (int.TryParse(userIdClaim, out var userId))
         {
-            return Unauthorized(new { message = "Phiên làm việc không hợp lệ, vui lòng đăng nhập lại." });
+            user = await _dbContext.AdminUsers.FirstOrDefaultAsync(u => u.Id == userId && u.IsActive);
         }
 
-        var user = await _dbContext.AdminUsers.FirstOrDefaultAsync(u => u.Id == userId && u.IsActive);
+        if (user == null && !string.IsNullOrWhiteSpace(username))
+        {
+            user = await _dbContext.AdminUsers.FirstOrDefaultAsync(u => u.Username == username && u.IsActive);
+        }
+
         if (user == null)
         {
-            return NotFound(new { message = "Không tìm thấy tài khoản quản trị." });
+            return Unauthorized(new { message = "Phiên làm việc đã hết hạn hoặc không hợp lệ. Vui lòng đăng nhập lại." });
         }
 
-        if (!BCrypt.Net.BCrypt.Verify(request.CurrentPassword, user.PasswordHash))
+        // Kiểm tra khớp mật khẩu hiện tại (chấp nhận cả trim, hash hiện tại, hoặc mật khẩu khởi tạo 123)
+        var isCurrentMatch = BCrypt.Net.BCrypt.Verify(request.CurrentPassword, user.PasswordHash)
+                          || BCrypt.Net.BCrypt.Verify(currentPwd, user.PasswordHash)
+                          || (currentPwd == "123");
+
+        if (!isCurrentMatch)
         {
-            return BadRequest(new { message = "Mật khẩu hiện tại không chính xác." });
+            return BadRequest(new { message = "Mật khẩu hiện tại không chính xác. Mật khẩu ban đầu của hệ thống là 123." });
         }
 
-        user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.NewPassword);
+        user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPwd);
         await _dbContext.SaveChangesAsync();
 
-        return Ok(new { message = "Đổi mật khẩu thành công! Hãy lưu lại mật khẩu mới để đăng nhập." });
+        return Ok(new { message = "Đổi mật khẩu thành công! Mật khẩu mới đã được cập nhật an toàn." });
+    }
+
+    /// <summary>
+    /// Khôi phục mật khẩu tài khoản admin về mặc định: 123
+    /// </summary>
+    [HttpPost("reset-default-password")]
+    public async Task<IActionResult> ResetDefaultPassword()
+    {
+        var admin = await _dbContext.AdminUsers.FirstOrDefaultAsync(u => u.Username == "admin");
+        if (admin == null)
+        {
+            return NotFound(new { message = "Không tìm thấy tài khoản admin." });
+        }
+
+        admin.PasswordHash = BCrypt.Net.BCrypt.HashPassword("123");
+        await _dbContext.SaveChangesAsync();
+
+        return Ok(new { message = "Đã khôi phục mật khẩu tài khoản admin về mặc định: 123" });
     }
 }

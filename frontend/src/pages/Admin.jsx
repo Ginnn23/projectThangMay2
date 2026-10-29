@@ -311,25 +311,31 @@ function ChangePasswordModal({ isOpen, onClose, onShowToast }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  const [resetting, setResetting] = useState(false);
+
   if (!isOpen) return null;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
-    if (!currentPassword) {
-      setError("Vui lòng nhập mật khẩu hiện tại.");
+    const cur = currentPassword.trim();
+    const nw = newPassword.trim();
+    const cf = confirmPassword.trim();
+
+    if (!cur) {
+      setError("Vui lòng nhập mật khẩu hiện tại (mật khẩu mặc định ban đầu là 123).");
       return;
     }
-    if (!newPassword) {
+    if (!nw) {
       setError("Vui lòng nhập mật khẩu mới.");
       return;
     }
-    if (newPassword.length < 6) {
-      setError("Mật khẩu mới phải có tối thiểu 6 ký tự để bảo đảm an toàn.");
+    if (nw.length < 3) {
+      setError("Mật khẩu mới phải có tối thiểu 3 ký tự.");
       return;
     }
-    if (newPassword !== confirmPassword) {
+    if (nw !== cf) {
       setError("Mật khẩu xác nhận không khớp với mật khẩu mới.");
       return;
     }
@@ -337,8 +343,8 @@ function ChangePasswordModal({ isOpen, onClose, onShowToast }) {
     setLoading(true);
     try {
       const res = await apiClient.post("/auth/change-password", {
-        currentPassword,
-        newPassword
+        currentPassword: cur,
+        newPassword: nw
       });
       onShowToast?.(res?.data?.message || "Đã đổi mật khẩu quản trị thành công!", "success");
       setCurrentPassword("");
@@ -352,6 +358,21 @@ function ChangePasswordModal({ isOpen, onClose, onShowToast }) {
     }
   };
 
+  const handleResetDefault = async () => {
+    if (!window.confirm("Bạn có chắc chắn muốn đặt lại mật khẩu tài khoản admin về mặc định: 123?")) return;
+    setResetting(true);
+    setError("");
+    try {
+      const res = await apiClient.post("/auth/reset-default-password");
+      onShowToast?.(res?.data?.message || "Đã khôi phục mật khẩu admin về 123 thành công!", "success");
+      setCurrentPassword("123");
+    } catch (err) {
+      setError(layLoiApi(err) || "Không thể khôi phục mật khẩu.");
+    } finally {
+      setResetting(false);
+    }
+  };
+
   return (
     <div className="admin-modal-backdrop" onClick={onClose}>
       <div className="admin-change-pwd-modal" onClick={(e) => e.stopPropagation()}>
@@ -360,7 +381,7 @@ function ChangePasswordModal({ isOpen, onClose, onShowToast }) {
             <i className="bi bi-shield-lock-fill"></i>
             <div>
               <h3>Đổi Mật Khẩu Quản Trị</h3>
-              <p>Bảo vệ website, thay đổi mật khẩu mặc định 123</p>
+              <p>Mật khẩu khởi tạo ban đầu của hệ thống là <strong>123</strong></p>
             </div>
           </div>
           <button type="button" className="admin-modal-close" onClick={onClose} title="Đóng">
@@ -377,13 +398,32 @@ function ChangePasswordModal({ isOpen, onClose, onShowToast }) {
           )}
 
           <div className="admin-pwd-field">
-            <label>Mật khẩu hiện tại</label>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <label style={{ margin: 0 }}>Mật khẩu hiện tại</label>
+              <button
+                type="button"
+                onClick={handleResetDefault}
+                disabled={resetting}
+                style={{
+                  background: "transparent",
+                  border: "none",
+                  color: "#d97706",
+                  fontSize: "12px",
+                  fontWeight: 700,
+                  cursor: "pointer",
+                  textDecoration: "underline"
+                }}
+                title="Bấm nếu quên hoặc muốn đặt lại về 123"
+              >
+                {resetting ? "Đang khôi phục..." : "Quên MK? Đặt về 123"}
+              </button>
+            </div>
             <div className="admin-pwd-input-wrap">
               <input
                 type={showCurrent ? "text" : "password"}
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
-                placeholder="Nhập mật khẩu hiện tại (ví dụ: 123)"
+                placeholder="Nhập mật khẩu hiện tại (mặc định: 123)"
                 autoComplete="current-password"
                 required
               />
@@ -400,13 +440,13 @@ function ChangePasswordModal({ isOpen, onClose, onShowToast }) {
           </div>
 
           <div className="admin-pwd-field">
-            <label>Mật khẩu mới (tối thiểu 6 ký tự)</label>
+            <label>Mật khẩu mới (tối thiểu 3 ký tự)</label>
             <div className="admin-pwd-input-wrap">
               <input
                 type={showNew ? "text" : "password"}
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                placeholder="Nhập mật khẩu mới an toàn"
+                placeholder="Nhập mật khẩu mới"
                 autoComplete="new-password"
                 required
               />
