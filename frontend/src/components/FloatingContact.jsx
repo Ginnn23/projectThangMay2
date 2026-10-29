@@ -2,8 +2,10 @@ import { useEffect, useMemo, useState } from "react";
 import { soDienThoaiCongTy, soDienThoaiLienKet } from "../data/contactInfo";
 
 const zaloUrl = `https://zalo.me/${soDienThoaiLienKet}`;
+const telegramBotUsername = "HaHongElevatorLeadBot";
+const telegramAppScheme = "tg://resolve?domain=HaHongElevatorLeadBot&start=tuvan";
+const telegramWebMirror = "https://telegram.dog/HaHongElevatorLeadBot";
 const telegramBotUrl = "https://t.me/HaHongElevatorLeadBot?start=tuvan";
-const telegramWebUrl = "https://web.telegram.org/k/#@HaHongElevatorLeadBot";
 
 const thongBaoHoatDong = [
   {
@@ -36,6 +38,16 @@ function FloatingContact() {
   const [thongBaoDangChon, setThongBaoDangChon] = useState(0);
   const [hienThongBao, setHienThongBao] = useState(false);
   const [showTelegramModal, setShowTelegramModal] = useState(false);
+  const [copiedBot, setCopiedBot] = useState(false);
+
+  const handleCopyBot = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    navigator.clipboard?.writeText(`@${telegramBotUsername}`).then(() => {
+      setCopiedBot(true);
+      setTimeout(() => setCopiedBot(false), 2500);
+    });
+  };
 
   const prefersReducedMotion = useMemo(
     () => typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches,
@@ -185,28 +197,26 @@ function FloatingContact() {
               )}
 
               <div className="d-flex flex-column gap-2 mb-3">
-                {/* Lua chon 1: Telegram Web (Hoat dong 100% tren moi iPhone/Safari/Chrome) */}
+                {/* Lua chon 1: Mo truc tiep App Telegram qua giao thuc tg:// khong bi chan mang */}
                 <a
-                  href={telegramWebUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  href={telegramAppScheme}
                   className="btn btn-info text-dark fw-bold d-flex align-items-center justify-content-between p-3 rounded-3 text-decoration-none shadow-sm"
                   style={{ background: "#22d3ee", border: "none" }}
                   onClick={() => setShowTelegramModal(false)}
                 >
                   <div className="d-flex align-items-center gap-2">
-                    <i className="bi bi-globe fs-4"></i>
+                    <i className="bi bi-telegram fs-4"></i>
                     <div className="text-start">
-                      <div className="fw-bold">Mở Telegram trên Web (Khuyên dùng iPhone)</div>
-                      <small className="text-dark-50" style={{ fontSize: "11px" }}>Không bị chặn bởi Apple App Store, vào chat ngay</small>
+                      <div className="fw-bold">Mở Trực Tiếp App Telegram</div>
+                      <small className="text-dark-50" style={{ fontSize: "11px" }}>Tự động bật Telegram trên điện thoại &amp; máy tính</small>
                     </div>
                   </div>
                   <i className="bi bi-arrow-right fs-5"></i>
                 </a>
 
-                {/* Lua chon 2: Telegram App */}
+                {/* Lua chon 2: Mo qua Link du phong vuot tuong lua mang VN */}
                 <a
-                  href={telegramBotUrl}
+                  href={telegramWebMirror}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="btn btn-outline-light d-flex align-items-center justify-content-between p-3 rounded-3 text-decoration-none"
@@ -214,14 +224,33 @@ function FloatingContact() {
                   onClick={() => setShowTelegramModal(false)}
                 >
                   <div className="d-flex align-items-center gap-2">
-                    <i className="bi bi-telegram fs-4 text-info"></i>
+                    <i className="bi bi-globe fs-4 text-info"></i>
                     <div className="text-start">
-                      <div className="fw-bold">Mở bằng Ứng dụng Telegram</div>
-                      <small className="text-secondary" style={{ fontSize: "11px" }}>Dành cho máy Android, iPad hoặc máy tính PC</small>
+                      <div className="fw-bold">Mở Link Web Dự Phòng</div>
+                      <small className="text-secondary" style={{ fontSize: "11px" }}>Không lo bị chặn mạng Viettel / VNPT / FPT</small>
                     </div>
                   </div>
                   <i className="bi bi-arrow-right fs-5"></i>
                 </a>
+
+                {/* Lua chon 3: Sao chep Bot ID de tim trong Telegram */}
+                <button
+                  type="button"
+                  className="btn btn-outline-info d-flex align-items-center justify-content-between p-2 px-3 rounded-3 text-decoration-none"
+                  style={{ border: "1px dashed rgba(34, 211, 238, 0.4)", background: "rgba(34, 211, 238, 0.05)" }}
+                  onClick={handleCopyBot}
+                >
+                  <div className="d-flex align-items-center gap-2">
+                    <i className={`bi ${copiedBot ? "bi-check2-circle text-success" : "bi-clipboard"} fs-5`}></i>
+                    <div className="text-start">
+                      <div className="fw-bold text-white small">
+                        {copiedBot ? "Đã copy: @HaHongElevatorLeadBot" : "Sao chép Bot ID: @HaHongElevatorLeadBot"}
+                      </div>
+                      <small className="text-white-50" style={{ fontSize: "11px" }}>Dán vào ô tìm kiếm Telegram để nhắn tin ngay</small>
+                    </div>
+                  </div>
+                  <span className="badge bg-info text-dark" style={{ fontSize: "10px" }}>{copiedBot ? "Đã sao chép!" : "Copy"}</span>
+                </button>
 
                 {/* Lua chon 3: Zalo nhanh nhat */}
                 <a

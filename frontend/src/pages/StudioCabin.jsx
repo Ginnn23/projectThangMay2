@@ -30,12 +30,12 @@ const PRESET_COLLECTIONS = [
     tagline: "View 360° Đẳng Cấp",
     badge: "Homelift Nhà Phố",
     themeClass: "preset-panorama",
-    desc: "Kính cường lực an toàn siêu trong suốt, sàn đá Terrazzo cát be chống trượt, trần phẳng gián tiếp, tay vịn inox mờ.",
+    desc: "Kính cường lực an toàn siêu trong suốt, sàn đá Terrazzo cát be chống trượt, trần phẳng gián tiếp, tay vịn tròn inox chống xước.",
     specs: {
       wallId: "kinh-cuong-luc",
       floorId: "floor-terrazzo-sand",
       ceilingId: "ceil-cove-warm",
-      handrailId: "flat-satin",
+      handrailId: "round-inox",
       elevatorType: "homelift-kinh"
     }
   },
@@ -51,7 +51,7 @@ const PRESET_COLLECTIONS = [
       floorId: "floor-chevron-brass",
       ceilingId: "ceil-cove-warm",
       handrailId: "wood-brass",
-      elevatorType: "inox-guong-vang"
+      elevatorType: "biet-thu-walnut"
     }
   },
   {
@@ -76,8 +76,8 @@ export default function StudioCabin() {
 
   // State cấu hình
   const [activePreset, setActivePreset] = useState("classic-walnut");
-  const [elevatorType, setElevatorType] = useState("homelift-kinh");
-  const [capacityKg, setCapacityKg] = useState(350);
+  const [elevatorType, setElevatorType] = useState("biet-thu-walnut");
+  const [capacityKg, setCapacityKg] = useState(450);
   const [stops, setStops] = useState(4);
   const [doorType, setDoorType] = useState("CO");
 

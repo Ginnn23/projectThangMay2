@@ -592,6 +592,16 @@
 .bracket-left { left: 24px; }
 .bracket-right { right: 24px; }
 
+/* 0. Tay vịn tròn Inox 304 chuẩn Homelift Nhà Phố & Thang Kính */
+.handrail-round-inox .handrail-bar,
+.side-handrail.handrail-round-inox {
+  background: linear-gradient(180deg, #f8fafc 0%, #cbd5e1 45%, #64748b 100%);
+  border-radius: 999px;
+  height: 14px;
+  border: 1.5px solid #e2e8f0;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.75), 0 0 10px rgba(255, 255, 255, 0.4);
+}
+
 /* 1. Gỗ tự nhiên đầu nẹp kim loại (Như Ảnh 1 & 3) */
 .handrail-wood-brass .handrail-bar,
 .side-handrail.handrail-wood-brass {

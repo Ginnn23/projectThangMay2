@@ -14,9 +14,9 @@ export const WALL_OPTIONS = [
     code: "HAHONG-W01",
     name: "Gỗ Óc Chó Phối Gương Soi & Nẹp Inox",
     spec: "Gỗ Walnut 15mm • Gương bỉ 5mm • Nẹp titan",
-    desc: "Vách gỗ óc chó tự nhiên phối gương soi trung tâm & nẹp kim loại sang trọng",
-    badge: "Biệt thự 5★",
-    syncValue: "inox-guong-vang",
+    desc: "Vách gỗ óc chó tự nhiên phối gương soi trung tâm & nẹp kim loại sang trọng (Chuẩn Villa & Dinh Thự)",
+    badge: "Villa & Dinh Thự 5★",
+    syncValue: "biet-thu-walnut",
     type: "wood-mirror"
   },
   {
@@ -154,8 +154,17 @@ export const CEILING_OPTIONS = [
   }
 ];
 
-// 4. TAY VỊN CABIN (3 TÙY CHỌN TỪ ẢNH THỰC TẾ)
+// 4. TAY VỊN CABIN (4 TÙY CHỌN CHUẨN KIẾN TRÚC THỰC TẾ)
 export const HANDRAIL_OPTIONS = [
+  {
+    id: "round-inox",
+    code: "HAHONG-R04",
+    name: "Tay Vịn Tròn Inox SUS 304 Chuyên Homelift",
+    spec: "SUS 304 phi 38mm chải xước satin • Bo tròn 2 đầu",
+    desc: "Tay vịn tròn tiêu chuẩn kiến trúc Homelift nhà phố & thang kính, chống bám vân tay, êm tay tuyệt đối",
+    badge: "Homelift Nhà Phố",
+    type: "round-inox"
+  },
   {
     id: "wood-brass",
     code: "HAHONG-R01",
@@ -268,6 +277,8 @@ export default function CabinVisualizer({
         setSelectedWallId("inox-tieu-chuan");
       } else if (elevatorType === "homelift-kinh") {
         setSelectedWallId("kinh-cuong-luc");
+      } else if (elevatorType === "biet-thu-walnut") {
+        setSelectedWallId("wood-walnut-mirror");
       }
     }
     prevElevatorTypeRef.current = elevatorType;
