@@ -812,9 +812,184 @@
   color: #cbd5e1;
 }
 
+/* Guide Tip */
+.dt-revenue-tip {
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  border: 1px solid #86efac;
+  border-radius: 12px;
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  color: #166534;
+  font-size: 0.84rem;
+  line-height: 1.5;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.08);
+}
+
+.dt-revenue-tip i {
+  font-size: 1.4rem;
+  color: #15803d;
+  flex-shrink: 0;
+}
+
+/* Interactive Status Select in Table */
+.dt-status-select {
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  cursor: pointer;
+  outline: none;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.dt-status-select:hover,
+.dt-status-select:focus {
+  filter: brightness(0.96);
+  box-shadow: 0 0 0 2px rgba(11, 31, 58, 0.15);
+}
+
+.dt-row-btn-delete {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.dt-row-btn-delete:hover {
+  background: #fee2e2;
+  color: #ef4444;
+}
+
+/* Modal Backdrop & Card */
+.dt-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(11, 31, 58, 0.65);
+  backdrop-filter: blur(4px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: fadeInModal 0.2s ease-out;
+}
+
+@keyframes fadeInModal {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.dt-modal-card {
+  background: #ffffff;
+  border-radius: 20px;
+  max-width: 640px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+}
+
+.dt-modal-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.dt-modal-header h3 {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #0B1F3A;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.dt-modal-close {
+  background: transparent;
+  border: none;
+  font-size: 1.3rem;
+  color: #94a3b8;
+  cursor: pointer;
+  border-radius: 8px;
+  padding: 4px 8px;
+}
+
+.dt-modal-close:hover { color: #0B1F3A; background: #f1f5f9; }
+
+.dt-modal-body {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.dt-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 576px) {
+  .dt-form-row { grid-template-columns: 1fr; }
+}
+
+.dt-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.dt-form-group label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #334155;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.dt-form-group input,
+.dt-form-group select,
+.dt-form-group textarea {
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid #cbd5e1;
+  font-size: 0.85rem;
+  color: #0B1F3A;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.dt-form-group input:focus,
+.dt-form-group select:focus,
+.dt-form-group textarea:focus {
+  border-color: #0B1F3A;
+  box-shadow: 0 0 0 3px rgba(11, 31, 58, 0.1);
+}
+
+.dt-modal-footer {
+  padding: 18px 24px;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
 /* Print Styles */
 @media print {
-  .admin-toolbar, .dt-hero-actions, .dt-search-box, .dt-status-filter-pills {
+  .admin-toolbar, .dt-hero-actions, .dt-search-box, .dt-status-filter-pills, .dt-revenue-tip {
     display: none !important;
   }
   .dt-hero-header {

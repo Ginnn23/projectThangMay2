@@ -303,6 +303,7 @@ function AdminLogin({ onLogin }) {
 
 function AdminToolbar({ activeTab, onChangeTab, user, onLogout }) {
   const tabs = [
+    { key: "revenue", label: "Doanh thu", icon: "bi-bar-chart-line" },
     { key: "contacts", label: "Liên hệ", icon: "bi-inbox" },
     { key: "estimates", label: "Dự toán báo giá", icon: "bi-calculator" },
     { key: "maintenance", label: "Bảo trì", icon: "bi-calendar-check" },
@@ -310,7 +311,6 @@ function AdminToolbar({ activeTab, onChangeTab, user, onLogout }) {
     { key: "services", label: "Dịch vụ", icon: "bi-tools" },
     { key: "projects", label: "Dự án", icon: "bi-buildings" },
     { key: "ai", label: "Huấn luyện AI", icon: "bi-robot" },
-    { key: "revenue", label: "Doanh thu", icon: "bi-bar-chart-line" },
   ];
 
   return (
@@ -2065,6 +2065,118 @@ function DoanhThuAdmin({ onShowToast }) {
     fetchData();
   }, []);
 
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [creating, setCreating] = useState(false);
+  const [createForm, setCreateForm] = useState({
+    customerName: "",
+    phoneNumber: "",
+    email: "",
+    address: "",
+    buildingType: "biet-thu",
+    stops: 4,
+    capacityKg: 450,
+    elevatorType: "homelift-kinh",
+    motorBrand: "Fuji",
+    doorType: "CO",
+    status: "DealClosed",
+    adminNotes: ""
+  });
+
+  const handleStatusChange = async (id, newStatus) => {
+    try {
+      try {
+        await apiClient.patch(`/estimates/${id}/status`, { status: newStatus });
+      } catch {
+        await apiClient.patch(`/admin/estimates/${id}/status`, { status: newStatus });
+      }
+      setEstimates((prev) =>
+        prev.map((item) => (item.id === id ? { ...item, status: newStatus } : item))
+      );
+      if (newStatus === "DealClosed") {
+        onShowToast?.("Đã chuyển sang Chốt deal ✓ — Doanh thu đã được cộng thêm!", "success");
+      } else {
+        onShowToast?.("Đã cập nhật trạng thái hợp đồng / dự toán.", "success");
+      }
+    } catch {
+      onShowToast?.("Không thể cập nhật trạng thái.", "error");
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm("Bạn có chắc chắn muốn xóa bản ghi này?")) return;
+    try {
+      try {
+        await apiClient.delete(`/estimates/${id}`);
+      } catch {
+        await apiClient.delete(`/admin/estimates/${id}`);
+      }
+      setEstimates((prev) => prev.filter((item) => item.id !== id));
+      onShowToast?.("Đã xóa bản ghi dự toán thành công.");
+    } catch {
+      onShowToast?.("Không thể xóa bản ghi.", "error");
+    }
+  };
+
+  const handleCreateSubmit = async (e) => {
+    e.preventDefault();
+    if (!createForm.customerName.trim() || !createForm.phoneNumber.trim()) {
+      onShowToast?.("Vui lòng nhập họ tên và số điện thoại.", "warning");
+      return;
+    }
+    setCreating(true);
+    try {
+      const createPayload = {
+        customerName: createForm.customerName.trim(),
+        phoneNumber: createForm.phoneNumber.trim(),
+        email: createForm.email.trim() || "khachhang@gmail.com",
+        address: createForm.address.trim() || "TP. Hồ Chí Minh",
+        buildingType: createForm.buildingType,
+        stops: Number(createForm.stops) || 4,
+        capacityKg: Number(createForm.capacityKg) || 450,
+        elevatorType: createForm.elevatorType,
+        motorBrand: createForm.motorBrand,
+        doorType: createForm.doorType
+      };
+
+      const { data: newEst } = await apiClient.post("/estimates", createPayload);
+
+      if (newEst?.id && createForm.status !== "New") {
+        try {
+          await apiClient.patch(`/estimates/${newEst.id}/status`, {
+            status: createForm.status,
+            adminNotes: createForm.adminNotes
+          });
+          newEst.status = createForm.status;
+          newEst.adminNotes = createForm.adminNotes;
+        } catch {
+          // ignore patch error
+        }
+      }
+
+      setEstimates((prev) => [newEst, ...prev]);
+      setShowCreateModal(false);
+      setCreateForm({
+        customerName: "",
+        phoneNumber: "",
+        email: "",
+        address: "",
+        buildingType: "biet-thu",
+        stops: 4,
+        capacityKg: 450,
+        elevatorType: "homelift-kinh",
+        motorBrand: "Fuji",
+        doorType: "CO",
+        status: "DealClosed",
+        adminNotes: ""
+      });
+      onShowToast?.("Đã tạo hợp đồng mới thành công! Doanh thu đã được ghi nhận.", "success");
+    } catch (err) {
+      onShowToast?.(layLoiApi(err) || "Không thể tạo hợp đồng mới.", "error");
+    } finally {
+      setCreating(false);
+    }
+  };
+
   // Filter by period
   const now = new Date();
   const currentQuarter = Math.floor(now.getMonth() / 3);
@@ -2340,13 +2452,21 @@ function DoanhThuAdmin({ onShowToast }) {
           </div>
 
           {/* Action Buttons */}
+          <button
+            type="button"
+            className="dt-action-btn btn-primary-action"
+            onClick={() => setShowCreateModal(true)}
+            title="Tạo dự toán / hợp đồng mới để tính doanh số"
+          >
+            <i className="bi bi-plus-circle-fill"></i> Tạo Hợp Đồng Mới
+          </button>
           <button type="button" className="dt-action-btn" onClick={handleExportCSV} title="Xuất dữ liệu Excel">
             <i className="bi bi-file-earmark-excel"></i> Xuất Excel
           </button>
           <button type="button" className="dt-action-btn" onClick={() => window.print()} title="In báo cáo">
             <i className="bi bi-printer"></i> In
           </button>
-          <button type="button" className="dt-action-btn btn-primary-action" onClick={fetchData} title="Làm mới số liệu">
+          <button type="button" className="dt-action-btn" onClick={fetchData} title="Làm mới số liệu">
             <i className="bi bi-arrow-clockwise"></i> Làm Mới
           </button>
         </div>
@@ -2457,6 +2577,14 @@ function DoanhThuAdmin({ onShowToast }) {
               <i className="bi bi-building-check"></i> Phân khúc dân dụng & biệt thự
             </p>
           </div>
+        </div>
+      </div>
+
+      {/* REVENUE GUIDE TIP */}
+      <div className="dt-revenue-tip">
+        <i className="bi bi-lightbulb-fill"></i>
+        <div>
+          <strong>Cách tính tiền Doanh Thu Ký Kết:</strong> Doanh thu chỉ được cộng khi hợp đồng đạt trạng thái <span className="dt-status-badge status-dealclosed" style={{ padding: "2px 8px" }}>Chốt deal ✓</span>. Bạn có thể chọn trực tiếp ô Trạng Thái trong bảng bên dưới thành <strong>"Chốt deal ✓ (Cộng Doanh Thu)"</strong> hoặc bấm <strong>"Tạo Hợp Đồng Mới"</strong> ở phía trên để ghi nhận số tiền ngay lập tức!
         </div>
       </div>
 
@@ -2778,9 +2906,10 @@ function DoanhThuAdmin({ onShowToast }) {
                   <th>Dòng Thang Máy</th>
                   <th>Thông Số</th>
                   <th>Giá Dự Toán</th>
-                  <th>Trạng Thái</th>
+                  <th>Trạng Thái (Chọn để tính tiền)</th>
                   <th>Ngày Tạo</th>
                   <th>Ghi Chú</th>
+                  <th style={{ textAlign: "center" }}>Xóa</th>
                 </tr>
               </thead>
               <tbody>
@@ -2834,19 +2963,20 @@ function DoanhThuAdmin({ onShowToast }) {
                         </small>
                       </td>
 
-                      {/* Status */}
+                      {/* Interactive Status Selector */}
                       <td>
-                        <span className={`dt-status-badge ${statusInfo.class}`}>
-                          <span
-                            style={{
-                              width: 6,
-                              height: 6,
-                              borderRadius: "50%",
-                              background: statusInfo.dotColor
-                            }}
-                          ></span>
-                          {statusInfo.label}
-                        </span>
+                        <select
+                          className={`dt-status-select ${statusInfo.class}`}
+                          value={e.status}
+                          onChange={(ev) => handleStatusChange(e.id, ev.target.value)}
+                          title="Chọn 'Chốt deal ✓' để cộng tiền trực tiếp vào Doanh Thu Ký Kết"
+                        >
+                          <option value="DealClosed">Chốt deal ✓ (Cộng Doanh Thu)</option>
+                          <option value="SurveyScheduled">Lên lịch khảo sát</option>
+                          <option value="Contacted">Đã liên hệ tư vấn</option>
+                          <option value="New">Mới gửi dự toán</option>
+                          <option value="Cancelled">Đã huỷ / Tạm dừng</option>
+                        </select>
                       </td>
 
                       {/* Date */}
@@ -2858,6 +2988,18 @@ function DoanhThuAdmin({ onShowToast }) {
                       <td style={{ maxWidth: 200, color: "#475569", fontSize: "0.78rem" }}>
                         {e.adminNotes || "—"}
                       </td>
+
+                      {/* Delete Action */}
+                      <td style={{ textAlign: "center" }}>
+                        <button
+                          type="button"
+                          className="dt-row-btn-delete"
+                          onClick={() => handleDelete(e.id)}
+                          title="Xóa dự toán này"
+                        >
+                          <i className="bi bi-trash3"></i>
+                        </button>
+                      </td>
                     </tr>
                   );
                 })}
@@ -2866,6 +3008,179 @@ function DoanhThuAdmin({ onShowToast }) {
           )}
         </div>
       </div>
+
+      {/* CREATE NEW DEAL / ESTIMATE MODAL */}
+      {showCreateModal && (
+        <div className="dt-modal-backdrop" onClick={() => !creating && setShowCreateModal(false)}>
+          <div className="dt-modal-card" onClick={(e) => e.stopPropagation()}>
+            <div className="dt-modal-header">
+              <h3>
+                <i className="bi bi-file-earmark-plus" style={{ color: "#D9A441" }}></i>
+                Tạo Dự Toán & Ghi Nhận Hợp Đồng Mới
+              </h3>
+              <button
+                type="button"
+                className="dt-modal-close"
+                onClick={() => !creating && setShowCreateModal(false)}
+              >
+                <i className="bi bi-x-lg"></i>
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateSubmit}>
+              <div className="dt-modal-body">
+                <div className="dt-form-row">
+                  <div className="dt-form-group">
+                    <label>Họ và Tên Khách Hàng *</label>
+                    <input
+                      type="text"
+                      placeholder="VD: Nguyễn Văn Hùng"
+                      required
+                      value={createForm.customerName}
+                      onChange={(e) => setCreateForm((prev) => ({ ...prev, customerName: e.target.value }))}
+                    />
+                  </div>
+                  <div className="dt-form-group">
+                    <label>Số Điện Thoại (10 số) *</label>
+                    <input
+                      type="tel"
+                      placeholder="VD: 0908123456"
+                      required
+                      pattern="0[0-9]{9}"
+                      value={createForm.phoneNumber}
+                      onChange={(e) => setCreateForm((prev) => ({ ...prev, phoneNumber: e.target.value }))}
+                    />
+                  </div>
+                </div>
+
+                <div className="dt-form-row">
+                  <div className="dt-form-group">
+                    <label>Gmail Nhận Báo Giá *</label>
+                    <input
+                      type="email"
+                      placeholder="VD: khachhang@gmail.com"
+                      required
+                      value={createForm.email}
+                      onChange={(e) => setCreateForm((prev) => ({ ...prev, email: e.target.value }))}
+                    />
+                  </div>
+                  <div className="dt-form-group">
+                    <label>Địa Chỉ Công Trình</label>
+                    <input
+                      type="text"
+                      placeholder="VD: 100 Tân Sơn, Tân Bình, TP.HCM"
+                      value={createForm.address}
+                      onChange={(e) => setCreateForm((prev) => ({ ...prev, address: e.target.value }))}
+                    />
+                  </div>
+                </div>
+
+                <div className="dt-form-row">
+                  <div className="dt-form-group">
+                    <label>Dòng Thang Máy</label>
+                    <select
+                      value={createForm.elevatorType}
+                      onChange={(e) => setCreateForm((prev) => ({ ...prev, elevatorType: e.target.value }))}
+                    >
+                      <option value="homelift-kinh">Thang Máy Kính Homelift Panorama</option>
+                      <option value="inox-guong-vang">Cabin Inox Gương Vàng Luxury PVD</option>
+                      <option value="inox-tieu-chuan">Cabin Inox 304 Tiêu Chuẩn Hairline</option>
+                    </select>
+                  </div>
+                  <div className="dt-form-group">
+                    <label>Hãng Động Cơ</label>
+                    <select
+                      value={createForm.motorBrand}
+                      onChange={(e) => setCreateForm((prev) => ({ ...prev, motorBrand: e.target.value }))}
+                    >
+                      <option value="Fuji">Fuji (Công nghệ Nhật Bản)</option>
+                      <option value="Mitsubishi">Mitsubishi (Thái Lan)</option>
+                      <option value="Montanari">Montanari (Nhập khẩu Ý)</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="dt-form-row">
+                  <div className="dt-form-group">
+                    <label>Số Tầng (Điểm Dừng)</label>
+                    <select
+                      value={createForm.stops}
+                      onChange={(e) => setCreateForm((prev) => ({ ...prev, stops: Number(e.target.value) }))}
+                    >
+                      {[2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
+                        <option key={num} value={num}>{num} Tầng</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="dt-form-group">
+                    <label>Tải Trọng Cabin</label>
+                    <select
+                      value={createForm.capacityKg}
+                      onChange={(e) => setCreateForm((prev) => ({ ...prev, capacityKg: Number(e.target.value) }))}
+                    >
+                      <option value={300}>300 kg (3 - 4 người)</option>
+                      <option value={350}>350 kg (4 - 5 người)</option>
+                      <option value={450}>450 kg (6 người)</option>
+                      <option value={630}>630 kg (8 - 9 người)</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="dt-form-group">
+                  <label>Trạng Thái Ban Đầu (Chọn Chốt Deal để tính ngay vào Doanh Thu)</label>
+                  <select
+                    value={createForm.status}
+                    onChange={(e) => setCreateForm((prev) => ({ ...prev, status: e.target.value }))}
+                    style={{ fontWeight: 700, color: createForm.status === "DealClosed" ? "#15803d" : "#0B1F3A" }}
+                  >
+                    <option value="DealClosed">✓ Chốt deal (Cộng ngay vào Doanh Thu Ký Kết)</option>
+                    <option value="SurveyScheduled">Lên lịch khảo sát công trình</option>
+                    <option value="Contacted">Đã liên hệ tư vấn</option>
+                    <option value="New">Mới gửi dự toán (Pipeline)</option>
+                  </select>
+                </div>
+
+                <div className="dt-form-group">
+                  <label>Ghi Chú Hợp Đồng / Dự Án</label>
+                  <textarea
+                    rows="2"
+                    placeholder="VD: Hợp đồng thi công trọn gói, tạm ứng đợt 1..."
+                    value={createForm.adminNotes}
+                    onChange={(e) => setCreateForm((prev) => ({ ...prev, adminNotes: e.target.value }))}
+                  ></textarea>
+                </div>
+              </div>
+
+              <div className="dt-modal-footer">
+                <button
+                  type="button"
+                  className="dt-action-btn"
+                  onClick={() => setShowCreateModal(false)}
+                  style={{ color: "#64748b", border: "1px solid #cbd5e1", background: "#f8fafc" }}
+                  disabled={creating}
+                >
+                  Hủy Bỏ
+                </button>
+                <button
+                  type="submit"
+                  className="dt-action-btn btn-primary-action"
+                  disabled={creating}
+                >
+                  {creating ? (
+                    <>
+                      <i className="bi bi-arrow-repeat spin"></i> Đang Tạo...
+                    </>
+                  ) : (
+                    <>
+                      <i className="bi bi-check2-circle"></i> Lưu & Ghi Nhận Doanh Thu
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
