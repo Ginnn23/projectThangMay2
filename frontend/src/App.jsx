@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import AOS from "aos";
 import { Route, Routes, useLocation } from "react-router-dom";
+import { LanguageProvider } from "./context/LanguageContext";
 
 import Header from "./components/Header";
 import Footer from "./components/Footer";
@@ -48,7 +49,7 @@ function App() {
   }, []);
 
   return (
-    <>
+    <LanguageProvider>
       <ScrollToTop />
       {!laTrangAdmin && <Header />}
       <Routes>
@@ -68,7 +69,7 @@ function App() {
       {!laTrangAdmin && <FloatingContact />}
       {!laTrangAdmin && <AiConsultant />}
       {!laTrangAdmin && <Footer />}
-    </>
+    </LanguageProvider>
   );
 }
 

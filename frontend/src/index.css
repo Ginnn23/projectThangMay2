@@ -1038,8 +1038,8 @@ body.ai-chat-open .floating-contact {
 
 /* Nút Gọi Hotline */
 .floating-phone {
-  background: linear-gradient(135deg, #ff3b1f, #ff8c1a);
-  animation: floatingContactPulse 2.4s infinite;
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: #ffffff;
 }
 
 /* Nút Zalo */
@@ -1095,25 +1095,13 @@ body.ai-chat-open .floating-contact {
 
 @keyframes floatingContactPulse {
   0% {
-    box-shadow: 0 0 0 0 rgba(255, 59, 31, 0.6);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.6);
   }
   70% {
-    box-shadow: 0 0 0 12px rgba(255, 59, 31, 0);
+    box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
   }
   100% {
-    box-shadow: 0 0 0 0 rgba(255, 59, 31, 0);
-  }
-}
-
-@keyframes floatingContactPulse {
-  0% {
-    opacity: 0.9;
-    transform: scale(0.82);
-  }
-
-  100% {
-    opacity: 0;
-    transform: scale(1.35);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
   }
 }
 
@@ -5334,4 +5322,54 @@ body.ai-chat-open .floating-contact {
 
 .floating-telegram-icon::after {
   border-color: rgba(0, 136, 204, 0.35);
+}
+
+
+/* =============================================================================
+   NÚT CHUYỂN ĐỔI NGÔN NGỮ VIỆT NAM / ENGLISH HÌNH TRÒN TINH TẾ
+   ============================================================================= */
+.btn-lang-switcher {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: #f8fafc;
+  border: 1.5px solid #cbd5e1;
+  padding: 6px 14px 6px 8px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  outline: none;
+}
+
+.btn-lang-switcher:hover {
+  background: #ffffff;
+  border-color: #0b3a72;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(11, 58, 114, 0.15);
+}
+
+.btn-lang-switcher:active {
+  transform: translateY(1px) scale(0.96);
+}
+
+.lang-flag-circle {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 17px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.lang-code-text {
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  color: #0b2246;
+  text-transform: uppercase;
 }

@@ -2804,7 +2804,7 @@ function DoanhThuAdmin({ onShowToast }) {
               {closedRate}%
             </strong>
             <p className="dt-metric-subtext">
-              <i className="bi bi-percent"></i> {dealClosed.length}/{filteredEstimates.length || 1} dự toán chuyển đổi
+              <i className="bi bi-check2-circle"></i> {dealClosed.length}/{filteredEstimates.length} dự toán đã chốt
             </p>
           </div>
         </div>

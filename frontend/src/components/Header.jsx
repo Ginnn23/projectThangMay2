@@ -1,22 +1,24 @@
 import { useState } from "react";
 import { NavLink } from "react-router-dom";
+import { useLanguage } from "../context/LanguageContext";
 
 import logoHaHong from "../assets/images/logo-ha-hong.jpg";
 import { emailCongTy, soDienThoaiCongTy, soDienThoaiLienKet } from "../data/contactInfo";
 
-const menuItems = [
-  { label: "Trang chủ", to: "/", end: true },
-  { label: "Giới thiệu", to: "/gioi-thieu" },
-  { label: "Dịch vụ", to: "/dich-vu" },
-  { label: "Dự án", to: "/du-an" },
-  { label: "Thiết kế Cabin", to: "/thiet-ke-cabin" },
-  { label: "Dự toán báo giá", to: "/du-toan" },
-  { label: "Tin tức", to: "/tin-tuc" },
-  { label: "Liên hệ", to: "/lien-he" },
-];
-
 function Header() {
   const [menuDangMo, setMenuDangMo] = useState(false);
+  const { lang, toggleLanguage, t } = useLanguage();
+
+  const menuItems = [
+    { label: t.home, to: "/", end: true },
+    { label: t.about, to: "/gioi-thieu" },
+    { label: t.services, to: "/dich-vu" },
+    { label: t.projects, to: "/du-an" },
+    { label: t.cabinStudio, to: "/thiet-ke-cabin" },
+    { label: t.estimator, to: "/du-toan" },
+    { label: t.news, to: "/tin-tuc" },
+    { label: t.contact, to: "/lien-he" },
+  ];
 
   const dongMenu = () => {
     setMenuDangMo(false);
@@ -63,7 +65,7 @@ function Header() {
           <div className={`collapse navbar-collapse justify-content-lg-center${menuDangMo ? " show" : ""}`} id="mainMenu">
             <ul className="navbar-nav align-items-lg-center mx-lg-auto">
               {menuItems.map((item) => (
-                <li className="nav-item" key={item.label}>
+                <li className="nav-item" key={item.to}>
                   <NavLink className={({ isActive }) => `nav-link${isActive ? " active" : ""}`} end={item.end} to={item.to} onClick={dongMenu}>
                     {item.label}
                   </NavLink>
@@ -71,10 +73,28 @@ function Header() {
               ))}
             </ul>
 
-            <NavLink className="btn navbar-quote-button ms-lg-3" to="/lien-he" onClick={dongMenu}>
-              Yêu cầu báo giá
-              <i className="bi bi-arrow-up-right ms-2"></i>
-            </NavLink>
+            <div className="d-flex align-items-center gap-2 ms-lg-3 mt-3 mt-lg-0 flex-wrap">
+              <NavLink className="btn navbar-quote-button" to="/lien-he" onClick={dongMenu}>
+                {t.quoteButton}
+                <i className="bi bi-arrow-up-right ms-2"></i>
+              </NavLink>
+
+              {/* NÚT CHUYỂN ĐỔI NGÔN NGỮ VIỆT NAM / ENGLISH HÌNH TRÒN TINH TẾ */}
+              <button
+                type="button"
+                className="btn-lang-switcher"
+                onClick={toggleLanguage}
+                title={lang === "vi" ? "Chuyển sang tiếng Anh (Switch to English)" : "Switch to Vietnamese (Chuyển sang tiếng Việt)"}
+                aria-label="Chuyển đổi ngôn ngữ Việt / Anh"
+              >
+                <span className="lang-flag-circle">
+                  {lang === "vi" ? "🇻🇳" : "🇬🇧"}
+                </span>
+                <span className="lang-code-text">
+                  {lang === "vi" ? "VIE" : "ENG"}
+                </span>
+              </button>
+            </div>
           </div>
         </div>
       </nav>
