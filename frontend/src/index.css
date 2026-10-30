@@ -5373,3 +5373,37 @@ body.ai-chat-open .floating-contact {
   color: #0b2246;
   text-transform: uppercase;
 }
+
+/* =============================================================================
+   ẨN HOÀN TOÀN CÁC PHẦN TỬ THỪA CỦA GOOGLE TRANSLATE ĐỂ TRANG WEB HOÀN TOÀN TỰ NHIÊN
+   ============================================================================= */
+.goog-te-banner-frame.skiptranslate,
+.goog-te-banner-frame,
+#goog-gt-tt,
+.goog-te-balloon-frame,
+#google_translate_element,
+.goog-te-spinner-pos {
+  display: none !important;
+  visibility: hidden !important;
+}
+
+body {
+  top: 0px !important;
+  position: static !important;
+}
+
+.goog-tooltip,
+.goog-tooltip:hover {
+  display: none !important;
+}
+
+.goog-text-highlight {
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Ẩn banner trên cùng của Google Translate */
+body > .skiptranslate:first-child {
+  display: none !important;
+}
