@@ -14,7 +14,7 @@ export const WALL_OPTIONS = [
     code: "HAHONG-W01",
     name: "Gỗ Óc Chó Phối Gương Soi & Nẹp Inox",
     spec: "Gỗ Walnut 15mm • Gương bỉ 5mm • Nẹp titan",
-    desc: "Vách gỗ óc chó tự nhiên phối gương soi trung tâm & nẹp kim loại sang trọng (Chuẩn Villa & Dinh Thự)",
+    desc: "Gỗ óc chó phối gương soi trung tâm & nẹp kim loại sang trọng.",
     badge: "Villa & Dinh Thự 5★",
     syncValue: "biet-thu-walnut",
     type: "wood-mirror"
@@ -24,7 +24,7 @@ export const WALL_OPTIONS = [
     code: "HAHONG-W02",
     name: "Inox 304 Sọc Nhuyễn Hairline",
     spec: "SUS 304 dày 1.5mm • Vân xước satin mịn",
-    desc: "Bề mặt chải xước kim loại satin chống bám vân tay, bền bỉ cơ học vĩnh cửu",
+    desc: "Bề mặt inox xước satin chống bám vân tay, độ bền cao.",
     badge: "Tiêu chuẩn bền bỉ",
     syncValue: "inox-tieu-chuan",
     type: "hairline"
@@ -34,7 +34,7 @@ export const WALL_OPTIONS = [
     code: "HAHONG-W03",
     name: "Inox Gương Vàng PVD Hoàng Gia",
     spec: "Mạ PVD Champagne Gold 8K • Titan chống xước",
-    desc: "Mạ titan PVD vàng Champagne kim loại quý phái, phản chiếu ánh sáng tự nhiên",
+    desc: "Mạ titan PVD vàng Champagne sang trọng, sáng bóng tự nhiên.",
     badge: "Sang trọng PVD",
     syncValue: "inox-guong-vang",
     type: "gold-pvd"
@@ -44,7 +44,7 @@ export const WALL_OPTIONS = [
     code: "HAHONG-W04",
     name: "Inox Gương Bạc Phản Chiếu 8K",
     spec: "SUS 304 đánh bóng gương 8K • Mở rộng không gian",
-    desc: "Độ phản chiếu quang học trong trẻo, tạo chiều sâu vô tận cho cabin",
+    desc: "Inox gương trắng 8K bóng sáng, tạo cảm giác mở rộng không gian.",
     badge: "Gương 8K mở rộng",
     syncValue: "inox-tieu-chuan",
     type: "silver-mirror"
@@ -54,7 +54,7 @@ export const WALL_OPTIONS = [
     code: "HAHONG-W05",
     name: "Gỗ Sồi Tự Nhiên Nẹp Chỉ Đen Bắc Âu",
     spec: "Gỗ Oak sáng màu • Nẹp chỉ kim loại đen mờ",
-    desc: "Gỗ sồi phong cách Scandinavian chia mảng nẹp chỉ đen thanh lịch, ấm áp",
+    desc: "Gỗ sồi phong cách Bắc Âu nẹp chỉ đen thanh lịch, ấm cúng.",
     badge: "Bắc Âu Tinh Tế",
     syncValue: "inox-tieu-chuan",
     type: "oak-scandi"
@@ -64,7 +64,7 @@ export const WALL_OPTIONS = [
     code: "HAHONG-W06",
     name: "Kính Cường Lực Trong Suốt Panorama",
     spec: "Kính an toàn 10mm siêu trong • Mài vát cạnh",
-    desc: "Kính an toàn lấy sáng tự nhiên tối đa, ngắm cảnh quan 4 mặt cho thang Homelift",
+    desc: "Kính an toàn siêu trong đón sáng tối đa, ngắm trọn cảnh quan 360 độ.",
     badge: "Homelift Panorama",
     syncValue: "homelift-kinh",
     type: "glass"
@@ -74,7 +74,7 @@ export const WALL_OPTIONS = [
     code: "HAHONG-W07",
     name: "Inox Gương Đen Titanium Black 8K",
     spec: "Titanium Black PVD 8K • Đánh bóng gương siêu sâu",
-    desc: "Vách Inox gương đen tuyền Titanium Black phản chiếu chiều sâu sang trọng, phong cách Penthouse hiện đại",
+    desc: "Inox gương đen Titanium Black chiều sâu sang trọng chuẩn Penthouse.",
     badge: "Titanium Đen 8K",
     syncValue: "inox-tieu-chuan",
     type: "black-mirror"
@@ -84,7 +84,7 @@ export const WALL_OPTIONS = [
     code: "HAHONG-W08",
     name: "Vách Da Ý May Quả Trám Nẹp Chỉ Đồng",
     spec: "Da Microfiber Ý chần chỉ quả trám • Nẹp đồng vàng PVD",
-    desc: "Vách ốp da cao cấp chần chỉ quả trám thủ công phối nẹp đồng phong cách Hermès quý phái",
+    desc: "Vách da thủ công chần chỉ quả trám phối nẹp đồng phong cách Hermès.",
     badge: "Da Thủ Công Luxury",
     syncValue: "biet-thu-walnut",
     type: "quilted-leather"
@@ -94,7 +94,7 @@ export const WALL_OPTIONS = [
     code: "HAHONG-W09",
     name: "Đá Cẩm Thạch Xuyên Sáng Onyx Vàng Hoàng Gia",
     spec: "Đá ngọc Onyx tự nhiên 12mm • Đèn LED xuyên sáng đều",
-    desc: "Đá cẩm thạch ngọc tự nhiên cho ánh sáng vàng ấm xuyên qua mặt đá lung linh, đẳng cấp thượng lưu",
+    desc: "Đá ngọc cẩm thạch tự nhiên phát sáng vàng ấm lung linh, đẳng cấp thượng lưu.",
     badge: "Đá Ngọc Xuyên Sáng",
     syncValue: "inox-guong-vang",
     type: "onyx-alabaster"
@@ -108,7 +108,7 @@ export const FLOOR_OPTIONS = [
     code: "HAHONG-F01",
     name: "Đá Cẩm Thạch Nẹp Chỉ Đồng Xương Cá",
     spec: "Đá sáng mài bóng • Nẹp chỉ đồng vàng Chevron",
-    desc: "Nền đá tự nhiên nẹp các đường chỉ kim loại đồng vàng hình xương cá Chevron độc đáo",
+    desc: "Đá tự nhiên nẹp chỉ đồng vàng hình xương cá Chevron nghệ thuật.",
     badge: "Chỉ đồng nghệ thuật",
     type: "chevron"
   },
@@ -117,7 +117,7 @@ export const FLOOR_OPTIONS = [
     code: "HAHONG-F02",
     name: "Sàn Gỗ Tự Nhiên Ghép Thanh Chống Trượt",
     spec: "Gỗ Walnut tự nhiên • Xử lý chịu lực công nghiệp",
-    desc: "Các thanh ván gỗ tự nhiên màu nâu ấm ghép dọc theo chiều sâu cabin ấm cúng",
+    desc: "Gỗ tự nhiên thanh dài chống trơn trượt, ấm cúng.",
     badge: "Gỗ tự nhiên",
     type: "wood"
   },
@@ -126,7 +126,7 @@ export const FLOOR_OPTIONS = [
     code: "HAHONG-F03",
     name: "Đá Marble Đen Tia Chớp Nero Marquina",
     spec: "Cẩm thạch đen Tây Ban Nha • Vân tia chớp trắng",
-    desc: "Nền đá đen tuyền huyền bí với các đường vân tia chớp trắng phản chiếu ánh sáng kiêu sa",
+    desc: "Đá cẩm thạch đen tia chớp trắng sang trọng, huyền bí.",
     badge: "Cẩm thạch Ý",
     type: "marquina"
   },
@@ -135,7 +135,7 @@ export const FLOOR_OPTIONS = [
     code: "HAHONG-F04",
     name: "Đá Terrazzo Hạt Nhỏ Cát Be Tinh Tế",
     spec: "Đá mài Terrazzo hạt thạch anh mịn • Chống trơn",
-    desc: "Hạt đá ngọc trai li ti màu kem cát nhã nhặn, chống trầy xước và chống trơn trượt tối đa",
+    desc: "Đá mài Terrazzo cát be mịn màng, chống trầy xước và chống trơn hiệu quả.",
     badge: "Hiện đại tối giản",
     type: "terrazzo"
   },
@@ -144,7 +144,7 @@ export const FLOOR_OPTIONS = [
     code: "HAHONG-F05",
     name: "Đá Thảm CNC Mandala Hoàng Gia",
     spec: "Cắt CNC hoa văn Mandala • Viền đá granite đen",
-    desc: "Cẩm thạch tự nhiên cắt CNC hoa văn tròn đối xứng vàng đen sang trọng chuẩn biệt thự",
+    desc: "Đá hoa văn CNC Mandala hoàng gia đối xứng vàng đen tinh xảo.",
     badge: "Tân cổ điển đẳng cấp",
     type: "royal-cnc"
   },
@@ -153,7 +153,7 @@ export const FLOOR_OPTIONS = [
     code: "HAHONG-F06",
     name: "Đá Trắng Hy Lạp Calacatta Gold Vân Mây Vàng",
     spec: "Cẩm thạch Calacatta trắng tinh • Đường vân mây vàng kim",
-    desc: "Nền đá trắng sáng tinh khiết với đường vân tia vàng đồng bộ cùng nội thất vách gương sang trọng",
+    desc: "Cẩm thạch trắng Calacatta vân mây vàng ánh kim quý phái.",
     badge: "Trắng Calacatta Gold",
     type: "calacatta-gold"
   },
@@ -162,7 +162,7 @@ export const FLOOR_OPTIONS = [
     code: "HAHONG-F07",
     name: "Sàn Gỗ Căm Xe Xương Cá Herringbone Cổ Điển",
     spec: "Gỗ tự nhiên ghép xương cá chữ V • Sơn UV chống xước",
-    desc: "Gỗ tự nhiên màu nâu ấm ghép họa tiết xương cá Herringbone đem lại sự ấm cúng, gần gũi thiên nhiên",
+    desc: "Gỗ tự nhiên ghép xương cá chữ V cổ điển, chống trơn trượt.",
     badge: "Gỗ Xương Cá Cổ Điển",
     type: "herringbone-teak"
   }
@@ -175,7 +175,7 @@ export const CEILING_OPTIONS = [
     code: "HAHONG-C01",
     name: "Trần Gián Tiếp Hắt Khe LED (3000K Vàng Ấm)",
     spec: "LED âm gián tiếp 3000K • Mặt trần phẳng viền titan",
-    desc: "Hệ trần giật cấp hắt ánh sáng LED âm gián tiếp màu vàng ấm 3000K dịu mắt, chống chói",
+    desc: "Trần gián tiếp hắt khe LED vàng ấm 3000K dịu mắt, chống chói.",
     badge: "Vàng ấm 3000K",
     lightType: "warm-cove",
     lightColor: "rgba(254, 240, 138, 0.45)"
@@ -185,7 +185,7 @@ export const CEILING_OPTIONS = [
     code: "HAHONG-C02",
     name: "Trần Inox Gương Chia Ô & Thanh LED (4000K)",
     spec: "Trần inox chia ô vuông • 2 dải LED dài âm trần",
-    desc: "Mặt trần inox gương chia ô kiến trúc kết hợp dải thanh LED âm màu trung tính hiện đại",
+    desc: "Trần chia ô âm thanh LED 4000K ánh sáng trung tính hiện đại.",
     badge: "Trung tính 4000K",
     lightType: "neutral-linear",
     lightColor: "rgba(241, 245, 249, 0.55)"
@@ -195,7 +195,7 @@ export const CEILING_OPTIONS = [
     code: "HAHONG-C03",
     name: "Trần Nẹp Khung Đen & Đèn Downlight (5000K)",
     spec: "Khung nẹp nhôm đen mờ • 4 đèn rọi spotlight",
-    desc: "Trần phẳng nẹp viền đen thanh lịch kết hợp đèn downlight rọi điểm sắc sảo chuẩn showroom",
+    desc: "Trần nẹp viền đen kết hợp 4 đèn rọi downlight 5000K tập trung.",
     badge: "Ánh sáng trắng 5000K",
     lightType: "cool-spotlight",
     lightColor: "rgba(224, 242, 254, 0.6)"
@@ -205,7 +205,7 @@ export const CEILING_OPTIONS = [
     code: "HAHONG-C04",
     name: "Trần Bầu Trời Sao Sợi Quang Galaxy (Rolls-Royce)",
     spec: "Hệ sợi quang phát sáng ngẫu nhiên • LED RGBW đa sắc",
-    desc: "Trần bầu trời sao ngàn điểm sáng lung linh như vũ trụ trên các dòng xe siêu sang Rolls-Royce",
+    desc: "Bầu trời sao sợi quang lung linh như xe siêu sang Rolls-Royce.",
     badge: "Bầu Trời Sao Galaxy",
     lightType: "starlight",
     lightColor: "rgba(186, 230, 253, 0.65)"
@@ -215,7 +215,7 @@ export const CEILING_OPTIONS = [
     code: "HAHONG-C05",
     name: "Trần Căng Xuyên Sáng Toàn Phần Barrisol (3500K)",
     spec: "Màng căng Barrisol Pháp • Ánh sáng tán xạ đều 100%",
-    desc: "Mặt trần phát sáng đồng đều nguyên khối, chống chói lóa mắt tuyệt đối, phong cách resort 5 sao",
+    desc: "Mặt trần căng phát sáng đồng đều nguyên khối, êm dịu phong cách resort.",
     badge: "Xuyên Sáng 3500K",
     lightType: "barrisol",
     lightColor: "rgba(254, 249, 195, 0.6)"
@@ -229,7 +229,7 @@ export const HANDRAIL_OPTIONS = [
     code: "HAHONG-R04",
     name: "Tay Vịn Tròn Inox SUS 304 Chuyên Homelift",
     spec: "SUS 304 phi 38mm chải xước satin • Bo tròn 2 đầu",
-    desc: "Tay vịn tròn tiêu chuẩn kiến trúc Homelift nhà phố & thang kính, chống bám vân tay, êm tay tuyệt đối",
+    desc: "Tay vịn tròn SUS 304 chuẩn Homelift, chống bám vân tay, cầm nắm êm ái.",
     badge: "Homelift Nhà Phố",
     type: "round-inox"
   },
@@ -238,7 +238,7 @@ export const HANDRAIL_OPTIONS = [
     code: "HAHONG-R01",
     name: "Tay Vịn Gỗ Tự Nhiên Đầu Bọc Nẹp Kim Loại",
     spec: "Thân gỗ tròn phi 38 • Đầu bọc nẹp PVD vàng đồng",
-    desc: "Thân gỗ tròn ấm tay, hai đầu bọc nẹp kim loại mạ PVD chống oxy hóa (Như Ảnh 1 & 3)",
+    desc: "Thân gỗ tròn ấm tay, 2 đầu bọc nẹp PVD vàng đồng sang trọng.",
     badge: "Gỗ & Nẹp Kim Loại",
     type: "wood-brass"
   },
@@ -247,7 +247,7 @@ export const HANDRAIL_OPTIONS = [
     code: "HAHONG-R02",
     name: "Tay Vịn Bản Dẹp Inox 304 Xước Satin",
     spec: "Inox 304 bản dẹp 40x10mm • Bát bắt tường giấu vít",
-    desc: "Bản dẹp 40mm chống trơn trượt, góc bo cạnh satin cao cấp công thái học (Như Ảnh 2)",
+    desc: "Bản dẹp inox 304 xước satin công thái học chắc chắn.",
     badge: "Inox dẹp công thái học",
     type: "flat-satin"
   },
@@ -256,7 +256,7 @@ export const HANDRAIL_OPTIONS = [
     code: "HAHONG-R03",
     name: "Tay Vịn Tròn Inox Gương Vàng PVD Champagne",
     spec: "Inox 304 phi 38mm mạ PVD • Bo cong hai đầu",
-    desc: "Inox bóng bẩy mạ PVD vàng Champagne đồng bộ vách gương sang trọng (Như Ảnh 4)",
+    desc: "Inox gương mạ PVD vàng Champagne bóng bẩy hoàng gia.",
     badge: "Hoàng Gia PVD",
     type: "round-pvd"
   },
@@ -265,7 +265,7 @@ export const HANDRAIL_OPTIONS = [
     code: "HAHONG-R05",
     name: "Tay Vịn Dẹp Đen Mờ Anodized Cao Cấp",
     spec: "Hợp kim nhôm Anodized đen mờ 40x10mm • Bát giấu vít",
-    desc: "Bản dẹp màu đen mờ chống xước, tạo điểm nhấn sắc nét và phong cách tối giản hiện đại",
+    desc: "Hợp kim nhôm đen mờ anodized phong cách tối giản hiện đại.",
     badge: "Đen Mờ Anodized",
     type: "flat-matte-black"
   },
@@ -274,7 +274,7 @@ export const HANDRAIL_OPTIONS = [
     code: "HAHONG-R06",
     name: "Tay Vịn Đôi Inox Song Song (Người Lớn & Trẻ Nhỏ)",
     spec: "2 thanh tròn phi 32mm song song • SUS 304 chải xước satin",
-    desc: "Thiết kế hai tầng tay vịn thông minh, tầng trên cho người lớn, tầng dưới hỗ trợ trẻ em và người ngồi xe lăn",
+    desc: "Hai tầng tay vịn song song tiện lợi cho cả người lớn, trẻ nhỏ và người cao tuổi.",
     badge: "Tay Vịn Đôi Song Song",
     type: "dual-tier-inox"
   }
@@ -429,60 +429,65 @@ const CabinVisualizer = forwardRef(function CabinVisualizer({
   // CHỨC NĂNG BẤM TẦNG THANG MÁY TỰ ĐÓNG VÀ MỞ CỬA TẠI TẦNG ĐÍCH
   // -------------------------------------------------------------
   const handleCallFloor = (target) => {
-    if (elevatorStatus !== "idle") {
-      triggerToast("Thang máy đang di chuyển, vui lòng chờ...");
+    if (elevatorStatus === "moving") {
+      triggerToast("Thang máy đang di chuyển giữa các tầng, vui lòng chờ...");
       return;
     }
 
     if (target === currentFloor) {
       if (!isDoorsOpen) {
         setIsDoorsOpen(true);
-        triggerToast(`Thang máy đang ở Tầng ${target} • Đang mở cửa đón khách`);
+        triggerToast(`Thang máy đang ở Tầng ${target} • Cửa đang mở đón khách`);
       } else {
         triggerToast(`Thang máy hiện đang đỗ sẵn tại Tầng ${target}`);
       }
       return;
     }
 
+    if (tripIntervalRef.current) {
+      clearInterval(tripIntervalRef.current);
+      tripIntervalRef.current = null;
+    }
+
     const direction = target > currentFloor ? "up" : "down";
     setTargetFloor(target);
     setMoveDirection(direction);
     setElevatorStatus("closing");
+    setIsDoorsOpen(false);
     triggerToast(`Đã bấm Tầng ${target} • Cửa đang tự động đóng lại...`);
 
-    // Bước 1: Tự động ĐÓNG CỬA
-    setIsDoorsOpen(false);
-
-    // Bước 2: Cửa đóng kín sau 850ms -> Bắt đầu chạy thang
+    // Cửa đóng -> Di chuyển mượt mà
     setTimeout(() => {
       setElevatorStatus("moving");
-      const stepsToTravel = Math.abs(target - currentFloor);
-      let stepCount = 0;
-      let activeFloor = currentFloor;
+      let active = currentFloor;
 
       tripIntervalRef.current = setInterval(() => {
-        stepCount++;
-        activeFloor = direction === "up" ? activeFloor + 1 : activeFloor - 1;
-        setCurrentFloor(activeFloor);
+        if (direction === "up") {
+          active += 1;
+        } else {
+          active -= 1;
+        }
+        setCurrentFloor(active);
 
-        if (activeFloor === target || stepCount >= stepsToTravel) {
+        const arrived = (direction === "up" && active >= target) || (direction === "down" && active <= target);
+        if (arrived) {
           clearInterval(tripIntervalRef.current);
           tripIntervalRef.current = null;
+          setCurrentFloor(target);
 
-          // Bước 3: Chuông Ding & Tự động MỞ CỬA tại tầng đó
           setTimeout(() => {
             setElevatorStatus("opening");
             setMoveDirection(null);
-            triggerToast(`🔔 Ding! Đã đến Tầng ${target} • Cửa đang tự động mở ra`);
             setIsDoorsOpen(true);
+            triggerToast(`🔔 Ding! Đã đến Tầng ${target} • Cửa tự động mở`);
 
             setTimeout(() => {
               setElevatorStatus("idle");
-            }, 900);
-          }, 450);
+            }, 600);
+          }, 350);
         }
-      }, 750);
-    }, 900);
+      }, 400);
+    }, 450);
   };
 
   const handleManualDoorToggle = () => {
@@ -868,7 +873,7 @@ const CabinVisualizer = forwardRef(function CabinVisualizer({
               </div>
               {/* Hàng nút bấm inox tròn viền đèn Halo Ring */}
               <div className="cabin-cop-buttons">
-                {floorList.slice(0, 5).map((fNum) => (
+                {floorList.map((fNum) => (
                   <div
                     key={fNum}
                     className={`cop-dot ${currentFloor === fNum ? "active" : ""} ${targetFloor === fNum && elevatorStatus !== "idle" ? "calling" : ""}`}
@@ -1122,130 +1127,206 @@ const CabinVisualizer = forwardRef(function CabinVisualizer({
 
         {/* Tab 1: Vách Cabin */}
         {activeTab === "walls" && (
-          <div className="cabin-cards-grid">
-            {WALL_OPTIONS.map((item) => {
-              const isSelected = selectedWallId === item.id;
-              return (
-                <button
-                  key={item.id}
-                  type="button"
-                  className={`cabin-material-card ${isSelected ? "active" : ""}`}
-                  onClick={() => handleSelectWall(item)}
-                >
-                  <div className={`swatch-preview-box swatch-wall-${item.id}`}>
-                    <span className="swatch-code-tag">{item.code}</span>
-                    {isSelected && (
-                      <div className="swatch-check-icon">
-                        <i className="bi bi-check-lg"></i>
-                      </div>
-                    )}
+          <>
+            <div className="cabin-cards-grid">
+              {WALL_OPTIONS.map((item) => {
+                const isSelected = selectedWallId === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    className={`cabin-material-card ${isSelected ? "active" : ""}`}
+                    onClick={() => handleSelectWall(item)}
+                  >
+                    <div className={`swatch-preview-box swatch-wall-${item.id}`}>
+                      <span className="swatch-code-tag">{item.code}</span>
+                      {isSelected && (
+                        <div className="swatch-check-icon">
+                          <i className="bi bi-check-lg"></i>
+                        </div>
+                      )}
+                    </div>
+                    <div className="swatch-content">
+                      <span className="swatch-name">{item.name}</span>
+                      <span className="swatch-badge">{item.badge}</span>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+            {curWallObj && (
+              <div className="cabin-active-material-detail">
+                <div className="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-1">
+                  <div className="d-flex align-items-center gap-2">
+                    <span className="badge bg-warning text-dark fw-bold">{curWallObj.code}</span>
+                    <strong className="text-white" style={{ fontSize: "0.86rem" }}>{curWallObj.name}</strong>
                   </div>
-                  <div className="swatch-content">
-                    <span className="swatch-name">{item.name}</span>
-                    <span className="swatch-spec">{item.spec}</span>
-                    <span className="swatch-desc">{item.desc}</span>
-                    <span className="swatch-badge">{item.badge}</span>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
+                  <span className="text-success small fw-semibold">
+                    <i className="bi bi-check-circle-fill me-1"></i>Đang áp dụng vào Cabin
+                  </span>
+                </div>
+                <div className="small text-info fw-semibold mb-1" style={{ fontSize: "0.78rem" }}>
+                  <i className="bi bi-shield-check me-1"></i>{curWallObj.spec}
+                </div>
+                <p className="small text-muted mb-0" style={{ fontSize: "0.76rem", lineHeight: "1.4" }}>
+                  {curWallObj.desc}
+                </p>
+              </div>
+            )}
+          </>
         )}
 
         {/* Tab 2: Sàn Đá & Gỗ */}
         {activeTab === "flooring" && (
-          <div className="cabin-cards-grid">
-            {FLOOR_OPTIONS.map((item) => {
-              const isSelected = selectedFloorId === item.id;
-              return (
-                <button
-                  key={item.id}
-                  type="button"
-                  className={`cabin-material-card ${isSelected ? "active" : ""}`}
-                  onClick={() => handleSelectFloor(item)}
-                >
-                  <div className={`swatch-preview-box swatch-floor-${item.id}`}>
-                    <span className="swatch-code-tag">{item.code}</span>
-                    {isSelected && (
-                      <div className="swatch-check-icon">
-                        <i className="bi bi-check-lg"></i>
-                      </div>
-                    )}
+          <>
+            <div className="cabin-cards-grid">
+              {FLOOR_OPTIONS.map((item) => {
+                const isSelected = selectedFloorId === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    className={`cabin-material-card ${isSelected ? "active" : ""}`}
+                    onClick={() => handleSelectFloor(item)}
+                  >
+                    <div className={`swatch-preview-box swatch-floor-${item.id}`}>
+                      <span className="swatch-code-tag">{item.code}</span>
+                      {isSelected && (
+                        <div className="swatch-check-icon">
+                          <i className="bi bi-check-lg"></i>
+                        </div>
+                      )}
+                    </div>
+                    <div className="swatch-content">
+                      <span className="swatch-name">{item.name}</span>
+                      <span className="swatch-badge">{item.badge}</span>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+            {curFloorObj && (
+              <div className="cabin-active-material-detail">
+                <div className="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-1">
+                  <div className="d-flex align-items-center gap-2">
+                    <span className="badge bg-warning text-dark fw-bold">{curFloorObj.code}</span>
+                    <strong className="text-white" style={{ fontSize: "0.86rem" }}>{curFloorObj.name}</strong>
                   </div>
-                  <div className="swatch-content">
-                    <span className="swatch-name">{item.name}</span>
-                    <span className="swatch-spec">{item.spec}</span>
-                    <span className="swatch-desc">{item.desc}</span>
-                    <span className="swatch-badge">{item.badge}</span>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
+                  <span className="text-success small fw-semibold">
+                    <i className="bi bi-check-circle-fill me-1"></i>Đang áp dụng vào Cabin
+                  </span>
+                </div>
+                <div className="small text-info fw-semibold mb-1" style={{ fontSize: "0.78rem" }}>
+                  <i className="bi bi-shield-check me-1"></i>{curFloorObj.spec}
+                </div>
+                <p className="small text-muted mb-0" style={{ fontSize: "0.76rem", lineHeight: "1.4" }}>
+                  {curFloorObj.desc}
+                </p>
+              </div>
+            )}
+          </>
         )}
 
         {/* Tab 3: Trần LED */}
         {activeTab === "ceiling" && (
-          <div className="cabin-cards-grid">
-            {CEILING_OPTIONS.map((item) => {
-              const isSelected = selectedCeilingId === item.id;
-              return (
-                <button
-                  key={item.id}
-                  type="button"
-                  className={`cabin-material-card ${isSelected ? "active" : ""}`}
-                  onClick={() => handleSelectCeiling(item)}
-                >
-                  <div className={`swatch-preview-box swatch-ceil-${item.id}`}>
-                    <span className="swatch-code-tag">{item.code}</span>
-                    {isSelected && (
-                      <div className="swatch-check-icon">
-                        <i className="bi bi-check-lg"></i>
-                      </div>
-                    )}
+          <>
+            <div className="cabin-cards-grid">
+              {CEILING_OPTIONS.map((item) => {
+                const isSelected = selectedCeilingId === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    className={`cabin-material-card ${isSelected ? "active" : ""}`}
+                    onClick={() => handleSelectCeiling(item)}
+                  >
+                    <div className={`swatch-preview-box swatch-ceil-${item.id}`}>
+                      <span className="swatch-code-tag">{item.code}</span>
+                      {isSelected && (
+                        <div className="swatch-check-icon">
+                          <i className="bi bi-check-lg"></i>
+                        </div>
+                      )}
+                    </div>
+                    <div className="swatch-content">
+                      <span className="swatch-name">{item.name}</span>
+                      <span className="swatch-badge">{item.badge}</span>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+            {curCeilObj && (
+              <div className="cabin-active-material-detail">
+                <div className="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-1">
+                  <div className="d-flex align-items-center gap-2">
+                    <span className="badge bg-warning text-dark fw-bold">{curCeilObj.code}</span>
+                    <strong className="text-white" style={{ fontSize: "0.86rem" }}>{curCeilObj.name}</strong>
                   </div>
-                  <div className="swatch-content">
-                    <span className="swatch-name">{item.name}</span>
-                    <span className="swatch-spec">{item.spec}</span>
-                    <span className="swatch-desc">{item.desc}</span>
-                    <span className="swatch-badge">{item.badge}</span>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
+                  <span className="text-success small fw-semibold">
+                    <i className="bi bi-check-circle-fill me-1"></i>Đang áp dụng vào Cabin
+                  </span>
+                </div>
+                <div className="small text-info fw-semibold mb-1" style={{ fontSize: "0.78rem" }}>
+                  <i className="bi bi-shield-check me-1"></i>{curCeilObj.spec}
+                </div>
+                <p className="small text-muted mb-0" style={{ fontSize: "0.76rem", lineHeight: "1.4" }}>
+                  {curCeilObj.desc}
+                </p>
+              </div>
+            )}
+          </>
         )}
 
         {/* Tab 4: Tay Vịn */}
         {activeTab === "handrail" && (
-          <div className="cabin-cards-grid">
-            {HANDRAIL_OPTIONS.map((item) => {
-              const isSelected = selectedHandrailId === item.id;
-              return (
-                <button
-                  key={item.id}
-                  type="button"
-                  className={`cabin-material-card ${isSelected ? "active" : ""}`}
-                  onClick={() => handleSelectHandrail(item)}
-                >
-                  <div className={`swatch-preview-box swatch-rail-${item.id}`}>
-                    <span className="swatch-code-tag">{item.code}</span>
-                    {isSelected && (
-                      <div className="swatch-check-icon">
-                        <i className="bi bi-check-lg"></i>
-                      </div>
-                    )}
+          <>
+            <div className="cabin-cards-grid">
+              {HANDRAIL_OPTIONS.map((item) => {
+                const isSelected = selectedHandrailId === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    className={`cabin-material-card ${isSelected ? "active" : ""}`}
+                    onClick={() => handleSelectHandrail(item)}
+                  >
+                    <div className={`swatch-preview-box swatch-rail-${item.id}`}>
+                      <span className="swatch-code-tag">{item.code}</span>
+                      {isSelected && (
+                        <div className="swatch-check-icon">
+                          <i className="bi bi-check-lg"></i>
+                        </div>
+                      )}
+                    </div>
+                    <div className="swatch-content">
+                      <span className="swatch-name">{item.name}</span>
+                      <span className="swatch-badge">{item.badge}</span>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+            {curRailObj && (
+              <div className="cabin-active-material-detail">
+                <div className="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-1">
+                  <div className="d-flex align-items-center gap-2">
+                    <span className="badge bg-warning text-dark fw-bold">{curRailObj.code}</span>
+                    <strong className="text-white" style={{ fontSize: "0.86rem" }}>{curRailObj.name}</strong>
                   </div>
-                  <div className="swatch-content">
-                    <span className="swatch-name">{item.name}</span>
-                    <span className="swatch-spec">{item.spec}</span>
-                    <span className="swatch-desc">{item.desc}</span>
-                    <span className="swatch-badge">{item.badge}</span>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
+                  <span className="text-success small fw-semibold">
+                    <i className="bi bi-check-circle-fill me-1"></i>Đang áp dụng vào Cabin
+                  </span>
+                </div>
+                <div className="small text-info fw-semibold mb-1" style={{ fontSize: "0.78rem" }}>
+                  <i className="bi bi-shield-check me-1"></i>{curRailObj.spec}
+                </div>
+                <p className="small text-muted mb-0" style={{ fontSize: "0.76rem", lineHeight: "1.4" }}>
+                  {curRailObj.desc}
+                </p>
+              </div>
+            )}
+          </>
         )}
       </div>
 

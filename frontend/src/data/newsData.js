@@ -311,7 +311,7 @@ Tuy nhiên, cải tạo nhà cũ luôn đi kèm nhiều thách thức kết cấ
     author: "Kỹ sư Trưởng Cơ Điện - Hà Hồng Elevator",
     featured: false,
     summary: "Phân tích toàn diện ưu nhược điểm giữa động cơ kéo có hộp số truyền thống và động cơ không hộp số nam châm vĩnh cửu Fuji (Nhật Bản), Montanari (Ý), Mitsubishi về độ êm, độ bền và mức tiêu hao điện năng.",
-    image: "https://images.unsplash.com/photo-1581092335397-9583fe92d232?auto=format&fit=crop&w=1200&q=80",
+    image: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=1200&q=80",
     tags: ["Động cơ Fuji", "Động cơ Montanari", "Không hộp số", "Tiết kiệm điện năng", "So sánh động cơ"],
     content: `
 ### 1. Tầm quan trọng của động cơ máy kéo thang máy

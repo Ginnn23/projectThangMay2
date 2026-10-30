@@ -74,6 +74,22 @@ const PRESET_COLLECTIONS = [
 
 export default function StudioCabin() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  useEffect(() => {
+    const pStops = searchParams.get("stops");
+    if (pStops && !isNaN(pStops)) {
+      setStops(Math.min(Math.max(Number(pStops), 2), 10));
+    }
+    const pCap = searchParams.get("capacityKg");
+    if (pCap && !isNaN(pCap)) {
+      setCapacityKg(Number(pCap));
+    }
+    const pType = searchParams.get("elevatorType");
+    if (pType) {
+      setElevatorType(pType);
+    }
+  }, [searchParams]);
 
   // State cấu hình
   const [activePreset, setActivePreset] = useState("classic-walnut");
@@ -380,14 +396,14 @@ export default function StudioCabin() {
                         </select>
                       </div>
                       <div className="col-6">
-                        <label className="form-label small fw-bold text-muted mb-1">Số Tầng (Stops):</label>
+                        <label className="form-label small fw-bold text-muted mb-1">Số Tầng:</label>
                         <select
                           className="form-select form-select-sm"
                           value={stops}
                           onChange={(e) => setStops(Number(e.target.value))}
                         >
                           {[2, 3, 4, 5, 6, 7, 8, 9, 10].map((s) => (
-                            <option key={s} value={s}>{s} Tầng ({s} điểm dừng)</option>
+                            <option key={s} value={s}>{s} Tầng</option>
                           ))}
                         </select>
                       </div>

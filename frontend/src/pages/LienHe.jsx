@@ -336,7 +336,7 @@ function FormLienHe() {
                     <option value="">Chọn loại thang máy</option>
                     {loaiThangMayCongTy.map((item) => <option value={item} key={item}>{item}</option>)}
                   </select>
-                  {loi.loaiCongTrinh && <div className="form-error" id="loaiCongTrinh-error">{loaiCongTrinh}</div>}
+                  {loi.loaiCongTrinh && <div className="form-error" id="loaiCongTrinh-error">{loi.loaiCongTrinh}</div>}
                 </div>
 
                 <div className="col-12">

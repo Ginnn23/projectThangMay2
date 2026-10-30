@@ -112,7 +112,7 @@ function AiConsultant() {
         `• **Dòng thang tối ưu:** **${typeName}**\n` +
         `• **Động cơ & Cửa:** ${res.suggestedMotorBrand} • Cửa ${res.suggestedDoorType}\n` +
         `• **Dự toán sơ bộ:** **${res.estimatedPriceMin?.toLocaleString("vi-VN")} - ${res.estimatedPriceMax?.toLocaleString("vi-VN")} đ**\n\n` +
-        `💡 **Nhận xét chuyên môn:**\n${res.summaryAnalysis}\n\n` +
+        `💡 **Gợi ý tư vấn tham khảo:**\n${res.summaryAnalysis}\n\n` +
         `👉 Anh/chị có thể để lại **Số điện thoại** để kỹ sư Hà Hồng gửi bản vẽ 2D/3D chi tiết hoặc mở trang **Dự toán thang máy** để xuất file PDF báo giá ạ!`;
 
       const modelMsg = {

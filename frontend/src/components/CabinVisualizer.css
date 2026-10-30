@@ -674,8 +674,11 @@
 
 .cabin-cop-buttons {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
+  flex-direction: column-reverse;
+  flex-wrap: wrap;
+  max-height: 120px;
+  gap: 3px;
+  align-content: center;
 }
 
 .cop-dot {
@@ -1573,3 +1576,19 @@
 .swatch-rail-round-inox { background: linear-gradient(180deg, #ffffff 0%, #94a3b8 100%); }
 .swatch-rail-flat-matte-black { background: #18181b; }
 .swatch-rail-dual-tier-inox { background: linear-gradient(180deg, #ffffff 0%, #94a3b8 50%, #ffffff 51%, #64748b 100%); }
+
+/* Chi tiết mẫu vật liệu đang chọn (gọn gàng, đủ hiểu) */
+.cabin-active-material-detail {
+  margin-top: 10px;
+  padding: 10px 14px;
+  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid rgba(250, 204, 21, 0.35);
+  border-radius: 10px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+  animation: fadeIn 0.25s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-3px); }
+  to { opacity: 1; transform: translateY(0); }
+}

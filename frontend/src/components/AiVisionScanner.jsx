@@ -521,7 +521,7 @@ export default function AiVisionScanner({ onApplySpecs }) {
                 {/* Khung nhận định chuyên môn */}
                 <div className="ai-vision-highlights-box mb-3">
                   <div className="small fw-bold text-warning mb-1">
-                    <i className="bi bi-lightbulb me-1"></i> ĐÁNH GIÁ CHUYÊN MÔN KỸ SƯ HÀ HỒNG:
+                    <i className="bi bi-lightbulb me-1"></i> GỢI Ý TƯ VẤN THAM KHẢO TỪ AI:
                   </div>
                   <p className="small text-light mb-2" style={{ lineHeight: "1.6" }}>{result.summaryAnalysis}</p>
                   {result.technicalHighlights?.length > 0 && (

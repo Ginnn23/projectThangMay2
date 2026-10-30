@@ -294,6 +294,7 @@ export default function News() {
                     src={currentArticle.image}
                     alt={currentArticle.title}
                     className="article-hero-img"
+                    onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = heroImage; }}
                   />
                 </div>
 
@@ -396,6 +397,7 @@ export default function News() {
                             objectFit: "cover",
                             borderRadius: "8px"
                           }}
+                          onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = heroImage; }}
                         />
                         <div style={{ flex: 1 }}>
                           <div
@@ -539,6 +541,7 @@ export default function News() {
                       src={featuredArticle.image}
                       alt={featuredArticle.title}
                       className="featured-article-img"
+                      onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = heroImage; }}
                     />
                   </div>
                 </div>
@@ -613,6 +616,7 @@ export default function News() {
                         src={article.image}
                         alt={article.title}
                         className="news-card-img"
+                        onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = heroImage; }}
                       />
                       <span className="news-card-badge">{article.category}</span>
                     </div>

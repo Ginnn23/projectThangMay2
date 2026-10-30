@@ -260,12 +260,12 @@ export default function DuToanThangMay() {
 
     const trimmedEmail = email.trim().toLowerCase();
     if (!trimmedEmail) {
-      setErrorMsg("Vui lòng nhập địa chỉ Gmail (VD: hotro.hahong@gmail.com).");
+      setErrorMsg("Vui lòng nhập địa chỉ Email / Gmail nhận báo giá (VD: hotro.hahong@gmail.com).");
       return;
     }
-    const gmailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/i;
-    if (!gmailRegex.test(trimmedEmail)) {
-      setErrorMsg("Email bắt buộc phải có đuôi @gmail.com (VD: yourname@gmail.com).");
+    const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!EMAIL_REGEX.test(trimmedEmail)) {
+      setErrorMsg("Vui lòng nhập địa chỉ Email/Gmail đúng định dạng (Ví dụ: yourname@gmail.com).");
       return;
     }
 
@@ -646,16 +646,16 @@ export default function DuToanThangMay() {
                         </div>
                       </div>
 
-                      {/* Địa chỉ Gmail */}
+                      {/* Địa chỉ Email / Gmail */}
                       <div className="col-12 col-sm-6 form-input-box mb-0">
                         <label className="form-input-label">
-                          Địa chỉ Gmail <span className="text-danger">*</span>
+                          Địa chỉ Email / Gmail <span className="text-danger">*</span>
                         </label>
                         <div className="form-input-inner">
                           <i className="bi bi-envelope-fill form-input-icon"></i>
                           <input
                             type="email"
-                            className="form-input-field"
+                            className={`form-input-field ${email.trim() && !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email.trim()) ? "border-danger" : ""}`}
                             placeholder="yourname@gmail.com"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
@@ -663,6 +663,12 @@ export default function DuToanThangMay() {
                             required
                           />
                         </div>
+                        {email.trim() && !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email.trim()) && (
+                          <div className="text-danger small mt-1" style={{ fontSize: "11px" }}>
+                            <i className="bi bi-exclamation-circle me-1"></i>
+                            Email không hợp lệ (Ví dụ: yourname@gmail.com)
+                          </div>
+                        )}
                       </div>
 
                       {/* Địa chỉ công trình */}
