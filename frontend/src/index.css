@@ -5331,10 +5331,10 @@ body.ai-chat-open .floating-contact {
 .btn-lang-switcher {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
+  gap: 8px;
   background: #f8fafc;
   border: 1.5px solid #cbd5e1;
-  padding: 6px 14px 6px 8px;
+  padding: 5px 12px 5px 6px;
   border-radius: 999px;
   cursor: pointer;
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
@@ -5354,24 +5354,25 @@ body.ai-chat-open .floating-contact {
 }
 
 .lang-flag-circle {
-  width: 28px;
-  height: 28px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
   background: #ffffff;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 17px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.16);
   border: 1px solid rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  flex-shrink: 0;
 }
 
 .lang-code-text {
   font-size: 13px;
-  font-weight: 800;
-  letter-spacing: 0.5px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
   color: #0b2246;
-  text-transform: uppercase;
+  white-space: nowrap;
 }
 
 /* =============================================================================
