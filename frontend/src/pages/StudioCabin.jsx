@@ -6,67 +6,69 @@ import SmartElevatorCOP from "../components/SmartElevatorCOP";
 import { soDienThoaiCongTy, soDienThoaiLienKet } from "../data/contactInfo";
 import { apiClient } from "../api/client";
 import heroImage from "../assets/images/hero-elevator.jpg";
-import anhGiaDinh01 from "../assets/images/du-an/thang-may-gia-dinh-01.webp";
-import anhGiaDinh02 from "../assets/images/du-an/thang-may-gia-dinh-02.webp";
-import anhGiaDinh03 from "../assets/images/du-an/thang-may-gia-dinh-03.webp";
-import anhInox01 from "../assets/images/du-an/cabin-thang-may-inox-01.webp";
-import anhChampagne01 from "../assets/images/du-an/cabin-thang-may-champagne-01.webp";
-import anhVanPhong01 from "../assets/images/du-an/thang-may-van-phong-01.webp";
-import anhVanPhong02 from "../assets/images/du-an/thang-may-van-phong-02.webp";
+import anhWalnutMirror from "../assets/images/cabin-styles/cabin-walnut-mirror.webp";
+import anhInoxHairline from "../assets/images/cabin-styles/cabin-inox-hairline.webp";
+import anhGoldPvd from "../assets/images/cabin-styles/cabin-gold-pvd.webp";
+import anhSilverMirror from "../assets/images/cabin-styles/cabin-silver-mirror.webp";
+import anhOakScandi from "../assets/images/cabin-styles/cabin-oak-scandi.webp";
+import anhGlassPanorama from "../assets/images/cabin-styles/cabin-glass-panorama.webp";
+import anhTitaniumBlack from "../assets/images/cabin-styles/cabin-titanium-black.webp";
+import anhQuiltedLeather from "../assets/images/cabin-styles/cabin-quilted-leather.jpg";
+import anhOnyxBacklit from "../assets/images/cabin-styles/cabin-onyx-backlit.jpg";
 import "./StudioCabin.css";
 
 // DANH SÁCH ẢNH THỰC TẾ CABIN PHỐI HOÀN THIỆN TƯƠNG ỨNG TỪNG MẪU VẬT LIỆU
 const CABIN_REAL_PHOTOS = {
   "wood-walnut-mirror": {
-    image: anhGiaDinh01,
+    image: anhWalnutMirror,
     title: "Cabin Gỗ Óc Chó Phối Gương Soi Quý Tộc",
     badge: "Chuẩn Biệt Thự & Villa 5★",
     desc: "Hình ảnh hoàn thiện thực tế: Vách gỗ Walnut tự nhiên kết hợp gương bỉ trung tâm, nẹp titan vàng đồng sang trọng."
   },
   "inox-guong-vang": {
-    image: anhChampagne01,
+    image: anhGoldPvd,
     title: "Cabin Inox Gương Vàng PVD Hoàng Gia",
     badge: "Hoàng Gia Luxury PVD 8K",
     desc: "Hình ảnh hoàn thiện thực tế: Mạ titan PVD vàng Champagne vương giả, phản chiếu ánh sáng tự nhiên lộng lẫy."
   },
   "kinh-cuong-luc": {
-    image: anhGiaDinh02,
+    image: anhGlassPanorama,
     title: "Cabin Thang Máy Kính Homelift Panorama",
     badge: "Homelift Nhà Phố View 360°",
     desc: "Hình ảnh hoàn thiện thực tế: Giếng thang vách kính an toàn 4 mặt siêu trong suốt, đón ánh sáng tự nhiên."
   },
   "wood-oak-scandi": {
-    image: anhGiaDinh03,
+    image: anhOakScandi,
     title: "Cabin Gỗ Sồi Bắc Âu Nẹp Chỉ Đen",
     badge: "Scandinavian Tinh Tế & Ấm Cúng",
     desc: "Hình ảnh hoàn thiện thực tế: Gỗ sồi sáng màu phân mảng nẹp chỉ đen thanh lịch, phong cách tối giản Bắc Âu."
   },
   "inox-tieu-chuan": {
-    image: anhInox01,
+    image: anhInoxHairline,
     title: "Cabin Inox 304 Sọc Nhuyễn Hairline",
     badge: "Tiêu Chuẩn Bền Bỉ Cơ Học",
     desc: "Hình ảnh hoàn thiện thực tế: Inox SUS 304 chải xước satin chống bám vân tay, bền bỉ cơ học vĩnh cửu."
   },
   "inox-guong-bac": {
-    image: anhVanPhong01,
+    image: anhSilverMirror,
     title: "Cabin Inox Gương Bạc Phản Chiếu 8K",
     badge: "Mở Rộng Không Gian Vô Tận",
     desc: "Hình ảnh hoàn thiện thực tế: Inox đánh bóng gương 8K trắng sáng, tạo cảm giác mở rộng không gian tối đa."
   },
   "inox-guong-den": {
-    image: anhVanPhong02,
+    image: anhTitaniumBlack,
     title: "Cabin Inox Gương Đen Titanium Black 8K",
     badge: "Penthouse Hiện Đại",
     desc: "Hình ảnh hoàn thiện thực tế: Gương đen tuyền Titanium Black phản chiếu chiều sâu sang trọng chuẩn Penthouse."
   },
   "da-leather-hermes": {
-    image: anhChampagne01,
+    image: anhQuiltedLeather,
     title: "Cabin Vách Da Ý May Quả Trám Nẹp Đồng",
     badge: "Da Thủ Công Luxury Hermès",
-    desc: "Hình ảnh hoàn thiện thực tế: Vách da Microfiber Ý chần chỉ quả trám phối nẹp đồng phong cách Hermès quý phái."
+    desc: "Hình ảnh hoàn thiện thực tế: Vách da Microfiber Ý chần chỉ quả trám thủ công phối nẹp đồng phong cách Hermès quý phái."
   },
   "onyx-backlit": {
-    image: anhChampagne01,
+    image: anhOnyxBacklit,
     title: "Cabin Đá Cẩm Thạch Xuyên Sáng Onyx Vàng",
     badge: "Đá Ngọc Xuyên Sáng Thượng Lưu",
     desc: "Hình ảnh hoàn thiện thực tế: Đá ngọc tự nhiên cho ánh sáng vàng ấm xuyên qua mặt đá lung linh đẳng cấp."
