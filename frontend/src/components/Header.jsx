@@ -79,19 +79,20 @@ function Header() {
                 <i className="bi bi-arrow-up-right ms-2"></i>
               </NavLink>
 
-              {/* NÚT CHUYỂN ĐỔI NGÔN NGỮ VIỆT NAM / ENGLISH HÌNH TRÒN TINH TẾ */}
+              {/* NÚT CHUYỂN ĐỔI NGÔN NGỮ VIỆT NAM / ENGLISH HÌNH TRÒN TINH TẾ (CHỐNG DỊCH NHẦM THÀNH MẠNG SỐNG) */}
               <button
                 type="button"
-                className="btn-lang-switcher"
+                className="btn-lang-switcher notranslate"
+                translate="no"
                 onClick={toggleLanguage}
-                title={lang === "vi" ? "Chuyển sang tiếng Anh (Switch to English)" : "Switch to Vietnamese (Chuyển sang tiếng Việt)"}
+                title={lang === "vi" ? "Switch to English (Chuyển sang Tiếng Anh)" : "Chuyển sang Tiếng Việt (Switch to Vietnamese)"}
                 aria-label="Chuyển đổi ngôn ngữ Việt / Anh"
               >
-                <span className="lang-flag-circle">
+                <span className="lang-flag-circle notranslate" translate="no">
                   {lang === "vi" ? "🇻🇳" : "🇬🇧"}
                 </span>
-                <span className="lang-code-text">
-                  {lang === "vi" ? "VIE" : "ENG"}
+                <span className="lang-code-text notranslate" translate="no">
+                  {lang === "vi" ? "VN" : "EN"}
                 </span>
               </button>
             </div>

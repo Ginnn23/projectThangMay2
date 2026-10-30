@@ -430,6 +430,50 @@ $@"💬 <b>TIN NHẮN TỪ KHÁCH TRÊN WEBSITE:</b>
         bool isAdmin = !string.IsNullOrWhiteSpace(configuredChatId) &&
                        (senderChatId == configuredChatId || senderUserId == configuredChatId);
 
+        // Khởi tạo bàn phím điều hướng nhanh cho khách hàng
+        var customerKeyboard = GetCustomerReplyMarkup();
+
+        // NẾU LÀ LỆNH /START HOẶC /MENU (DÙ LÀ ADMIN TEST HAY KHÁCH HÀNG ĐỀU GỬI MENU TƯ VẤN)
+        if (text.StartsWith("/start", StringComparison.OrdinalIgnoreCase) ||
+            text.Equals("/menu", StringComparison.OrdinalIgnoreCase) ||
+            text.Equals("/test", StringComparison.OrdinalIgnoreCase))
+        {
+            await TouchCustomerRepliedAsync(senderChatId!, cancellationToken);
+            var welcomeMessage =
+@"🏢 <b>CHÀO MỪNG BẠN ĐẾN VỚI THANG MÁY HÀ HỒNG!</b>
+━━━━━━━━━━━━━━━━━━━
+Dạ em là <b>Trợ lý Tư vấn Kỹ thuật & Báo giá tự động</b> của Công ty Thang Máy Hà Hồng.
+
+Anh/chị vui lòng chọn các mục bên dưới hoặc nhắn tin trực tiếp nhu cầu tại đây để được hỗ trợ tức thì:
+• 📊 <b>Báo giá thang máy gia đình</b> (Liên doanh & Nhập khẩu)
+• 📐 <b>Kích thước hố thang & hố PIT</b> (Tối ưu nhà phố hẹp)
+• 🏠 <b>Thang máy kính Homelift Panorama</b>
+• 👨‍🔧 <b>Yêu cầu Kỹ sư trưởng gọi lại tư vấn</b>
+
+📞 Hotline Kỹ thuật 24/7 / Zalo: <b>0909 9333 58</b>";
+
+            await PostTelegramMessageAsync(botToken, senderChatId!, welcomeMessage, cancellationToken, customerKeyboard);
+
+            // Nếu là khách thật (không phải admin test), thông báo cho Admin biết có khách vừa vào bot
+            if (!isAdmin && !string.IsNullOrWhiteSpace(configuredChatId))
+            {
+                var customerName = $"{msg.From?.FirstName} {msg.From?.LastName}".Trim();
+                if (string.IsNullOrWhiteSpace(customerName)) customerName = "Khách hàng";
+                var username = !string.IsNullOrWhiteSpace(msg.From?.Username) ? $"@{msg.From.Username}" : "Chưa đặt username";
+
+                var noticeAdmin =
+$@"🔔 <b>KHÁCH HÀNG VỪA KẾT NỐI TELEGRAM BOT!</b>
+━━━━━━━━━━━━━━━━━━━
+👤 <b>Khách:</b> {EscapeHtml(customerName)} ({username})
+🆔 <b>Chat ID:</b> <code>{senderChatId}</code>
+⏰ <b>Thời gian:</b> {ToVietnamTime(DateTime.UtcNow):HH:mm:ss dd/MM}
+👉 <i>Khách vừa bấm Bắt đầu chat trên Bot.</i>";
+
+                await PostTelegramMessageAsync(botToken, configuredChatId, noticeAdmin, cancellationToken);
+            }
+            return;
+        }
+
         if (isAdmin)
         {
             // ==========================================
@@ -453,7 +497,7 @@ $@"💬 <b>TIN NHẮN TỪ KHÁCH TRÊN WEBSITE:</b>
                 if (!string.IsNullOrWhiteSpace(customerChatId))
                 {
                     var customerNotice = $"👨‍🔧 <b>Kỹ sư Thang Máy Hà Hồng:</b>\n\n{EscapeHtml(text)}";
-                    await PostTelegramMessageAsync(botToken, customerChatId, customerNotice, cancellationToken);
+                    await PostTelegramMessageAsync(botToken, customerChatId, customerNotice, cancellationToken, customerKeyboard);
                     await SendTelegramReplyAsync(botToken, configuredChatId!, "✅ <i>Đã gửi câu trả lời đến khách hàng trên Telegram!</i>", msg.MessageId, cancellationToken);
                     await TouchCustomerRepliedAsync(customerChatId, cancellationToken);
                     return;
@@ -491,9 +535,10 @@ Khi có tin nhắn từ khách (trên Website hoặc Telegram) gửi về đây:
 2. Chọn <b>Reply (Trả lời)</b>
 3. Nhập câu trả lời rồi gửi đi.
 
-Bot sẽ tự động chuyển tiếp câu trả lời về đúng khách hàng đó ngay lập tức! ✨";
+Bot sẽ tự động chuyển tiếp câu trả lời về đúng khách hàng đó ngay lập tức! ✨
+<i>(Gõ /menu hoặc /start để kiểm tra giao diện bot của khách hàng)</i>";
 
-                await PostTelegramMessageAsync(botToken, configuredChatId!, adminGuide, cancellationToken);
+                await PostTelegramMessageAsync(botToken, configuredChatId!, adminGuide, cancellationToken, customerKeyboard);
                 return;
             }
 
@@ -508,33 +553,108 @@ Bot sẽ tự động chuyển tiếp câu trả lời về đúng khách hàng 
 
             var now = DateTime.UtcNow;
             var vnTime = ToVietnamTime(now);
-
-            // Nếu khách bấm /start lần đầu
-            if (text.Equals("/start", StringComparison.OrdinalIgnoreCase))
-            {
-                await TouchCustomerRepliedAsync(senderChatId, cancellationToken);
-                var welcomeCustomer =
-@"🏢 <b>CHÀO MỪNG BẠN ĐẾN VỚI THANG MÁY HÀ HỒNG!</b>
-━━━━━━━━━━━━━━━━━━━
-Dạ em là trợ lý kết nối của <b>Thang Máy Hà Hồng</b>.
-Anh/chị đang cần tư vấn:
-• 📊 Báo giá thang máy gia đình, homelift kính
-• 📐 Kích thước hố thang & hố PIT
-• 🛠️ Bảo trì, sửa chữa thang máy 24/7
-
-Anh/chị hãy nhắn tin nội dung hoặc câu hỏi tại đây, Kỹ sư của Hà Hồng sẽ phản hồi trực tiếp ngay ạ! 📞";
-
-                await PostTelegramMessageAsync(botToken, senderChatId, welcomeCustomer, cancellationToken);
-                return;
-            }
+            var lowerText = text.ToLowerInvariant();
 
             var customerName = $"{msg.From?.FirstName} {msg.From?.LastName}".Trim();
             if (string.IsNullOrWhiteSpace(customerName)) customerName = "Khách hàng Telegram";
             var username = !string.IsNullOrWhiteSpace(msg.From?.Username) ? $"@{msg.From.Username}" : "Chưa đặt username";
 
+            // Kiểm tra xem khách có để lại Số điện thoại không
+            var phoneMatch = System.Text.RegularExpressions.Regex.Match(text, @"(0|\+84)[35789][0-9]{8}");
+            bool hasPhone = phoneMatch.Success;
+
+            // 1. Phản hồi tự động thông minh theo nội dung khách chọn/hỏi
+            string? botAutoReply = null;
+
+            if (lowerText.Contains("báo giá") || lowerText.Contains("chi phí") || lowerText.Contains("giá bao nhiêu") || lowerText.Contains("giá thang"))
+            {
+                botAutoReply =
+@"💰 <b>BẢNG GIÁ THAM KHẢO THANG MÁY HÀ HỒNG (2026):</b>
+━━━━━━━━━━━━━━━━━━━
+1️⃣ <b>Thang máy gia đình liên doanh (Fuji / Montanari / Mitsubishi):</b>
+• Tải trọng 250kg - 450kg: Dao động từ <b>280 - 450 triệu VNĐ</b>.
+• Động cơ & tủ điều khiển nhập khẩu chính hãng, vách cabin Inox gương/sọc nhuyễn hoặc phối vân gỗ cao cấp.
+
+2️⃣ <b>Thang máy kính Homelift Panorama cao cấp:</b>
+• Giá hoàn thiện: Từ <b>550 - 850+ triệu VNĐ</b> (Khung nhôm định hình cao cấp hoặc Inox PVD, 4 mặt kính cường lực an toàn).
+
+💡 <i>Để nhận file báo giá chi tiết và bản vẽ kỹ thuật theo đúng số tầng & kích thước nhà anh/chị, anh/chị nhắn giúp em <b>Số tầng</b> hoặc để lại <b>Số điện thoại</b> tại đây nhé!</i>";
+            }
+            else if (lowerText.Contains("kích thước") || lowerText.Contains("hố thang") || lowerText.Contains("hố pit") || lowerText.Contains("chiều cao") || lowerText.Contains("oh"))
+            {
+                botAutoReply =
+@"📐 <b>KÍCH THƯỚC HỐ THANG THAM KHẢO:</b>
+━━━━━━━━━━━━━━━━━━━
+• <b>Thang Homelift mini siêu nhỏ (3-4 người):</b>
+  - Kích thước phủ bì: từ <b>1000 x 1000 mm</b> đến <b>1200 x 1200 mm</b>
+  - Chiều sâu hố PIT: chỉ từ <b>200 - 300 mm</b> (hoàn toàn không cần đào sâu, không chạm móng nhà phố)
+  - Chiều cao tầng trên cùng (OH): từ <b>2600 - 2800 mm</b>
+
+• <b>Thang máy tiêu chuẩn (4-6 người - 450kg):</b>
+  - Kích thước phủ bì: khoảng <b>1500 x 1500 mm</b>
+  - Hố PIT: <b>450 - 600 mm</b> | OH: <b>3400 - 3800 mm</b>
+
+💡 <i>Hà Hồng hỗ trợ kỹ sư đến khảo sát vị trí và đo đạc thực tế tại công trình <b>MIỄN PHÍ 100%</b>. Anh/chị nhắn địa chỉ hoặc SĐT để đặt lịch nhé!</i>";
+            }
+            else if (lowerText.Contains("kính") || lowerText.Contains("homelift"))
+            {
+                botAutoReply =
+@"🏠 <b>THANG MÁY KÍNH HOMELIFT PANORAMA HÀ HỒNG:</b>
+━━━━━━━━━━━━━━━━━━━
+• Thiết kế 4 mặt kính cường lực an toàn 2 lớp, tầm nhìn rộng mở, lấy sáng giếng trời cực tốt.
+• Khung hợp kim nhôm chịu lực hàng không hoặc Inox mạ PVD Gold/Black sang trọng.
+• Vận hành êm ái dưới 50dB, công nghệ biến tần tiết kiệm điện năng tới 40%.
+• Lắp đặt nhanh gọn chỉ trong 7 - 10 ngày làm việc.";
+            }
+            else if (hasPhone)
+            {
+                botAutoReply =
+$@"✅ <b>DẠ EM ĐÃ GHI NHẬN SỐ ĐIỆN THOẠI CỦA ANH/CHỊ!</b>
+━━━━━━━━━━━━━━━━━━━
+📱 <b>Số điện thoại:</b> {phoneMatch.Value}
+
+Kỹ sư trưởng Thang Máy Hà Hồng đã nhận được thông báo và sẽ liên hệ trực tiếp cho anh/chị qua Điện thoại / Zalo trong vòng <b>5 - 10 phút</b> để tư vấn chu đáo nhất ạ!
+
+📞 Hotline kỹ thuật khẩn cấp 24/7: <b>0909 9333 58</b>";
+            }
+            else if (lowerText.Contains("kỹ sư") || lowerText.Contains("gọi lại") || lowerText.Contains("tư vấn") || lowerText.Contains("liên hệ"))
+            {
+                botAutoReply =
+@"👨‍🔧 <b>DẠ KỸ SƯ HÀ HỒNG SẴN SÀNG HỖ TRỢ ANH/CHỊ!</b>
+━━━━━━━━━━━━━━━━━━━
+Anh/chị vui lòng để lại <b>Số điện thoại</b> hoặc nhắn nội dung công trình (địa chỉ, số tầng, tình trạng nhà xây mới hay cải tạo).
+
+Kỹ sư bên em sẽ gọi lại ngay hoặc tư vấn chi tiết qua Zalo cho anh/chị ạ! 📞";
+            }
+            else if (lowerText.Contains("hotline") || lowerText.Contains("điện thoại") || lowerText.Contains("sđt"))
+            {
+                botAutoReply =
+@"📞 <b>HOTLINE TƯ VẤN & CỨU HỘ 24/7:</b>
+━━━━━━━━━━━━━━━━━━━
+• Trực tiếp Kỹ sư trưởng: <b>0909 9333 58</b>
+• Zalo tư vấn: <b>0909 9333 58</b>
+• Email: <b>hahongco@gmail.com</b>
+• Website: <b>thangmayhahong.xyz</b>
+
+Anh/chị có thể gọi điện trực tiếp bất cứ lúc nào để được hỗ trợ nhanh nhất ạ!";
+            }
+
+            // Gửi câu trả lời cho khách nếu có nội dung phù hợp
+            if (!string.IsNullOrWhiteSpace(botAutoReply))
+            {
+                await PostTelegramMessageAsync(botToken, senderChatId, botAutoReply, cancellationToken, customerKeyboard);
+            }
+            else
+            {
+                // Nếu là tin nhắn bình thường khác, gửi xác nhận tiếp nhận
+                var ackToCustomer = "Dạ em đã chuyển tin nhắn của anh/chị đến Kỹ sư Thang Máy Hà Hồng. Kỹ sư sẽ phản hồi anh/chị ngay tại đây trong giây lát ạ! 👨‍🔧 (Hotline hỗ trợ nhanh: 0909 9333 58)";
+                await PostTelegramMessageAsync(botToken, senderChatId, ackToCustomer, cancellationToken, customerKeyboard);
+            }
+
             // Chuyển tiếp tin nhắn của khách hàng về cho ADMIN (Bạn)
+            var forwardHeader = hasPhone ? "🚨 <b>CÓ KHÁCH ĐỂ LẠI SỐ ĐIỆN THOẠI TRÊN TELEGRAM!</b>" : "💬 <b>CÓ KHÁCH HÀNG CHAT QUA TELEGRAM!</b>";
             var forwardToAdmin =
-$@"💬 <b>CÓ KHÁCH HÀNG CHAT QUA TELEGRAM!</b>
+$@"{forwardHeader}
 ━━━━━━━━━━━━━━━━━━━
 👤 <b>Khách:</b> {EscapeHtml(customerName)} ({username})
 🆔 <b>Chat ID:</b> <code>{senderChatId}</code>
@@ -549,14 +669,6 @@ $@"💬 <b>CÓ KHÁCH HÀNG CHAT QUA TELEGRAM!</b>
             {
                 MsgToCustomerChatMap[adminMsgId.Value] = senderChatId;
                 await SaveCustomerChatMapDbAsync(adminMsgId.Value, senderChatId, cancellationToken);
-            }
-
-            // Gửi xác nhận cho khách hàng: CHỈ GỬI 1 LẦN duy nhất trong phiên chat (lưu Database, cooldown 60 phút)
-            var shouldSendAck = await ShouldSendCustomerAckAsync(senderChatId, cancellationToken);
-            if (shouldSendAck)
-            {
-                var ackToCustomer = "Dạ em đã chuyển tin nhắn của anh/chị đến Kỹ sư Thang Máy Hà Hồng. Kỹ sư sẽ phản hồi anh/chị ngay tại đây trong giây lát ạ! 👨‍🔧";
-                await PostTelegramMessageAsync(botToken, senderChatId, ackToCustomer, cancellationToken);
             }
         }
     }
@@ -745,21 +857,51 @@ $@"💬 <b>CÓ KHÁCH HÀNG CHAT QUA TELEGRAM!</b>
         await cmd.ExecuteNonQueryAsync(cancellationToken);
     }
 
-    private async Task<long?> PostTelegramMessageAsync(string botToken, string chatId, string messageText, CancellationToken cancellationToken)
+    private static object GetCustomerReplyMarkup()
+    {
+        return new
+        {
+            keyboard = new[]
+            {
+                new[] { new { text = "📊 Báo giá thang máy gia đình" }, new { text = "📐 Kích thước hố thang & PIT" } },
+                new[] { new { text = "🏠 Thang máy kính Homelift" }, new { text = "👨‍🔧 Yêu cầu Kỹ sư gọi lại" } },
+                new[] { new { text = "📞 Hotline: 0909 9333 58" } }
+            },
+            resize_keyboard = true,
+            one_time_keyboard = false
+        };
+    }
+
+    private async Task<long?> PostTelegramMessageAsync(
+        string botToken,
+        string chatId,
+        string messageText,
+        CancellationToken cancellationToken,
+        object? replyMarkup = null)
     {
         var url = $"https://api.telegram.org/bot{botToken}/sendMessage";
-        var payload = new
+        var payload = new Dictionary<string, object?>
         {
-            chat_id = chatId,
-            text = messageText,
-            parse_mode = "HTML",
-            disable_web_page_preview = true
+            ["chat_id"] = chatId,
+            ["text"] = messageText,
+            ["parse_mode"] = "HTML",
+            ["disable_web_page_preview"] = true
         };
+
+        if (replyMarkup != null)
+        {
+            payload["reply_markup"] = replyMarkup;
+        }
 
         try
         {
             using var response = await _httpClient.PostAsJsonAsync(url, payload, cancellationToken);
-            if (!response.IsSuccessStatusCode) return null;
+            if (!response.IsSuccessStatusCode)
+            {
+                var err = await response.Content.ReadAsStringAsync(cancellationToken);
+                _logger.LogWarning("Telegram API returned non-success: {Status} {Error}", response.StatusCode, err);
+                return null;
+            }
 
             var json = await response.Content.ReadFromJsonAsync<JsonElement>(cancellationToken: cancellationToken);
             if (json.TryGetProperty("result", out var result) && result.TryGetProperty("message_id", out var msgId))
