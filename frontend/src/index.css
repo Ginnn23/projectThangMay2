@@ -291,16 +291,20 @@ a {
   transform: translateX(5px);
 }
 
+/* =============================================================================
+   HERO SECTION - PHONG CÁCH TỐI GIẢN CAO CẤP KIẾN TRÚC NHẬT / CHÂU ÂU
+   ============================================================================= */
 .hero-section {
   position: relative;
-  min-height: 88vh;
+  min-height: 86vh;
   display: flex;
   align-items: center;
   color: #ffffff;
   overflow: hidden;
   background:
-    linear-gradient(112deg, rgba(6, 19, 38, 0.98) 0%, rgba(11, 45, 86, 0.96) 48%, rgba(232, 237, 243, 0.88) 100%),
-    url("./assets/images/elevator-lobby.jpg");
+    radial-gradient(circle at 75% 45%, rgba(30, 95, 175, 0.28) 0%, transparent 55%),
+    radial-gradient(circle at 20% 80%, rgba(226, 160, 63, 0.08) 0%, transparent 45%),
+    linear-gradient(135deg, #051329 0%, #082142 50%, #0b2d5a 100%);
   background-position: center;
   background-size: cover;
 }
@@ -309,197 +313,311 @@ a {
   content: "";
   position: absolute;
   inset: 0;
-  background:
-    linear-gradient(120deg, rgba(79, 195, 247, 0.12), transparent 42%),
-    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.05) 0 1px, transparent 1px 118px);
+  background: radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.04), transparent 60%);
   pointer-events: none;
 }
 
 .hero-container {
   position: relative;
-  padding-top: clamp(62px, 6vw, 92px);
-  padding-bottom: clamp(48px, 6vw, 78px);
+  padding-top: clamp(48px, 5vw, 80px);
+  padding-bottom: clamp(40px, 5vw, 68px);
 }
 
 .hero-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1.16fr) minmax(360px, 0.84fr);
+  grid-template-columns: minmax(0, 1.18fr) minmax(360px, 0.82fr);
   align-items: center;
-  gap: clamp(18px, 2.6vw, 42px);
+  gap: clamp(24px, 3.5vw, 56px);
 }
 
 .hero-content {
   position: relative;
   z-index: 2;
-  max-width: 740px;
-  animation: heroEntrance 0.9s ease-out both;
+  max-width: 680px;
+  animation: heroEntrance 0.8s ease-out both;
 }
 
-.hero-eyebrow,
-.section-eyebrow {
-  display: inline-block;
-  margin-bottom: 18px;
-  color: var(--gold);
-  font-size: 13px;
-  font-weight: 800;
-  letter-spacing: 3px;
-}
-
-.hero-content h1 {
-  max-width: 740px;
-  margin-bottom: 22px;
-  font-size: clamp(40px, 4.25vw, 68px);
-  font-weight: 800;
-  line-height: 1.13;
-  letter-spacing: 0;
-}
-
-.hero-title-line {
-  display: block;
-  color: #ffffff;
-  white-space: nowrap;
-}
-
-.hero-title-highlight {
-  color: var(--gold);
-}
-
-.hero-content > p {
-  max-width: 560px;
-  margin-bottom: 30px;
-  color: rgba(255, 255, 255, 0.9);
-  font-size: clamp(17px, 1.25vw, 19px);
-  line-height: 1.78;
-}
-
-.hero-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 14px;
-}
-
-.hero-outline-button {
-  color: #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.72);
-  background: rgba(255, 255, 255, 0.05);
-}
-
-.hero-outline-button:hover {
-  color: var(--ink);
-  background-color: #ffffff;
-  border-color: #ffffff;
-}
-
-.hero-gallery {
-  position: relative;
-  z-index: 1;
-  width: min(100%, 620px);
-  justify-self: end;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(120px, 0.34fr);
-  align-items: stretch;
-  gap: 16px;
-  perspective: 1100px;
-}
-
-.hero-gallery-main,
-.hero-gallery-small {
-  overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.72);
-  border-radius: 20px;
-  background: #0d1828;
-  box-shadow: 0 34px 74px rgba(0, 0, 0, 0.28);
-}
-
-.hero-gallery-main {
-  width: 100%;
-  min-height: clamp(430px, 35vw, 560px);
-  margin-left: auto;
-  transform: perspective(1000px) rotateY(-5deg);
-  transition: transform 0.35s ease;
-}
-
-.hero-gallery-main:hover {
-  transform: perspective(1000px) rotateY(-3deg) scale(1.015);
-}
-
-.hero-gallery img {
-  width: 100%;
-  height: 100%;
-  display: block;
-  object-fit: cover;
-  filter: contrast(1.06) saturate(1.04);
-}
-
-.hero-gallery-main img {
-  animation: heroGalleryFade 0.45s ease both;
-}
-
-.hero-gallery-small {
-  width: 100%;
-  min-height: 0;
-  flex: 1;
-  border-radius: 16px;
-}
-
-.hero-gallery-side {
-  display: grid;
-  grid-template-rows: 1fr 1fr auto;
-  gap: 14px;
-}
-
-.hero-gallery-badge {
-  max-width: 250px;
-  padding: 13px 15px;
+/* Eyebrow badge dạng pill bo tròn tinh tế */
+.hero-eyebrow-pill {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
-  color: var(--ink);
-  background: rgba(255, 255, 255, 0.94);
-  border: 1px solid rgba(255, 255, 255, 0.74);
+  gap: 8px;
+  padding: 6px 16px;
+  background: rgba(247, 186, 83, 0.12);
+  border: 1px solid rgba(247, 186, 83, 0.32);
   border-radius: 999px;
-  box-shadow: 0 18px 44px rgba(7, 19, 37, 0.16);
-  font-size: 14px;
+  color: #f7ba53;
+  font-size: 11.5px;
   font-weight: 800;
+  letter-spacing: 1.5px;
+  margin-bottom: 22px;
+  backdrop-filter: blur(8px);
 }
 
-.hero-gallery-badge i {
-  color: var(--blue);
-  font-size: 20px;
+.hero-eyebrow-pill .badge-bullet {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #f7ba53;
+  box-shadow: 0 0 8px #f7ba53;
 }
 
-.hero-stats {
-  max-width: 720px;
-  margin-top: 32px;
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
+/* Tiêu đề H1 bố cục 2 dòng thanh thoát, nhã nhặn */
+.hero-main-title {
+  max-width: 680px;
+  margin-bottom: 20px;
+  font-size: clamp(36px, 3.8vw, 58px);
+  font-weight: 800;
+  line-height: 1.18;
+  letter-spacing: -0.5px;
 }
 
-.hero-stat-item {
-  min-height: 88px;
-  padding: 15px 14px;
-  background: rgba(255, 255, 255, 0.09);
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  border-radius: 8px;
-}
-
-.hero-stat-item strong,
-.hero-stat-item span {
+.hero-title-top {
   display: block;
+  color: #ffffff;
 }
 
-.hero-stat-item strong {
-  margin-bottom: 5px;
-  color: var(--gold);
-  font-size: clamp(24px, 2vw, 32px);
-  line-height: 1;
+.hero-title-bottom {
+  display: block;
+  background: linear-gradient(90deg, #f7ba53 0%, #ffe099 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
-.hero-stat-item span {
+.hero-description {
+  max-width: 580px;
+  margin-bottom: 30px;
   color: rgba(255, 255, 255, 0.82);
-  font-size: 14px;
+  font-size: clamp(15.5px, 1.12vw, 17.5px);
+  line-height: 1.72;
+  font-weight: 400;
+}
+
+/* Cụm 2 nút bấm nổi bật nhưng gọn gàng */
+.hero-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 34px;
+}
+
+.hero-primary-button {
+  background: linear-gradient(135deg, #0284c7, #0369a1);
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 15px;
+  padding: 13px 26px;
+  border-radius: 999px;
+  border: none;
+  box-shadow: 0 8px 22px rgba(2, 132, 199, 0.35);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.hero-primary-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(2, 132, 199, 0.45);
+  color: #ffffff;
+}
+
+.hero-studio-button {
+  display: inline-flex;
+  align-items: center;
+  padding: 12px 22px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1.5px solid rgba(255, 255, 255, 0.22);
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 15px;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  backdrop-filter: blur(8px);
+}
+
+.hero-studio-button:hover {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: #f7ba53;
+  color: #f7ba53;
+  transform: translateY(-2px);
+}
+
+/* =============================================================================
+   DẢI CHỈ SỐ STATS TỐI GIẢN (KHÔNG HỘP THÔ CỨNG, CHUẨN THƯƠNG HIỆU LỚN)
+   ============================================================================= */
+.hero-minimal-stats {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding-top: 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  max-width: 640px;
+}
+
+.hero-minimal-stat-item {
+  position: relative;
+  flex: 1;
+}
+
+.stat-number-wrap .stat-value {
+  display: block;
+  font-size: clamp(24px, 2.2vw, 32px);
+  font-weight: 800;
+  color: #f7ba53;
+  line-height: 1.1;
+  margin-bottom: 4px;
+  font-family: "Space Grotesk", -apple-system, BlinkMacSystemFont, sans-serif;
+  letter-spacing: -0.5px;
+}
+
+.stat-label {
+  display: block;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.72);
+  font-weight: 500;
   line-height: 1.35;
+}
+
+.stat-separator {
+  position: absolute;
+  right: -10px;
+  top: 15%;
+  height: 70%;
+  width: 1px;
+  background: rgba(255, 255, 255, 0.14);
+}
+
+/* =============================================================================
+   HERO ARCHITECTURAL SHOWCASE (KHUNG TRƯNG BÀY DUY NHẤT, ĐẲNG CẤP)
+   ============================================================================= */
+.hero-showcase-wrap {
+  position: relative;
+  width: 100%;
+  max-width: 540px;
+  justify-self: end;
+}
+
+.hero-showcase-frame {
+  position: relative;
+  border-radius: 28px;
+  overflow: hidden;
+  aspect-ratio: 4 / 4.9;
+  max-height: 560px;
+  box-shadow:
+    0 32px 75px -15px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(255, 255, 255, 0.18);
+  background: #08172e;
+}
+
+.hero-showcase-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  animation: showcaseFadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+  transition: transform 0.8s ease;
+}
+
+.hero-showcase-frame:hover .hero-showcase-image {
+  transform: scale(1.025);
+}
+
+@keyframes showcaseFadeIn {
+  from {
+    opacity: 0.35;
+    transform: scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.hero-showcase-top-badge {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  background: rgba(8, 23, 46, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+  backdrop-filter: blur(12px);
+  color: #f7ba53;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+}
+
+.hero-showcase-top-badge .live-status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 8px #10b981;
+}
+
+.hero-showcase-overlay {
+  position: absolute;
+  bottom: 0;
+  inset-inline: 0;
+  padding: 20px 22px;
+  background: linear-gradient(to top, rgba(5, 14, 28, 0.94) 0%, rgba(5, 14, 28, 0.72) 65%, transparent 100%);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  backdrop-filter: blur(4px);
+}
+
+.hero-showcase-caption {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #ffffff;
+}
+
+.hero-showcase-caption i {
+  font-size: 26px;
+  color: #38bdf8;
+}
+
+.hero-showcase-caption strong {
+  display: block;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1.25;
+}
+
+.hero-showcase-caption small {
+  display: block;
+  font-size: 11.5px;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.hero-showcase-dots {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.showcase-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  border: none;
+  background: rgba(255, 255, 255, 0.35);
+  cursor: pointer;
+  transition: all 0.25s ease;
+  padding: 0;
+}
+
+.showcase-dot.active {
+  width: 22px;
+  background: #f7ba53;
+  box-shadow: 0 0 8px rgba(247, 186, 83, 0.6);
 }
 
 .trust-strip {
@@ -1262,19 +1380,17 @@ body.ai-chat-open .floating-contact {
 
   .hero-grid {
     grid-template-columns: 1fr;
+    gap: 40px;
   }
 
   .hero-content {
     max-width: 720px;
   }
 
-  .hero-gallery-main {
+  .hero-showcase-wrap {
+    max-width: 520px;
     margin: 0 auto;
-    transform: none;
-  }
-
-  .hero-gallery-side {
-    max-width: 210px;
+    justify-self: center;
   }
 
   .trust-strip-grid {
@@ -1371,34 +1487,28 @@ body.ai-chat-open .floating-contact {
     width: 100%;
   }
 
-  .hero-stats,
+  .hero-minimal-stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+
+  .stat-separator {
+    display: none;
+  }
+
+  .hero-showcase-wrap {
+    max-width: 100%;
+  }
+
+  .hero-showcase-frame {
+    aspect-ratio: 4 / 4.4;
+    border-radius: 20px;
+    max-height: 440px;
+  }
+
   .trust-strip-grid {
     grid-template-columns: 1fr;
-  }
-
-  .hero-gallery {
-    grid-template-columns: 1fr;
-  }
-
-  .hero-gallery-main {
-    width: min(390px, 100%);
-    min-height: 360px;
-  }
-
-  .hero-gallery-side {
-    max-width: none;
-    grid-template-columns: repeat(2, 1fr);
-    grid-template-rows: 120px auto;
-  }
-
-  .hero-gallery-small {
-    border-radius: 14px;
-  }
-
-  .hero-gallery-badge {
-    padding: 11px 14px;
-    font-size: 13px;
-    grid-column: 1 / -1;
   }
 
   .company-points {
