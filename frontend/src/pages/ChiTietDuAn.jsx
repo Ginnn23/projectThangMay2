@@ -829,7 +829,7 @@ function ChiTietDuAn() {
       <section className="project-detail-hero">
         <div className="site-container">
           <nav className="about-breadcrumb" aria-label="breadcrumb">
-            <a href="/">Trang chủ</a>
+            <Link to="/">Trang chủ</Link>
             <span>/</span>
             <Link to="/du-an">Dự án</Link>
             <span>/</span>
@@ -837,7 +837,6 @@ function ChiTietDuAn() {
           </nav>
           <div className="project-detail-grid">
             <div className="project-detail-copy" data-aos="fade-right">
-              <span className="section-eyebrow">{duAn.category}</span>
               <h1>{duAn.name}</h1>
               <p>{duAn.description}</p>
               <div className="project-detail-meta">

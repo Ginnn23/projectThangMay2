@@ -940,6 +940,7 @@ body.ai-chat-open .floating-contact {
 
 /* THÔNG BÁO VỪA ĐẶT LỊCH / BÁO GIÁ (HIỂN THỊ TO RÕ, ĐẸP MẮT) */
 .floating-activity {
+  position: relative;
   width: min(320px, calc(100vw - 40px));
   min-height: 72px;
   padding: 12px 14px;
@@ -957,6 +958,33 @@ body.ai-chat-open .floating-contact {
   transform: translateY(12px) scale(0.95);
   transition: opacity 0.35s ease, transform 0.35s ease;
   margin-bottom: 4px;
+}
+
+.floating-activity-close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  border-radius: 50%;
+  cursor: pointer;
+  padding: 0;
+  font-size: 11px;
+  line-height: 1;
+  transition: all 0.2s ease;
+  z-index: 2;
+}
+
+.floating-activity-close:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+  transform: scale(1.15);
 }
 
 .floating-activity.is-visible {

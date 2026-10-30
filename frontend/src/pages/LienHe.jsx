@@ -30,6 +30,19 @@ const anhXaDichVuCongTy = {
   "thang-cuon": "Dịch vụ tư vấn",
 };
 
+const anhXaLoaiThangCongTy = {
+  "gia-dinh": "Thang máy gia đình",
+  "thang-may-gia-dinh": "Thang máy gia đình",
+  "van-phong": "Thang máy văn phòng",
+  "thang-may-van-phong": "Thang máy văn phòng",
+  "doanh-nghiep": "Thang máy doanh nghiệp",
+  "thang-may-doanh-nghiep": "Thang máy doanh nghiệp",
+  "khach-san": "Thang máy khách sạn",
+  "thang-may-khach-san": "Thang máy khách sạn",
+  "cua-sap": "Cửa sập",
+  "thang-cuon": "Thang cuốn",
+};
+
 const dichVuCongTy = [
   "Dịch vụ tư vấn",
   "Dịch vụ lắp đặt",
@@ -143,14 +156,16 @@ function chuanHoaSoDienThoai(value) {
 }
 
 function taoNoiDungGuiApi(formData) {
-  return [
-    `Dịch vụ quan tâm: ${formData.dichVu}`,
-    `Loại công trình: ${formData.loaiCongTrinh || "Chưa cung cấp"}`,
-    `Địa điểm công trình: ${formData.diaDiem || "Chưa cung cấp"}`,
-    "",
-    "Nội dung yêu cầu:",
-    formData.noiDung.trim(),
-  ].join("\n");
+  const parts = [];
+  if (formData.dichVu) {
+    parts.push(`Dịch vụ quan tâm: ${formData.dichVu}`);
+  }
+  parts.push(`Loại thang máy / công trình: ${formData.loaiCongTrinh || "Chưa cung cấp"}`);
+  parts.push(`Địa điểm công trình: ${formData.diaDiem || "Chưa cung cấp"}`);
+  parts.push("");
+  parts.push("Nội dung yêu cầu:");
+  parts.push(formData.noiDung.trim());
+  return parts.join("\n");
 }
 
 function kiemTraForm(formData) {
@@ -165,12 +180,13 @@ function kiemTraForm(formData) {
     loi.soDienThoai = "Số điện thoại phải có 10 chữ số và bắt đầu bằng số 0.";
   }
 
-  if (formData.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
-    loi.email = "Vui lòng nhập email đúng định dạng.";
+  const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  if (formData.email.trim() && !EMAIL_REGEX.test(formData.email.trim())) {
+    loi.email = "Vui lòng nhập email đúng định dạng (Ví dụ: ten@gmail.com).";
   }
 
-  if (!formData.dichVu) {
-    loi.dichVu = "Vui lòng chọn dịch vụ quan tâm.";
+  if (!formData.loaiCongTrinh) {
+    loi.loaiCongTrinh = "Vui lòng chọn loại thang máy / công trình.";
   }
 
   const noiDungDaTrim = formData.noiDung.trim();
@@ -189,8 +205,16 @@ function kiemTraForm(formData) {
 
 function FormLienHe() {
   const { search } = useLocation();
-  const dichVuMacDinh = anhXaDichVuCongTy[new URLSearchParams(search).get("dichVu")] || "";
-  const [formData, setFormData] = useState({ ...giaTriMacDinh, dichVu: dichVuMacDinh });
+  const searchParams = new URLSearchParams(search);
+  const paramDichVu = searchParams.get("dichVu") || searchParams.get("loai") || "";
+  const dichVuMacDinh = anhXaDichVuCongTy[paramDichVu] || "";
+  const loaiThangMacDinh = anhXaLoaiThangCongTy[paramDichVu] || "";
+
+  const [formData, setFormData] = useState({
+    ...giaTriMacDinh,
+    dichVu: dichVuMacDinh,
+    loaiCongTrinh: loaiThangMacDinh,
+  });
   const [loi, setLoi] = useState({});
   const [dangGui, setDangGui] = useState(false);
   const [thongBao, setThongBao] = useState(null);
@@ -302,30 +326,22 @@ function FormLienHe() {
 
                 <div className="col-md-6">
                   <label htmlFor="email">Email</label>
-                  <input id="email" name="email" type="email" autoComplete="email" value={formData.email} ref={(element) => { inputRefs.current.email = element; }} aria-describedby={loi.email ? "email-error" : undefined} aria-invalid={!!loi.email} onChange={capNhatTruong} />
+                  <input id="email" name="email" type="email" autoComplete="email" placeholder="Ví dụ: ten@gmail.com" value={formData.email} ref={(element) => { inputRefs.current.email = element; }} aria-describedby={loi.email ? "email-error" : undefined} aria-invalid={!!loi.email} onChange={capNhatTruong} />
                   {loi.email && <div className="form-error" id="email-error">{loi.email}</div>}
                 </div>
 
                 <div className="col-md-6">
-                  <label htmlFor="dichVu">Dịch vụ quan tâm *</label>
-                  <select id="dichVu" name="dichVu" value={formData.dichVu} ref={(element) => { inputRefs.current.dichVu = element; }} aria-describedby={loi.dichVu ? "dichVu-error" : undefined} aria-invalid={!!loi.dichVu} onChange={capNhatTruong}>
-                    <option value="">Chọn dịch vụ</option>
-                    {dichVuCongTy.map((item) => <option value={item} key={item}>{item}</option>)}
-                  </select>
-                  {loi.dichVu && <div className="form-error" id="dichVu-error">{loi.dichVu}</div>}
-                </div>
-
-                <div className="col-md-6">
-                  <label htmlFor="loaiCongTrinh">Loại thang máy / công trình</label>
-                  <select id="loaiCongTrinh" name="loaiCongTrinh" value={formData.loaiCongTrinh} onChange={capNhatTruong}>
+                  <label htmlFor="loaiCongTrinh">Loại thang máy / công trình *</label>
+                  <select id="loaiCongTrinh" name="loaiCongTrinh" value={formData.loaiCongTrinh} ref={(element) => { inputRefs.current.loaiCongTrinh = element; }} aria-describedby={loi.loaiCongTrinh ? "loaiCongTrinh-error" : undefined} aria-invalid={!!loi.loaiCongTrinh} onChange={capNhatTruong}>
                     <option value="">Chọn loại thang máy</option>
                     {loaiThangMayCongTy.map((item) => <option value={item} key={item}>{item}</option>)}
                   </select>
+                  {loi.loaiCongTrinh && <div className="form-error" id="loaiCongTrinh-error">{loaiCongTrinh}</div>}
                 </div>
 
-                <div className="col-md-6">
+                <div className="col-12">
                   <label htmlFor="diaDiem">Địa điểm công trình</label>
-                  <input id="diaDiem" name="diaDiem" type="text" autoComplete="street-address" value={formData.diaDiem} onChange={capNhatTruong} />
+                  <input id="diaDiem" name="diaDiem" type="text" autoComplete="street-address" placeholder="Ví dụ: Quận 7, TP.HCM hoặc TP. Thủ Đức..." value={formData.diaDiem} onChange={capNhatTruong} />
                 </div>
 
                 <div className="col-12">

@@ -34,28 +34,54 @@ const thongBaoHoatDong = [
 function FloatingContact() {
   const [thongBaoDangChon, setThongBaoDangChon] = useState(0);
   const [hienThongBao, setHienThongBao] = useState(false);
+  const [daBoQua, setDaBoQua] = useState(() => {
+    try {
+      return sessionStorage.getItem("hide_floating_activity") === "true";
+    } catch {
+      return false;
+    }
+  });
+
+  const boQuaThongBao = (e) => {
+    if (e) e.stopPropagation();
+    setHienThongBao(false);
+    setDaBoQua(true);
+    try {
+      sessionStorage.setItem("hide_floating_activity", "true");
+    } catch {
+      // ignore
+    }
+  };
 
   useEffect(() => {
+    if (daBoQua) return undefined;
+
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (prefersReducedMotion) return undefined;
 
-    const hienSauKhiVaoTrang = window.setTimeout(() => setHienThongBao(true), 2200);
+    // Giảm tần suất: Lần đầu tiên hiện sau 10 giây khi vào trang
+    const hienSauKhiVaoTrang = window.setTimeout(() => {
+      setHienThongBao(true);
+      window.setTimeout(() => setHienThongBao(false), 5000);
+    }, 10000);
+
+    // Chu kỳ lặp lại giảm xuống 45 giây/lần (thay vì 14 giây dồn dập như trước)
     const vongLap = window.setInterval(() => {
       setHienThongBao(false);
 
       window.setTimeout(() => {
         setThongBaoDangChon((current) => (current + 1) % thongBaoHoatDong.length);
         setHienThongBao(true);
-      }, 450);
+      }, 500);
 
-      window.setTimeout(() => setHienThongBao(false), 6200);
-    }, 14000);
+      window.setTimeout(() => setHienThongBao(false), 5500);
+    }, 45000);
 
     return () => {
       window.clearTimeout(hienSauKhiVaoTrang);
       window.clearInterval(vongLap);
     };
-  }, []);
+  }, [daBoQua]);
 
   const thongBao = thongBaoHoatDong[thongBaoDangChon];
 
@@ -63,20 +89,31 @@ function FloatingContact() {
     <>
       <div className="floating-contact" aria-label="Liên hệ nhanh">
         {/* Thông báo khách hàng vừa yêu cầu */}
-        <div className={`floating-activity ${hienThongBao ? "is-visible" : ""}`} aria-live="polite">
-          <span className="floating-activity-icon">
-            <i className={`bi ${thongBao.icon}`}></i>
-          </span>
-          <div className="activity-info">
-            <div className="d-flex align-items-center justify-content-between mb-1">
-              <strong>{thongBao.ten}</strong>
-              <small>{thongBao.thoiGian}</small>
-            </div>
-            <span className="activity-service">
-              vừa yêu cầu <mark>{thongBao.dichVu}</mark>
+        {!daBoQua && (
+          <div className={`floating-activity ${hienThongBao ? "is-visible" : ""}`} aria-live="polite">
+            <button
+              type="button"
+              className="floating-activity-close"
+              onClick={boQuaThongBao}
+              title="Đóng thông báo này"
+              aria-label="Đóng thông báo"
+            >
+              <i className="bi bi-x-lg"></i>
+            </button>
+            <span className="floating-activity-icon">
+              <i className={`bi ${thongBao.icon}`}></i>
             </span>
+            <div className="activity-info">
+              <div className="d-flex align-items-center justify-content-between mb-1 pe-3">
+                <strong>{thongBao.ten}</strong>
+                <small>{thongBao.thoiGian}</small>
+              </div>
+              <span className="activity-service">
+                vừa yêu cầu <mark>{thongBao.dichVu}</mark>
+              </span>
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Cụm 3 Icon liên hệ hình tròn cố định màu sắc nổi bật, bấm vào là kết nối ngay */}
         <div className="floating-buttons-stack">
