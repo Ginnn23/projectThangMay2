@@ -7,32 +7,25 @@ function Hero() {
       <div className="site-container hero-container">
         <div className="hero-grid">
           <div className="hero-content" data-aos="fade-right">
-            <div className="hero-eyebrow-pill">
-              <span className="badge-bullet"></span>
-              <span>GIẢI PHÁP THANG MÁY GIA ĐÌNH CAO CẤP TPHCM</span>
-            </div>
-
-            <h1 className="hero-main-title">
-              <span className="hero-title-top">Thang Máy Gia Đình May Đo</span>
-              <span className="hero-title-bottom">Chuẩn An Toàn &amp; Thẩm Mỹ</span>
+            <span className="hero-eyebrow">CHUYÊN GIA THANG MÁY GIA ĐÌNH & CÔNG TRÌNH TPHCM</span>
+            <h1>
+              <span className="hero-title-line">Thang máy gia đình uy tín</span>
+              <span className="hero-title-line hero-title-highlight">an toàn, tinh gọn</span>
+              <span className="hero-title-line hero-title-highlight">và chuẩn kỹ thuật</span>
             </h1>
-
-            <p className="hero-description">
-              Tư vấn, thiết kế bản vẽ và thi công thang máy gia đình, homelift kính Panorama tối ưu diện tích hố thang cho nhà phố, biệt thự. Vận hành êm ái dưới 50dB, bảo hành chính hãng 24 tháng.
+            <p>
+              Tư vấn, báo giá, lắp đặt và bảo trì thang máy gia đình, homelift kính, thang máy tải khách tại TP. Hồ Chí Minh và khu vực phía Nam. Khảo sát công trình tận nơi miễn phí.
             </p>
-
             <div className="hero-actions">
               <a href="/lien-he" className="btn hero-primary-button">
-                <span>Yêu Cầu Báo Giá</span>
+                Yêu cầu báo giá
                 <i className="bi bi-arrow-right ms-2"></i>
               </a>
-
-              <a href="/thiet-ke-cabin" className="btn hero-studio-button">
-                <i className="bi bi-box-seam me-2"></i>
-                <span>Thử Phối Cảnh Cabin 2.5D</span>
+              <a href="/du-an" className="btn hero-outline-button">
+                Xem dự án
+                <i className="bi bi-arrow-up-right ms-2"></i>
               </a>
             </div>
-
             <Stats />
           </div>
 
