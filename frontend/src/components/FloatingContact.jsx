@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { soDienThoaiCongTy, soDienThoaiLienKet } from "../data/contactInfo";
 
 const zaloUrl = `https://zalo.me/${soDienThoaiLienKet}`;
-const telegramBotUrl = "https://t.me/HaHongElevatorLeadBot?start=tuvan";
+const telegramBotUrl = "https://t.me/HaHongSupportBot";
 
 const thongBaoHoatDong = [
   {
