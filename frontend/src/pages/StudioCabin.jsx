@@ -1,5 +1,5 @@
-import { useState, useRef } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useState, useEffect, useRef } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import SeoHead from "../components/SeoHead";
 import CabinVisualizer from "../components/CabinVisualizer";
 import SmartElevatorCOP from "../components/SmartElevatorCOP";
@@ -76,26 +76,17 @@ export default function StudioCabin() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
-  useEffect(() => {
-    const pStops = searchParams.get("stops");
-    if (pStops && !isNaN(pStops)) {
-      setStops(Math.min(Math.max(Number(pStops), 2), 10));
-    }
-    const pCap = searchParams.get("capacityKg");
-    if (pCap && !isNaN(pCap)) {
-      setCapacityKg(Number(pCap));
-    }
-    const pType = searchParams.get("elevatorType");
-    if (pType) {
-      setElevatorType(pType);
-    }
-  }, [searchParams]);
-
   // State cấu hình
   const [activePreset, setActivePreset] = useState("classic-walnut");
-  const [elevatorType, setElevatorType] = useState("biet-thu-walnut");
-  const [capacityKg, setCapacityKg] = useState(450);
-  const [stops, setStops] = useState(4);
+  const [elevatorType, setElevatorType] = useState(() => searchParams.get("elevatorType") || "biet-thu-walnut");
+  const [capacityKg, setCapacityKg] = useState(() => {
+    const p = searchParams.get("capacityKg");
+    return p && !isNaN(p) ? Number(p) : 450;
+  });
+  const [stops, setStops] = useState(() => {
+    const p = searchParams.get("stops");
+    return p && !isNaN(p) ? Math.min(Math.max(Number(p), 2), 10) : 4;
+  });
   const [doorType, setDoorType] = useState("CO");
 
   // State các mã vật liệu (để điều khiển preset)
@@ -132,6 +123,21 @@ export default function StudioCabin() {
   const [submitting, setSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [submitMsg, setSubmitMsg] = useState("");
+
+  useEffect(() => {
+    const pStops = searchParams.get("stops");
+    if (pStops && !isNaN(pStops)) {
+      setStops(Math.min(Math.max(Number(pStops), 2), 10));
+    }
+    const pCap = searchParams.get("capacityKg");
+    if (pCap && !isNaN(pCap)) {
+      setCapacityKg(Number(pCap));
+    }
+    const pType = searchParams.get("elevatorType");
+    if (pType) {
+      setElevatorType(pType);
+    }
+  }, [searchParams]);
 
   const handleSelectPreset = (preset) => {
     setActivePreset(preset.id);
