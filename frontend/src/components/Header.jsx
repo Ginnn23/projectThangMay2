@@ -5,37 +5,6 @@ import { useLanguage } from "../context/LanguageContext";
 import logoHaHong from "../assets/images/logo-ha-hong.jpg";
 import { emailCongTy, soDienThoaiCongTy, soDienThoaiLienKet } from "../data/contactInfo";
 
-function VnFlag() {
-  return (
-    <svg viewBox="0 0 32 32" width="18" height="18" aria-hidden="true" style={{ display: "block", borderRadius: "50%" }}>
-      <circle cx="16" cy="16" r="16" fill="#da251d" />
-      <polygon
-        fill="#ffff00"
-        points="16,6.2 18.9,15.2 28.4,15.2 20.7,20.8 23.6,29.8 16,24.2 8.4,29.8 11.3,20.8 3.6,15.2 13.1,15.2"
-      />
-    </svg>
-  );
-}
-
-function UkFlag() {
-  return (
-    <svg viewBox="0 0 32 32" width="18" height="18" aria-hidden="true" style={{ display: "block", borderRadius: "50%" }}>
-      <defs>
-        <clipPath id="uk-flag-clip-header">
-          <circle cx="16" cy="16" r="16" />
-        </clipPath>
-      </defs>
-      <g clipPath="url(#uk-flag-clip-header)">
-        <rect width="32" height="32" fill="#012169" />
-        <path d="M0 0 L32 32 M32 0 L0 32" stroke="#ffffff" strokeWidth="5.5" />
-        <path d="M0 0 L32 32 M32 0 L0 32" stroke="#c8102e" strokeWidth="3" />
-        <path d="M16 0 V32 M0 16 H32" stroke="#ffffff" strokeWidth="8.5" />
-        <path d="M16 0 V32 M0 16 H32" stroke="#c8102e" strokeWidth="5" />
-      </g>
-    </svg>
-  );
-}
-
 function Header() {
   const [menuDangMo, setMenuDangMo] = useState(false);
   const { lang, toggleLanguage, t } = useLanguage();
@@ -110,20 +79,20 @@ function Header() {
                 <i className="bi bi-arrow-up-right ms-2"></i>
               </NavLink>
 
-              {/* NÚT CHUYỂN ĐỔI NGÔN NGỮ VIỆT NAM / ENGLISH HÌNH TRÒN TINH TẾ */}
+              {/* NÚT CHUYỂN ĐỔI NGÔN NGỮ VIỆT NAM / ENGLISH HÌNH TRÒN TINH TẾ (CHỐNG DỊCH NHẦM THÀNH MẠNG SỐNG) */}
               <button
                 type="button"
                 className="btn-lang-switcher notranslate"
                 translate="no"
                 onClick={toggleLanguage}
-                title={lang === "vi" ? "Switch to English (Chuyển sang Tiếng Anh)" : "Chuyển về Tiếng Việt (Switch to Vietnamese)"}
+                title={lang === "vi" ? "Switch to English (Chuyển sang Tiếng Anh)" : "Chuyển sang Tiếng Việt (Switch to Vietnamese)"}
                 aria-label="Chuyển đổi ngôn ngữ Việt / Anh"
               >
                 <span className="lang-flag-circle notranslate" translate="no">
-                  {lang === "vi" ? <UkFlag /> : <VnFlag />}
+                  {lang === "vi" ? "🇻🇳" : "🇬🇧"}
                 </span>
                 <span className="lang-code-text notranslate" translate="no">
-                  {lang === "vi" ? "Tiếng Anh" : "Tiếng Việt"}
+                  {lang === "vi" ? "VN" : "EN"}
                 </span>
               </button>
             </div>

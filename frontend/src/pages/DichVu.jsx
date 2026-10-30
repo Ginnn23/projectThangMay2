@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 
 import { API_BASE_URL, apiClient } from "../api/client";
 import elevatorDoorsImage from "../assets/images/elevator-doors.jpg";
@@ -114,7 +113,7 @@ function BannerTrang() {
     <section className="about-banner service-banner" style={{ backgroundImage: `linear-gradient(90deg, rgba(5, 14, 28, 0.94), rgba(5, 14, 28, 0.7)), url(${heroImage})` }}>
       <div className="site-container">
         <nav className="about-breadcrumb" aria-label="breadcrumb">
-          <Link to="/">Trang chủ</Link>
+          <a href="/">Trang chủ</a>
           <span>/</span>
           <span>Dịch vụ</span>
         </nav>

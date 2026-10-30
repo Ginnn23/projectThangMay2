@@ -37,7 +37,7 @@ function HeroGallery() {
 
     const timer = window.setInterval(() => {
       setActiveImageIndex((currentIndex) => (currentIndex + 1) % heroSettings.mainImages.length);
-    }, 5000);
+    }, 3000);
 
     return () => window.clearInterval(timer);
   }, [heroSettings.mainImages.length]);

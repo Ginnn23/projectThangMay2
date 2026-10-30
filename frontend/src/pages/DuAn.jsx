@@ -30,7 +30,7 @@ function BannerDuAn() {
     <section className="about-banner project-banner" style={{ backgroundImage: `linear-gradient(90deg, rgba(5, 14, 28, 0.95), rgba(5, 14, 28, 0.68)), url(${heroImage})` }}>
       <div className="site-container">
         <nav className="about-breadcrumb" aria-label="breadcrumb">
-          <Link to="/">Trang chủ</Link>
+          <a href="/">Trang chủ</a>
           <span>/</span>
           <span>Dự án</span>
         </nav>

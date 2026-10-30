@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 
 import { apiClient } from "../api/client";
 import heroImage from "../assets/images/hero-elevator.jpg";
@@ -104,7 +104,7 @@ function BannerLienHe() {
     >
       <div className="site-container">
         <nav className="about-breadcrumb" aria-label="breadcrumb">
-          <Link to="/">Trang chủ</Link>
+          <a href="/">Trang chủ</a>
           <span>/</span>
           <span>Liên hệ</span>
         </nav>
