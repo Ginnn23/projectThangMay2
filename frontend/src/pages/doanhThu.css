@@ -1000,3 +1000,303 @@
     box-shadow: none !important;
   }
 }
+
+/* ============================================================
+   HA HONG ELEVATOR - 5 CORE METRIC CARDS & ADVANCED REVENUE UI
+   ============================================================ */
+
+/* Metric Cards: Colors & Accents */
+.dt-metric-card.card-navy {
+  border-top: 4px solid #1e40af;
+}
+.dt-metric-card.card-navy:hover {
+  border-color: #1e40af;
+  box-shadow: 0 10px 25px -5px rgba(30, 64, 175, 0.15);
+}
+.dt-metric-icon-wrap.icon-navy {
+  background: #eff6ff;
+  color: #1e40af;
+}
+.dt-metric-badge.badge-navy {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.dt-metric-card.card-amber {
+  border-top: 4px solid #d97706;
+}
+.dt-metric-card.card-amber:hover {
+  border-color: #d97706;
+  box-shadow: 0 10px 25px -5px rgba(217, 119, 6, 0.15);
+}
+.dt-metric-icon-wrap.icon-amber {
+  background: #fef3c7;
+  color: #d97706;
+}
+.dt-metric-badge.badge-amber {
+  background: #fde68a;
+  color: #92400e;
+}
+
+.dt-metric-card.card-rose {
+  border-top: 4px solid #dc2626;
+}
+.dt-metric-card.card-rose:hover {
+  border-color: #dc2626;
+  box-shadow: 0 10px 25px -5px rgba(220, 38, 38, 0.15);
+}
+.dt-metric-icon-wrap.icon-rose {
+  background: #fee2e2;
+  color: #dc2626;
+}
+.dt-metric-badge.badge-rose {
+  background: #fecaca;
+  color: #991b1b;
+}
+
+/* Sub-filter Select */
+.dt-subfilter-select {
+  border-radius: 8px;
+  border-color: #cbd5e1;
+  font-weight: 600;
+  color: #1e293b;
+  min-width: 105px;
+}
+
+/* Chart Metric Mode Toggles */
+.dt-chart-toggle-group {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.dt-chart-toggle-pill {
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  color: #64748b;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.dt-chart-toggle-pill:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+.dt-chart-toggle-pill.active {
+  background: #0B1F3A;
+  color: #ffffff;
+  border-color: #0B1F3A;
+  box-shadow: 0 2px 6px rgba(11, 31, 58, 0.2);
+}
+
+/* Conversion Funnel (Phễu 8 Bước) */
+.dt-funnel-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.dt-funnel-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.dt-funnel-step-badge {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  color: #0B1F3A;
+  font-size: 0.75rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.dt-funnel-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.dt-funnel-info-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.dt-funnel-name {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.dt-funnel-count {
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: #0B1F3A;
+}
+
+.dt-funnel-bar-bg {
+  width: 100%;
+  height: 7px;
+  background: #f1f5f9;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.dt-funnel-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dt-funnel-desc {
+  font-size: 0.72rem;
+  color: #64748b;
+  line-height: 1.2;
+}
+
+/* Status Distribution Panels */
+.dt-status-panel {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 16px 20px;
+  box-shadow: 0 4px 15px rgba(7, 19, 37, 0.03);
+}
+
+.dt-status-panel-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #0B1F3A;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dt-status-tags-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 8px;
+}
+
+.dt-status-tag-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 9px;
+  padding: 8px 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.dt-status-tag-card:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+}
+
+.dt-status-tag-card.active {
+  background: #eff6ff;
+  border-color: #3b82f6;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.15);
+}
+
+.dt-status-tag-name {
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: #334155;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dt-status-tag-val {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #0B1F3A;
+  margin-top: 4px;
+}
+
+/* Badge Pills */
+.dt-badge-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.dt-cell-phone {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #2563eb;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+.dt-cell-phone:hover {
+  text-decoration: underline;
+}
+
+.dt-profit-preview-banner {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #166534;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.dt-payment-summary-box {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.dt-ledger-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.dt-ledger-table {
+  font-size: 0.82rem;
+}
+.dt-ledger-table th {
+  font-weight: 700;
+  color: #334155;
+}
+
+.dt-modal-lg {
+  max-width: 820px;
+}
+

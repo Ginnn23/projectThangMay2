@@ -16,6 +16,8 @@ public class ApplicationDbContext : DbContext
     public DbSet<SiteSetting> SiteSettings => Set<SiteSetting>();
     public DbSet<MaintenanceCustomer> MaintenanceCustomers => Set<MaintenanceCustomer>();
     public DbSet<ElevatorEstimate> ElevatorEstimates => Set<ElevatorEstimate>();
+    public DbSet<ElevatorContract> ElevatorContracts => Set<ElevatorContract>();
+    public DbSet<ContractPayment> ContractPayments => Set<ContractPayment>();
 
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
@@ -116,6 +118,39 @@ public class ApplicationDbContext : DbContext
             entity.Property(x => x.AdminNotes).HasMaxLength(2000);
             entity.Property(x => x.CreatedAt).HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
         });
+
+        modelBuilder.Entity<ElevatorContract>(entity =>
+        {
+            entity.HasIndex(x => x.ContractCode).IsUnique();
+            entity.Property(x => x.ContractCode).HasMaxLength(50).IsRequired();
+            entity.Property(x => x.CustomerName).HasMaxLength(150).IsRequired();
+            entity.Property(x => x.PhoneNumber).HasMaxLength(30).IsRequired();
+            entity.Property(x => x.Email).HasMaxLength(254);
+            entity.Property(x => x.ProjectName).HasMaxLength(220).IsRequired();
+            entity.Property(x => x.Address).HasMaxLength(300);
+            entity.Property(x => x.ElevatorType).HasMaxLength(100);
+            entity.Property(x => x.MotorBrand).HasMaxLength(100);
+            entity.Property(x => x.DoorType).HasMaxLength(100);
+            entity.Property(x => x.PaymentStatus).HasMaxLength(50).HasDefaultValue("ChuaDatCoc").IsRequired();
+            entity.Property(x => x.ProjectStatus).HasMaxLength(50).HasDefaultValue("ChoDatCoc").IsRequired();
+            entity.Property(x => x.AdminNotes).HasMaxLength(2000);
+            entity.Property(x => x.CreatedAt).HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
+
+            entity.HasMany(x => x.Payments)
+                  .WithOne(x => x.Contract)
+                  .HasForeignKey(x => x.ContractId)
+                  .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<ContractPayment>(entity =>
+        {
+            entity.Property(x => x.PaymentMethod).HasMaxLength(50).HasDefaultValue("Chuyển khoản").IsRequired();
+            entity.Property(x => x.Stage).HasMaxLength(100).IsRequired();
+            entity.Property(x => x.ReceiptCode).HasMaxLength(100);
+            entity.Property(x => x.Note).HasMaxLength(1000);
+            entity.Property(x => x.CreatedBy).HasMaxLength(100);
+            entity.Property(x => x.CreatedAt).HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
+        });
     }
 
     private void ApplyUtcDates()
@@ -148,6 +183,11 @@ public class ApplicationDbContext : DbContext
             if (entry.Entity is ElevatorEstimate estimate && entry.State == EntityState.Modified)
             {
                 estimate.UpdatedAt = DateTime.UtcNow;
+            }
+
+            if (entry.Entity is ElevatorContract contract && entry.State == EntityState.Modified)
+            {
+                contract.UpdatedAt = DateTime.UtcNow;
             }
 
             if (entry.State == EntityState.Added)
