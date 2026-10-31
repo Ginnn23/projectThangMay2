@@ -115,27 +115,33 @@ public class ElevatorContract
         TotalCost = CostEquipment + CostShipping + CostInstallation + CostOther;
         ExpectedProfit = TotalValue - TotalCost;
 
+        decimal requiredDeposit = TotalValue > 0 ? Math.Round(TotalValue * (DepositRate / 100.0m)) : 0m;
+
         if (Payments != null && Payments.Count > 0)
         {
-            // First payment or deposit tagged
-            var depositPayments = Payments.Where(p => p.Stage.Contains("cọc", StringComparison.OrdinalIgnoreCase)).ToList();
-            if (depositPayments.Count > 0)
+            TotalPaid = Payments.Sum(p => p.Amount);
+
+            // Phân bổ chuẩn hóa giữa Tiền Cọc và Tiền Đóng Thêm:
+            // Tiền cọc tối đa không vượt quá mức cọc quy định theo hợp đồng (VD: 50% = 430Tr)
+            // Toàn bộ phần thanh toán vượt mức cọc sẽ được tính vào Tiền Đóng Thêm
+            if (TotalPaid >= requiredDeposit)
             {
-                DepositAmount = depositPayments.Sum(p => p.Amount);
-                AdditionalPaidAmount = Payments.Where(p => !p.Stage.Contains("cọc", StringComparison.OrdinalIgnoreCase)).Sum(p => p.Amount);
+                DepositAmount = requiredDeposit;
+                AdditionalPaidAmount = TotalPaid - requiredDeposit;
             }
             else
             {
-                // Fallback: first payment treated as deposit up to deposit rate requirement
-                var first = Payments.OrderBy(p => p.PaymentDate).First();
-                DepositAmount = first.Amount;
-                AdditionalPaidAmount = Payments.Where(p => p.Id != first.Id).Sum(p => p.Amount);
+                DepositAmount = TotalPaid;
+                AdditionalPaidAmount = 0m;
             }
-
-            TotalPaid = Payments.Sum(p => p.Amount);
         }
         else
         {
+            if (DepositAmount > requiredDeposit && TotalValue > 0)
+            {
+                AdditionalPaidAmount += (DepositAmount - requiredDeposit);
+                DepositAmount = requiredDeposit;
+            }
             TotalPaid = DepositAmount + AdditionalPaidAmount;
         }
 
@@ -148,11 +154,11 @@ public class ElevatorContract
             {
                 PaymentStatus = "ThanhToanDu";
             }
-            else if (TotalPaid > DepositAmount && TotalPaid > 0)
+            else if (TotalPaid >= requiredDeposit && TotalPaid > 0)
             {
                 PaymentStatus = "ThanhToanMotPhan";
             }
-            else if (DepositAmount > 0 || TotalPaid > 0)
+            else if (TotalPaid > 0 || DepositAmount > 0)
             {
                 PaymentStatus = "DaDatCoc";
             }

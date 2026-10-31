@@ -869,12 +869,12 @@
   color: #ef4444;
 }
 
-/* Modal Backdrop & Card */
+/* Modal Backdrop & Dialog */
 .dt-modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(11, 31, 58, 0.65);
-  backdrop-filter: blur(4px);
+  background: rgba(11, 31, 58, 0.7);
+  backdrop-filter: blur(6px);
   z-index: 9999;
   display: flex;
   align-items: center;
@@ -884,31 +884,49 @@
 }
 
 @keyframes fadeInModal {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from { opacity: 0; transform: scale(0.98); }
+  to { opacity: 1; transform: scale(1); }
 }
 
+.dt-modal-dialog,
 .dt-modal-card {
-  background: #ffffff;
-  border-radius: 20px;
-  max-width: 640px;
+  background: #ffffff !important;
+  border-radius: 18px !important;
+  max-width: 620px;
   width: 100%;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 25px 60px rgba(11, 31, 58, 0.35), 0 0 0 1px rgba(226, 232, 240, 0.9) !important;
   display: flex;
   flex-direction: column;
+  border: 1px solid #cbd5e1 !important;
+  color: #1e293b !important;
+  animation: slideUpModal 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideUpModal {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.dt-modal-dialog.dt-modal-lg,
+.dt-modal-card.dt-modal-lg {
+  max-width: 860px !important;
 }
 
 .dt-modal-header {
-  padding: 20px 24px;
+  padding: 18px 24px;
   border-bottom: 1px solid #e2e8f0;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  background: #f8fafc;
+  border-radius: 18px 18px 0 0;
 }
 
-.dt-modal-header h3 {
+.dt-modal-header .dt-modal-title,
+.dt-modal-header h3,
+.dt-modal-header h5 {
   margin: 0;
   font-size: 1.15rem;
   font-weight: 800;
@@ -919,22 +937,40 @@
 }
 
 .dt-modal-close {
-  background: transparent;
-  border: none;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
   font-size: 1.3rem;
-  color: #94a3b8;
+  line-height: 1;
+  color: #64748b;
   cursor: pointer;
   border-radius: 8px;
-  padding: 4px 8px;
+  padding: 4px 10px;
+  transition: all 0.2s ease;
 }
 
-.dt-modal-close:hover { color: #0B1F3A; background: #f1f5f9; }
+.dt-modal-close:hover {
+  color: #dc2626;
+  background: #fee2e2;
+  border-color: #fca5a5;
+}
 
 .dt-modal-body {
   padding: 24px;
   display: flex;
   flex-direction: column;
   gap: 16px;
+  background: #ffffff;
+}
+
+.dt-modal-footer {
+  padding: 16px 24px;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  background: #f8fafc;
+  border-radius: 0 0 18px 18px;
 }
 
 .dt-form-row {
@@ -1297,6 +1333,206 @@
 }
 
 .dt-modal-lg {
-  max-width: 820px;
+  max-width: 860px !important;
 }
+
+/* ============================================================
+   TABLE TOOLBAR & ADVANCED FILTER ALIGNMENT
+   ============================================================ */
+.dt-table-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 24px;
+  border-bottom: 1px solid #e2e8f0;
+  flex-wrap: wrap;
+  gap: 16px;
+  background: #ffffff;
+}
+
+.dt-table-title-group h3 {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #0B1F3A;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.dt-table-title-group p {
+  margin: 4px 0 0;
+  font-size: 0.82rem;
+  color: #64748b;
+}
+
+.dt-table-filters {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.dt-search-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-width: 260px;
+}
+
+.dt-search-input-wrap i {
+  position: absolute;
+  left: 12px;
+  color: #94a3b8;
+  font-size: 0.9rem;
+  pointer-events: none;
+}
+
+.dt-search-input-wrap input {
+  width: 100%;
+  padding: 7px 32px 7px 34px;
+  border: 1px solid #cbd5e1;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  background: #f8fafc;
+  color: #0f172a;
+  transition: all 0.2s ease;
+}
+
+.dt-search-input-wrap input:focus {
+  background: #ffffff;
+  border-color: #0B1F3A;
+  box-shadow: 0 0 0 3px rgba(11, 31, 58, 0.1);
+  outline: none;
+}
+
+.dt-search-clear {
+  position: absolute;
+  right: 10px;
+  background: none;
+  border: none;
+  font-size: 1.1rem;
+  line-height: 1;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 2px;
+}
+
+.dt-search-clear:hover {
+  color: #0B1F3A;
+}
+
+.dt-table-select {
+  border-radius: 999px;
+  border-color: #cbd5e1;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #1e293b;
+  padding: 6px 30px 6px 14px;
+  background-color: #f8fafc;
+  min-width: 175px;
+  width: auto;
+  cursor: pointer;
+}
+
+.dt-table-select:focus {
+  border-color: #0B1F3A;
+  box-shadow: 0 0 0 3px rgba(11, 31, 58, 0.1);
+}
+
+/* Badges for Collection Status (Đã thu đủ vs Chưa đủ tiền) */
+.dt-badge-paid-full {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: #ecfdf5;
+  color: #047857;
+  border: 1px solid #a7f3d0;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.dt-badge-debt {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.dt-badge-debt-amount {
+  color: #b45309;
+  font-weight: 700;
+  font-size: 0.88rem;
+}
+
+.dt-badge-debt-sub {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fde68a;
+  padding: 2px 7px;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  width: fit-content;
+}
+
+/* Cost Chip in Table */
+.dt-cost-chip {
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.72rem;
+  color: #2563eb;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  padding: 2px 7px;
+  border-radius: 6px;
+  margin-top: 3px;
+  transition: all 0.15s ease;
+}
+
+.dt-cost-chip:hover {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+/* Mini Progress Bar for Collections */
+.dt-mini-progress {
+  width: 100%;
+  height: 5px;
+  background: #e2e8f0;
+  border-radius: 999px;
+  overflow: hidden;
+  margin-top: 4px;
+}
+
+.dt-mini-progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #10b981, #059669);
+  transition: width 0.4s ease;
+}
+
+.dt-table th {
+  padding: 12px 14px;
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: #0B1F3A;
+  background: #f8fafc;
+  border-bottom: 2px solid #e2e8f0;
+  white-space: nowrap;
+}
+
+.dt-table td {
+  padding: 12px 14px;
+  vertical-align: middle;
+  border-bottom: 1px solid #f1f5f9;
+}
+
 

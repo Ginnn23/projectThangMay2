@@ -274,6 +274,25 @@ public class ContractsController : ControllerBase
             .OrderByDescending(c => c.ContractDate)
             .ToListAsync(cancellationToken);
 
+        bool needsSave = false;
+        foreach (var c in contracts)
+        {
+            var oldDep = c.DepositAmount;
+            var oldAdd = c.AdditionalPaidAmount;
+            var oldRem = c.RemainingAmount;
+            var oldStatus = c.PaymentStatus;
+            c.RecalculateFinancials();
+            if (c.DepositAmount != oldDep || c.AdditionalPaidAmount != oldAdd || c.RemainingAmount != oldRem || c.PaymentStatus != oldStatus)
+            {
+                _dbContext.Attach(c).State = EntityState.Modified;
+                needsSave = true;
+            }
+        }
+        if (needsSave)
+        {
+            await _dbContext.SaveChangesAsync(cancellationToken);
+        }
+
         return Ok(contracts.Select(MapToResponse).ToList());
     }
 

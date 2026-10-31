@@ -1198,12 +1198,15 @@ export default function DoanhThuAdmin({ onShowToast }) {
                 <th>Đã Cọc (50%)</th>
                 <th>Đã Đóng Thêm</th>
                 <th>Tổng Thực Thu</th>
-                <th>Công Nợ Còn</th>
-                <th>Tổng Chi Phí</th>
-                <th>Lợi Nhuận</th>
+                <th>Công Nợ Phải Thu</th>
+                <th>
+                  Tổng Chi Phí (Giá Vốn)
+                  <i className="bi bi-info-circle ms-1 text-muted" title="Gồm 4 cấu phần: Thiết bị chính hãng + Vận chuyển + Lắp đặt cơ điện + Chi phí phát sinh/kiểm định"></i>
+                </th>
+                <th>Lợi Nhuận Dự Kiến</th>
                 <th>TT Thanh Toán</th>
                 <th>Tiến Độ Thi Công</th>
-                <th className="text-end">Thao Tác</th>
+                <th className="text-end" style={{ minWidth: 140 }}>Thao Tác</th>
               </tr>
             </thead>
             <tbody>
@@ -1218,6 +1221,10 @@ export default function DoanhThuAdmin({ onShowToast }) {
                 filteredContracts.map((c) => {
                   const payInfo = paymentStatusMap[c.paymentStatus] || { label: c.paymentStatus, color: "#64748b", bg: "#f1f5f9" };
                   const projInfo = projectStatusMap[c.projectStatus] || { label: c.projectStatus, color: "#64748b", bg: "#f1f5f9" };
+                  const isPaidFull = c.remainingAmount <= 0 || c.totalPaid >= c.totalValue;
+                  const reqDeposit = c.totalValue > 0 ? Math.round(c.totalValue * (c.depositRate / 100)) : 0;
+                  const isDepositFull = c.depositAmount >= reqDeposit && c.depositAmount > 0;
+                  const collectionPct = c.totalValue > 0 ? Math.min(100, Math.round((c.totalPaid / c.totalValue) * 100)) : 0;
 
                   return (
                     <tr key={c.id}>
@@ -1226,7 +1233,7 @@ export default function DoanhThuAdmin({ onShowToast }) {
                         <div className="dt-cell-strong text-primary">{c.contractCode}</div>
                         <div className="dt-cell-subtext" title={c.projectName}>{c.projectName}</div>
                         <small className="text-muted" style={{ fontSize: "0.75rem" }}>
-                          {new Date(c.contractDate).toLocaleDateString("vi-VN")}
+                          Ký: {new Date(c.contractDate).toLocaleDateString("vi-VN")}
                         </small>
                       </td>
 
@@ -1243,45 +1250,96 @@ export default function DoanhThuAdmin({ onShowToast }) {
                         <div className="dt-cell-val font-weight-bold" style={{ color: "#0B1F3A" }}>
                           {formatVND(c.totalValue)}
                         </div>
-                        <small className="text-muted">Cọc {c.depositRate}%</small>
+                        <small className="text-muted d-block" style={{ fontSize: "0.72rem" }}>
+                          Cọc {c.depositRate}% = {formatShortVND(reqDeposit)}
+                        </small>
                       </td>
 
                       {/* Deposit Paid */}
                       <td>
-                        <span className="text-primary font-weight-semibold">
+                        <span className={`font-weight-semibold ${isDepositFull ? "text-primary" : "text-muted"}`}>
                           {formatVND(c.depositAmount)}
                         </span>
+                        {isDepositFull ? (
+                          <div className="badge bg-primary-subtle text-primary d-block mt-1" style={{ fontSize: "0.68rem" }}>
+                            ✓ Đủ cọc {c.depositRate}%
+                          </div>
+                        ) : c.depositAmount > 0 ? (
+                          <div className="text-muted d-block" style={{ fontSize: "0.68rem" }}>
+                            Đã cọc 1 phần
+                          </div>
+                        ) : (
+                          <div className="text-danger d-block" style={{ fontSize: "0.68rem" }}>
+                            Chưa cọc
+                          </div>
+                        )}
                       </td>
 
                       {/* Additional Paid */}
                       <td>
-                        <span className="text-muted">
-                          {formatVND(c.additionalPaidAmount)}
-                        </span>
+                        {c.additionalPaidAmount > 0 ? (
+                          <span className="text-dark font-weight-semibold">
+                            {formatVND(c.additionalPaidAmount)}
+                          </span>
+                        ) : (
+                          <span className="text-muted">-</span>
+                        )}
                       </td>
 
                       {/* Total Paid */}
                       <td>
-                        <strong className="text-success">
+                        <strong className={isPaidFull ? "text-success" : "text-primary"}>
                           {formatVND(c.totalPaid)}
                         </strong>
-                      </td>
-
-                      {/* Remaining Debt */}
-                      <td>
-                        <strong style={{ color: c.remainingAmount > 0 ? "#d97706" : "#16a34a" }}>
-                          {c.remainingAmount > 0 ? formatVND(c.remainingAmount) : "Đã thu đủ ✓"}
-                        </strong>
-                      </td>
-
-                      {/* Deployment Cost */}
-                      <td>
-                        <span className="text-danger">
-                          {formatVND(c.totalCost)}
-                        </span>
-                        <div style={{ fontSize: "0.72rem", color: "#64748b" }}>
-                          Thiết bị: {formatShortVND(c.costEquipment)}
+                        <div className="dt-mini-progress">
+                          <div
+                            className="dt-mini-progress-fill"
+                            style={{
+                              width: `${collectionPct}%`,
+                              background: isPaidFull ? "#10b981" : "#3b82f6"
+                            }}
+                          ></div>
                         </div>
+                        <div className="d-flex justify-content-between align-items-center mt-1" style={{ fontSize: "0.68rem" }}>
+                          <span className="text-muted">Tiến độ thu:</span>
+                          <strong className={isPaidFull ? "text-success" : "text-primary"}>{collectionPct}%</strong>
+                        </div>
+                      </td>
+
+                      {/* Remaining Debt (CẬP NHẬT RÕ RÀNG: ĐÃ THU ĐỦ vs CHƯA ĐỦ TIỀN) */}
+                      <td>
+                        {isPaidFull ? (
+                          <div className="dt-badge-paid-full" title="Khách hàng đã thanh toán đủ 100% giá trị hợp đồng">
+                            <i className="bi bi-check-circle-fill"></i> Đã Thu Đủ (0 ₫)
+                          </div>
+                        ) : (
+                          <div className="dt-badge-debt">
+                            <span className="dt-badge-debt-amount">{formatVND(c.remainingAmount)}</span>
+                            <span className="dt-badge-debt-sub">
+                              <i className="bi bi-exclamation-circle-fill"></i> Còn nợ {c.totalValue > 0 ? Math.round((c.remainingAmount / c.totalValue) * 100) : 0}%
+                            </span>
+                          </div>
+                        )}
+                      </td>
+
+                      {/* Deployment Cost (GIẢI THÍCH CHI PHÍ RÕ RÀNG VỚI POPUP) */}
+                      <td>
+                        <div className="font-weight-bold text-danger">
+                          {formatVND(c.totalCost)}
+                        </div>
+                        <button
+                          type="button"
+                          className="dt-cost-chip border-0 bg-transparent p-0 text-start"
+                          onClick={() => {
+                            setSelectedContractForLedger(c);
+                            setShowLedgerModal(true);
+                          }}
+                          title="Bấm để xem chi tiết 4 khoản chi phí triển khai"
+                        >
+                          <span className="badge bg-light text-primary border">
+                            <i className="bi bi-eye me-1"></i>Thiết bị: {formatShortVND(c.costEquipment)}
+                          </span>
+                        </button>
                       </td>
 
                       {/* Expected Profit */}
@@ -1289,6 +1347,9 @@ export default function DoanhThuAdmin({ onShowToast }) {
                         <strong className="text-teal" style={{ color: "#0d9488" }}>
                           {formatVND(c.expectedProfit)}
                         </strong>
+                        <div className="text-muted" style={{ fontSize: "0.72rem" }}>
+                          Lãi: {c.totalValue > 0 ? ((c.expectedProfit / c.totalValue) * 100).toFixed(1) : 0}%
+                        </div>
                       </td>
 
                       {/* Payment Status Badge */}
@@ -1317,7 +1378,7 @@ export default function DoanhThuAdmin({ onShowToast }) {
                           <button
                             type="button"
                             className="btn btn-sm btn-outline-success"
-                            title="Ghi nhận thanh toán mới"
+                            title="Ghi nhận đợt thanh toán mới"
                             onClick={() => handleOpenPayment(c)}
                           >
                             <i className="bi bi-cash-stack"></i>
@@ -1325,7 +1386,7 @@ export default function DoanhThuAdmin({ onShowToast }) {
                           <button
                             type="button"
                             className="btn btn-sm btn-outline-info"
-                            title="Xem lịch sử thanh toán & chi phí"
+                            title="Xem lịch sử thanh toán & cơ cấu chi phí"
                             onClick={() => {
                               setSelectedContractForLedger(c);
                               setShowLedgerModal(true);
