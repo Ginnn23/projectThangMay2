@@ -6,15 +6,15 @@ import SmartElevatorCOP from "../components/SmartElevatorCOP";
 import { soDienThoaiCongTy, soDienThoaiLienKet } from "../data/contactInfo";
 import { apiClient } from "../api/client";
 import heroImage from "../assets/images/hero-elevator.jpg";
-import anhWalnutMirror from "../assets/images/cabin-styles/cabin-walnut-mirror.webp";
-import anhInoxHairline from "../assets/images/cabin-styles/cabin-inox-hairline.webp";
-import anhGoldPvd from "../assets/images/cabin-styles/cabin-gold-pvd.webp";
-import anhSilverMirror from "../assets/images/cabin-styles/cabin-silver-mirror.webp";
-import anhOakScandi from "../assets/images/cabin-styles/cabin-oak-scandi.webp";
-import anhGlassPanorama from "../assets/images/cabin-styles/cabin-glass-panorama.webp";
-import anhTitaniumBlack from "../assets/images/cabin-styles/cabin-titanium-black.webp";
-import anhQuiltedLeather from "../assets/images/cabin-styles/cabin-quilted-leather.jpg";
-import anhOnyxBacklit from "../assets/images/cabin-styles/cabin-onyx-backlit.jpg";
+import anhWalnutMirror from "../assets/images/cabin-styles/cabin-walnut-mirror.jpg";
+import anhInoxHairline from "../assets/images/cabin-styles/cabin-inox-hairline.png";
+import anhGoldPvd from "../assets/images/cabin-styles/cabin-gold-pvd.jpg";
+import anhSilverMirror from "../assets/images/cabin-styles/cabin-silver-mirror.png";
+import anhOakScandi from "../assets/images/cabin-styles/cabin-oak-scandi.png";
+import anhGlassPanorama from "../assets/images/cabin-styles/cabin-glass-panorama.jpg";
+import anhTitaniumBlack from "../assets/images/cabin-styles/cabin-titanium-black.png";
+import anhQuiltedLeather from "../assets/images/cabin-styles/cabin-quilted-leather.png";
+import anhOnyxBacklit from "../assets/images/cabin-styles/cabin-onyx-backlit.png";
 import "./StudioCabin.css";
 
 // DANH SÁCH ẢNH THỰC TẾ CABIN PHỐI HOÀN THIỆN TƯƠNG ỨNG TỪNG MẪU VẬT LIỆU
