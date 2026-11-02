@@ -274,25 +274,6 @@ public class ContractsController : ControllerBase
             .OrderByDescending(c => c.ContractDate)
             .ToListAsync(cancellationToken);
 
-        bool needsSave = false;
-        foreach (var c in contracts)
-        {
-            var oldDep = c.DepositAmount;
-            var oldAdd = c.AdditionalPaidAmount;
-            var oldRem = c.RemainingAmount;
-            var oldStatus = c.PaymentStatus;
-            c.RecalculateFinancials();
-            if (c.DepositAmount != oldDep || c.AdditionalPaidAmount != oldAdd || c.RemainingAmount != oldRem || c.PaymentStatus != oldStatus)
-            {
-                _dbContext.Attach(c).State = EntityState.Modified;
-                needsSave = true;
-            }
-        }
-        if (needsSave)
-        {
-            await _dbContext.SaveChangesAsync(cancellationToken);
-        }
-
         return Ok(contracts.Select(MapToResponse).ToList());
     }
 
@@ -486,9 +467,98 @@ public class ContractsController : ControllerBase
         contract.CostInstallation = request.CostInstallation;
         contract.CostOther = request.CostOther;
 
+        decimal requiredDeposit = contract.TotalValue > 0 ? Math.Round(contract.TotalValue * (contract.DepositRate / 100.0m)) : 0m;
+
+        // Xử lý cập nhật trạng thái thanh toán một cách thông minh & tôn trọng lựa chọn của quản trị viên:
         if (!string.IsNullOrWhiteSpace(request.PaymentStatus))
         {
             contract.PaymentStatus = request.PaymentStatus;
+
+            if (request.PaymentStatus == "ChuaDatCoc")
+            {
+                // Khi chuyển sang Chưa Đặt Cọc: Xóa bỏ các thanh toán test cũ (nếu có) và đặt lại công nợ 100%
+                if (contract.Payments.Count > 0)
+                {
+                    _dbContext.ContractPayments.RemoveRange(contract.Payments);
+                    contract.Payments.Clear();
+                }
+                contract.DepositAmount = 0m;
+                contract.AdditionalPaidAmount = 0m;
+                contract.TotalPaid = 0m;
+                contract.RemainingAmount = contract.TotalValue;
+            }
+            else if (request.PaymentStatus == "DaDatCoc")
+            {
+                // Khi chuyển sang Đã Đặt Cọc: Đảm bảo tiền cọc bằng đúng mức cọc quy định (50%)
+                decimal currentPaid = contract.Payments.Sum(p => p.Amount);
+                if (currentPaid < requiredDeposit)
+                {
+                    decimal diff = requiredDeposit - currentPaid;
+                    var depositPayment = new ContractPayment
+                    {
+                        ContractId = contract.Id,
+                        PaymentDate = DateTime.UtcNow,
+                        Amount = diff,
+                        PaymentMethod = "Chuyển khoản",
+                        Stage = $"Đặt cọc đợt 1 ({contract.DepositRate}%)",
+                        ReceiptCode = $"UNC-{DateTime.UtcNow:yyyy}-{Random.Shared.Next(1000, 9999)}",
+                        Note = "Ghi nhận đặt cọc từ cập nhật hợp đồng",
+                        CreatedBy = User?.Identity?.Name ?? "Admin"
+                    };
+                    contract.Payments.Add(depositPayment);
+                }
+                contract.DepositAmount = requiredDeposit;
+                contract.AdditionalPaidAmount = 0m;
+                contract.TotalPaid = requiredDeposit;
+                contract.RemainingAmount = Math.Max(0, contract.TotalValue - requiredDeposit);
+            }
+            else if (request.PaymentStatus == "ThanhToanDu")
+            {
+                // Khi chuyển sang Đã Thanh Toán Đủ: Đảm bảo tổng thực thu bằng 100% giá trị hợp đồng và công nợ = 0đ
+                decimal currentPaid = contract.Payments.Sum(p => p.Amount);
+                if (currentPaid < contract.TotalValue)
+                {
+                    decimal diff = contract.TotalValue - currentPaid;
+                    var fullPayment = new ContractPayment
+                    {
+                        ContractId = contract.Id,
+                        PaymentDate = DateTime.UtcNow,
+                        Amount = diff,
+                        PaymentMethod = "Chuyển khoản",
+                        Stage = "Tất toán hợp đồng (100%)",
+                        ReceiptCode = $"UNC-{DateTime.UtcNow:yyyy}-{Random.Shared.Next(1000, 9999)}",
+                        Note = "Ghi nhận tất toán hợp đồng từ quản trị",
+                        CreatedBy = User?.Identity?.Name ?? "Admin"
+                    };
+                    contract.Payments.Add(fullPayment);
+                }
+                contract.DepositAmount = requiredDeposit;
+                contract.AdditionalPaidAmount = Math.Max(0, contract.TotalValue - requiredDeposit);
+                contract.TotalPaid = contract.TotalValue;
+                contract.RemainingAmount = 0m;
+            }
+            else if (request.PaymentStatus == "ThanhToanMotPhan")
+            {
+                decimal currentPaid = contract.Payments.Sum(p => p.Amount);
+                if (currentPaid == 0 && requiredDeposit > 0)
+                {
+                    var depositPayment = new ContractPayment
+                    {
+                        ContractId = contract.Id,
+                        PaymentDate = DateTime.UtcNow,
+                        Amount = requiredDeposit,
+                        PaymentMethod = "Chuyển khoản",
+                        Stage = $"Đặt cọc đợt 1 ({contract.DepositRate}%)",
+                        ReceiptCode = $"UNC-{DateTime.UtcNow:yyyy}-{Random.Shared.Next(1000, 9999)}",
+                        Note = "Đặt cọc hợp đồng",
+                        CreatedBy = User?.Identity?.Name ?? "Admin"
+                    };
+                    contract.Payments.Add(depositPayment);
+                    contract.DepositAmount = requiredDeposit;
+                    contract.TotalPaid = requiredDeposit;
+                    contract.RemainingAmount = Math.Max(0, contract.TotalValue - requiredDeposit);
+                }
+            }
         }
 
         if (!string.IsNullOrWhiteSpace(request.ProjectStatus))
@@ -498,7 +568,8 @@ public class ContractsController : ControllerBase
 
         contract.AdminNotes = request.AdminNotes;
 
-        contract.RecalculateFinancials();
+        // Tính toán lại chi phí & lợi nhuận mà KHÔNG ghi đè trạng thái thanh toán mà admin đã chọn
+        contract.RecalculateFinancials(autoUpdateStatus: false);
         await _dbContext.SaveChangesAsync(cancellationToken);
 
         return Ok(MapToResponse(contract));
@@ -532,7 +603,7 @@ public class ContractsController : ControllerBase
         };
 
         contract.Payments.Add(payment);
-        contract.RecalculateFinancials();
+        contract.RecalculateFinancials(autoUpdateStatus: true);
 
         // Advance project status if receiving deposit for the first time
         if (contract.ProjectStatus == "ChoDatCoc" && contract.TotalPaid > 0)
@@ -567,7 +638,7 @@ public class ContractsController : ControllerBase
         }
 
         contract.Payments.Remove(payment);
-        contract.RecalculateFinancials();
+        contract.RecalculateFinancials(autoUpdateStatus: true);
 
         await _dbContext.SaveChangesAsync(cancellationToken);
 

@@ -110,7 +110,7 @@ public class ElevatorContract
     // Relationships
     public List<ContractPayment> Payments { get; set; } = new();
 
-    public void RecalculateFinancials()
+    public void RecalculateFinancials(bool autoUpdateStatus = false)
     {
         TotalCost = CostEquipment + CostShipping + CostInstallation + CostOther;
         ExpectedProfit = TotalValue - TotalCost;
@@ -147,8 +147,9 @@ public class ElevatorContract
 
         RemainingAmount = Math.Max(0, TotalValue - TotalPaid);
 
-        // Update PaymentStatus automatically if not manually set to QuaHan
-        if (PaymentStatus != "QuaHan")
+        // Chỉ tự động cập nhật PaymentStatus khi được yêu cầu rõ ràng (VD: khi thêm đợt thanh toán mới qua API)
+        // Không tự ý ghi đè trạng thái mà người quản trị đã chủ động chọn trong form Sửa Hợp Đồng
+        if (autoUpdateStatus && PaymentStatus != "QuaHan")
         {
             if (TotalPaid >= TotalValue && TotalValue > 0)
             {
