@@ -1,13 +1,4 @@
 import { useState, useEffect, useRef, forwardRef, useImperativeHandle } from "react";
-import anhWalnutMirror from "../assets/images/cabin-styles/cabin-walnut-mirror.jpg";
-import anhInoxHairline from "../assets/images/cabin-styles/cabin-inox-hairline.png";
-import anhGoldPvd from "../assets/images/cabin-styles/cabin-gold-pvd.jpg";
-import anhSilverMirror from "../assets/images/cabin-styles/cabin-silver-mirror.png";
-import anhOakScandi from "../assets/images/cabin-styles/cabin-oak-scandi.png";
-import anhGlassPanorama from "../assets/images/cabin-styles/cabin-glass-panorama.jpg";
-import anhTitaniumBlack from "../assets/images/cabin-styles/cabin-titanium-black.png";
-import anhQuiltedLeather from "../assets/images/cabin-styles/cabin-quilted-leather.png";
-import anhOnyxBacklit from "../assets/images/cabin-styles/cabin-onyx-backlit.png";
 import "./CabinVisualizer.css";
 
 // =============================================================================
@@ -26,8 +17,7 @@ export const WALL_OPTIONS = [
     desc: "Gỗ óc chó phối gương soi trung tâm & nẹp kim loại sang trọng.",
     badge: "Villa & Dinh Thự 5★",
     syncValue: "biet-thu-walnut",
-    type: "wood-mirror",
-    image: anhWalnutMirror
+    type: "wood-mirror"
   },
   {
     id: "inox-tieu-chuan",
@@ -37,8 +27,7 @@ export const WALL_OPTIONS = [
     desc: "Bề mặt inox xước satin chống bám vân tay, độ bền cao.",
     badge: "Tiêu chuẩn bền bỉ",
     syncValue: "inox-tieu-chuan",
-    type: "hairline",
-    image: anhInoxHairline
+    type: "hairline"
   },
   {
     id: "inox-guong-vang",
@@ -48,8 +37,7 @@ export const WALL_OPTIONS = [
     desc: "Mạ titan PVD vàng Champagne sang trọng, sáng bóng tự nhiên.",
     badge: "Sang trọng PVD",
     syncValue: "inox-guong-vang",
-    type: "gold-pvd",
-    image: anhGoldPvd
+    type: "gold-pvd"
   },
   {
     id: "inox-guong-bac",
@@ -59,8 +47,7 @@ export const WALL_OPTIONS = [
     desc: "Inox gương trắng 8K bóng sáng, tạo cảm giác mở rộng không gian.",
     badge: "Gương 8K mở rộng",
     syncValue: "inox-tieu-chuan",
-    type: "silver-mirror",
-    image: anhSilverMirror
+    type: "silver-mirror"
   },
   {
     id: "wood-oak-scandi",
@@ -70,8 +57,7 @@ export const WALL_OPTIONS = [
     desc: "Gỗ sồi phong cách Bắc Âu nẹp chỉ đen thanh lịch, ấm cúng.",
     badge: "Bắc Âu Tinh Tế",
     syncValue: "inox-tieu-chuan",
-    type: "oak-scandi",
-    image: anhOakScandi
+    type: "oak-scandi"
   },
   {
     id: "kinh-cuong-luc",
@@ -81,8 +67,7 @@ export const WALL_OPTIONS = [
     desc: "Kính an toàn siêu trong đón sáng tối đa, ngắm trọn cảnh quan 360 độ.",
     badge: "Homelift Panorama",
     syncValue: "homelift-kinh",
-    type: "glass",
-    image: anhGlassPanorama
+    type: "glass"
   },
   {
     id: "inox-guong-den",
@@ -92,8 +77,7 @@ export const WALL_OPTIONS = [
     desc: "Inox gương đen Titanium Black chiều sâu sang trọng chuẩn Penthouse.",
     badge: "Titanium Đen 8K",
     syncValue: "inox-tieu-chuan",
-    type: "black-mirror",
-    image: anhTitaniumBlack
+    type: "black-mirror"
   },
   {
     id: "da-leather-hermes",
@@ -103,8 +87,7 @@ export const WALL_OPTIONS = [
     desc: "Vách da thủ công chần chỉ quả trám phối nẹp đồng phong cách Hermès.",
     badge: "Da Thủ Công Luxury",
     syncValue: "biet-thu-walnut",
-    type: "quilted-leather",
-    image: anhQuiltedLeather
+    type: "quilted-leather"
   },
   {
     id: "onyx-backlit",
@@ -114,8 +97,7 @@ export const WALL_OPTIONS = [
     desc: "Đá ngọc cẩm thạch tự nhiên phát sáng vàng ấm lung linh, đẳng cấp thượng lưu.",
     badge: "Đá Ngọc Xuyên Sáng",
     syncValue: "inox-guong-vang",
-    type: "onyx-alabaster",
-    image: anhOnyxBacklit
+    type: "onyx-alabaster"
   }
 ];
 
@@ -353,7 +335,6 @@ const CabinVisualizer = forwardRef(function CabinVisualizer({
   const [isDoorsOpen, setIsDoorsOpen] = useState(true);
   const [isLightOn, setIsLightOn] = useState(true);
   const [toastMsg, setToastMsg] = useState("");
-  const [viewingPhoto, setViewingPhoto] = useState(null);
 
   // State MÔ PHỎNG THANG MÁY CHẠY TẦNG (Tự động đóng cửa, chạy tầng, chuông Ding, mở cửa)
   const [currentFloor, setCurrentFloor] = useState(1);
@@ -778,17 +759,6 @@ const CabinVisualizer = forwardRef(function CabinVisualizer({
         </div>
 
         <div className="cabin-viz-actions">
-          {/* Nút xem ảnh chụp thực tế */}
-          <button
-            type="button"
-            className="cabin-viz-btn-action"
-            onClick={() => setViewingPhoto(curWallObj?.image || anhWalnutMirror)}
-            title="Xem ảnh chụp thực tế công trình của mẫu cabin này"
-          >
-            <i className="bi bi-camera-fill text-warning"></i>
-            <span>Ảnh Thật</span>
-          </button>
-
           {/* Nút bật / tắt đèn */}
           <button
             type="button"
@@ -1168,10 +1138,7 @@ const CabinVisualizer = forwardRef(function CabinVisualizer({
                     className={`cabin-material-card ${isSelected ? "active" : ""}`}
                     onClick={() => handleSelectWall(item)}
                   >
-                    <div
-                      className={`swatch-preview-box swatch-wall-${item.id}`}
-                      style={item.image ? { backgroundImage: `url(${item.image})`, backgroundSize: "cover", backgroundPosition: "center" } : undefined}
-                    >
+                    <div className={`swatch-preview-box swatch-wall-${item.id}`}>
                       <span className="swatch-code-tag">{item.code}</span>
                       {isSelected && (
                         <div className="swatch-check-icon">
@@ -1201,36 +1168,9 @@ const CabinVisualizer = forwardRef(function CabinVisualizer({
                 <div className="small text-info fw-semibold mb-1" style={{ fontSize: "0.78rem" }}>
                   <i className="bi bi-shield-check me-1"></i>{curWallObj.spec}
                 </div>
-                <p className="small text-muted mb-2" style={{ fontSize: "0.76rem", lineHeight: "1.4" }}>
+                <p className="small text-muted mb-0" style={{ fontSize: "0.76rem", lineHeight: "1.4" }}>
                   {curWallObj.desc}
                 </p>
-
-                {curWallObj.image && (
-                  <div className="d-flex align-items-center justify-content-between gap-2 pt-2" style={{ borderTop: "1px dashed rgba(255, 255, 255, 0.15)" }}>
-                    <div className="d-flex align-items-center gap-2">
-                      <img
-                        src={curWallObj.image}
-                        alt={curWallObj.name}
-                        style={{ width: "42px", height: "42px", objectFit: "cover", borderRadius: "6px", border: "1.5px solid #d4af37", cursor: "pointer" }}
-                        onClick={() => setViewingPhoto(curWallObj.image)}
-                        title="Bấm để phóng to ảnh chụp thực tế"
-                      />
-                      <div>
-                        <div className="text-warning small fw-bold">Ảnh công trình thi công thực tế</div>
-                        <small className="text-white-50" style={{ fontSize: "11px" }}>Bàn giao hoàn thiện cho khách hàng</small>
-                      </div>
-                    </div>
-                    <button
-                      type="button"
-                      className="btn btn-warning btn-sm fw-bold d-flex align-items-center gap-1"
-                      style={{ fontSize: "11px", padding: "4px 10px", borderRadius: "12px" }}
-                      onClick={() => setViewingPhoto(curWallObj.image)}
-                    >
-                      <i className="bi bi-camera-fill"></i>
-                      Xem Ảnh Thật
-                    </button>
-                  </div>
-                )}
               </div>
             )}
           </>
@@ -1428,84 +1368,6 @@ const CabinVisualizer = forwardRef(function CabinVisualizer({
           </button>
         </div>
       </div>
-      {/* Modal / Lightbox Phóng to ảnh chụp thực tế */}
-      {viewingPhoto && (
-        <div
-          className="cabin-photo-modal-overlay"
-          onClick={() => setViewingPhoto(null)}
-          style={{
-            position: "fixed",
-            inset: 0,
-            background: "rgba(3, 10, 24, 0.92)",
-            zIndex: 9999,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: "20px",
-            backdropFilter: "blur(6px)"
-          }}
-        >
-          <div
-            className="cabin-photo-modal-content"
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              maxWidth: "680px",
-              width: "100%",
-              background: "#0c182c",
-              border: "1px solid rgba(255, 215, 0, 0.35)",
-              borderRadius: "16px",
-              overflow: "hidden",
-              boxShadow: "0 25px 60px rgba(0, 0, 0, 0.8)"
-            }}
-          >
-            <div
-              className="d-flex justify-content-between align-items-center p-3"
-              style={{ borderBottom: "1px solid rgba(255, 255, 255, 0.1)", background: "rgba(10, 25, 47, 0.8)" }}
-            >
-              <div className="d-flex align-items-center gap-2">
-                <i className="bi bi-camera-fill text-warning fs-5"></i>
-                <div>
-                  <div className="text-white fw-bold" style={{ fontSize: "14px" }}>
-                    {curWallObj?.name || "Ảnh Chụp Thực Tế Cabin"}
-                  </div>
-                  <small className="text-warning" style={{ fontSize: "11px" }}>
-                    {curWallObj?.badge || "Công trình hoàn thiện thực tế"}
-                  </small>
-                </div>
-              </div>
-              <button
-                type="button"
-                className="btn-close btn-close-white"
-                onClick={() => setViewingPhoto(null)}
-                aria-label="Đóng"
-              ></button>
-            </div>
-
-            <div style={{ maxHeight: "72vh", overflow: "hidden", background: "#000", textAlign: "center" }}>
-              <img
-                src={viewingPhoto}
-                alt={curWallObj?.name || "Ảnh thực tế"}
-                style={{ width: "100%", maxHeight: "72vh", objectFit: "contain" }}
-              />
-            </div>
-
-            <div className="p-3 d-flex justify-content-between align-items-center" style={{ background: "rgba(10, 25, 47, 0.9)" }}>
-              <small className="text-white-50" style={{ fontSize: "12px" }}>
-                <i className="bi bi-check-circle-fill text-success me-1"></i>
-                {curWallObj?.desc || "Ảnh chụp thực tế công trình thang máy Hà Hồng"}
-              </small>
-              <button
-                type="button"
-                className="btn btn-warning btn-sm fw-bold px-3"
-                style={{ borderRadius: "8px", fontSize: "12px" }}
-                onClick={() => setViewingPhoto(null)}
-              >
-                Đóng
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 });
