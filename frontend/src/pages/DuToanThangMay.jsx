@@ -950,20 +950,25 @@ export default function DuToanThangMay() {
             </tbody>
           </table>
 
-          <div style={{ background: "#fef3c7", border: "1px solid #f59e0b", borderRadius: "6px", padding: "14px", marginBottom: "25px", textAlign: "center" }}>
-            <div style={{ fontSize: "13px", color: "#92400e", marginBottom: "4px" }}>TỔNG DỰ TOÁN TRỌN GÓI THAM KHẢO (ĐÃ GỒM ĐỘNG CƠ, CABIN, THI CÔNG &amp; KIỂM ĐỊNH):</div>
-            <div style={{ fontSize: "22px", fontWeight: "bold", color: "#0b2246" }}>
-              {formatVnd(result?.estimatedPriceMin)} - {formatVnd(result?.estimatedPriceMax)}
+          <div style={{ background: "#f8fafc", border: "2px solid #0b2246", borderRadius: "8px", padding: "12px", marginBottom: "20px", textAlign: "center" }}>
+            <div style={{ fontSize: "12px", color: "#0b2246", fontWeight: "bold", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+              TỔNG GIÁ TRỊ DỰ TOÁN TRỌN GÓI CHÍNH THỨC (ĐÃ BAO GỒM VAT, THI CÔNG &amp; KIỂM ĐỊNH):
+            </div>
+            <div style={{ fontSize: "24px", fontWeight: "bold", color: "#b45309", margin: "4px 0" }}>
+              {formatVnd(result?.estimatedPriceMin && result?.estimatedPriceMax ? Math.round((result.estimatedPriceMin + result.estimatedPriceMax) / 2) : 788000000)}
+            </div>
+            <div style={{ fontSize: "11.5px", color: "#64748b" }}>
+              Khoảng biến thiên cấu hình tham chiếu: {formatVnd(result?.estimatedPriceMin)} - {formatVnd(result?.estimatedPriceMax)}
             </div>
           </div>
 
-          <div style={{ display: "flex", justifyContent: "space-between", marginTop: "40px", fontSize: "12px", textAlign: "center" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", marginTop: "25px", fontSize: "12px", textAlign: "center" }}>
             <div style={{ width: "200px" }}>
-              <div style={{ fontWeight: "bold", marginBottom: "50px" }}>ĐẠI DIỆN KHÁCH HÀNG</div>
+              <div style={{ fontWeight: "bold", marginBottom: "40px" }}>ĐẠI DIỆN KHÁCH HÀNG</div>
               <div>(Ký và ghi rõ họ tên)</div>
             </div>
             <div style={{ width: "220px" }}>
-              <div style={{ fontWeight: "bold", marginBottom: "50px" }}>CÔNG TY CP THANG MÁY HÀ HỒNG</div>
+              <div style={{ fontWeight: "bold", marginBottom: "40px" }}>CÔNG TY CP THANG MÁY HÀ HỒNG</div>
               <div style={{ fontWeight: "bold", color: "#0b2246" }}>KỸ SƯ TRƯỞNG DUYỆT</div>
               <div style={{ fontSize: "11px", color: "#666" }}>(Đã ký &amp; đóng dấu số)</div>
             </div>

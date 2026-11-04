@@ -5313,19 +5313,47 @@ body.ai-chat-open .floating-contact {
 }
 
 @media print {
-  body * {
-    visibility: hidden !important;
+  @page {
+    size: A4 portrait;
+    margin: 8mm 12mm;
   }
-  #print-quotation, #print-quotation * {
+
+  html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #fff !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  /* Hide everything except #print-quotation */
+  header, footer, nav, aside, .navbar, .footer,
+  .floating-telegram, .floating-contact, .chat-widget,
+  .estimator-section, .hero-section, section {
+    display: none !important;
+  }
+
+  body * {
+    visibility: hidden;
+  }
+
+  #print-quotation,
+  #print-quotation * {
     visibility: visible !important;
   }
+
   #print-quotation {
-    position: absolute !important;
-    left: 0 !important;
-    top: 0 !important;
-    width: 100% !important;
     display: block !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
     background: #fff !important;
+    page-break-after: avoid !important;
+    page-break-inside: avoid !important;
   }
 }
 
