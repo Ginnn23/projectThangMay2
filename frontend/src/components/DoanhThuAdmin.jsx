@@ -21,6 +21,19 @@ export default function DoanhThuAdmin({ onShowToast }) {
   const [filterPaymentStatus, setFilterPaymentStatus] = useState("all");
   const [filterProjectStatus, setFilterProjectStatus] = useState("all");
 
+  // Privacy Mode (Che doanh thu & thông tin khách hàng để nộp báo cáo)
+  const [isPrivacyMode, setIsPrivacyMode] = useState(() => {
+    return localStorage.getItem("admin_privacy_mode") === "true";
+  });
+
+  const togglePrivacyMode = () => {
+    setIsPrivacyMode((prev) => {
+      const next = !prev;
+      localStorage.setItem("admin_privacy_mode", String(next));
+      return next;
+    });
+  };
+
   // Chart view mode
   const [chartMetricMode, setChartMetricMode] = useState("cash_vs_contract"); // "cash_vs_contract" | "cost_vs_profit" | "receivables" | "all"
   const [hoveredMonthIdx, setHoveredMonthIdx] = useState(null);
@@ -83,14 +96,48 @@ export default function DoanhThuAdmin({ onShowToast }) {
   }
 
   // Formatting helpers
-  const formatVND = (val) =>
-    new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(val || 0);
+  const formatVND = (val) => {
+    if (isPrivacyMode) return "•••••• ₫";
+    return new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(val || 0);
+  };
 
   const formatShortVND = (val) => {
+    if (isPrivacyMode) return "••• ₫";
     if (!val || val === 0) return "0 ₫";
     if (Math.abs(val) >= 1000000000) return (val / 1000000000).toFixed(2) + " Tỷ";
     if (Math.abs(val) >= 1000000) return (val / 1000000).toFixed(0) + " Tr";
     return formatVND(val);
+  };
+
+  // Masking helpers for Privacy / Reporting Mode
+  const maskCustomerName = (name, index = 0) => {
+    if (!isPrivacyMode) return name;
+    const char = String.fromCharCode(65 + (index % 26));
+    return `Khách Hàng ${char}`;
+  };
+
+  const maskPhone = (phone) => {
+    if (!isPrivacyMode || !phone) return phone;
+    if (phone.length >= 9) {
+      return `${phone.slice(0, 4)} *** ***`;
+    }
+    return "09•• ••• •••";
+  };
+
+  const maskContractCode = (code, index = 0) => {
+    if (!isPrivacyMode) return code;
+    if (code === "213123" || !code.startsWith("HD-")) {
+      return `HD-HH-2026-${String(index + 1).padStart(3, "0")}`;
+    }
+    return code;
+  };
+
+  const maskProjectName = (proj) => {
+    if (!isPrivacyMode || !proj) return proj;
+    if (proj.toLowerCase().includes("khải")) {
+      return "Nhà Phố Xây Mới";
+    }
+    return proj;
   };
 
   const mapElevatorTypeName = (type) => {
@@ -648,6 +695,17 @@ export default function DoanhThuAdmin({ onShowToast }) {
             <i className="bi bi-file-earmark-plus"></i> Ký Hợp Đồng Mới
           </button>
 
+          <button
+            type="button"
+            className={`dt-action-btn ${isPrivacyMode ? "dt-action-btn-privacy-active" : ""}`}
+            onClick={togglePrivacyMode}
+            title={isPrivacyMode ? "Tắt chế độ bảo mật (Hiện số liệu thật)" : "Bật chế độ bảo mật (Che số tiền & khách hàng để nộp báo cáo)"}
+            style={isPrivacyMode ? { background: "#0b2246", color: "#ffd875", borderColor: "#ffd875", fontWeight: 700 } : {}}
+          >
+            <i className={`bi ${isPrivacyMode ? "bi-eye-slash-fill text-warning" : "bi-eye-fill"}`}></i>
+            <span>{isPrivacyMode ? "Đang Bảo Mật" : "Bảo Mật Báo Cáo"}</span>
+          </button>
+
           <button type="button" className="dt-action-btn" onClick={handleExportCSV} title="Xuất file CSV báo cáo">
             <i className="bi bi-download"></i> Xuất CSV
           </button>
@@ -865,9 +923,15 @@ export default function DoanhThuAdmin({ onShowToast }) {
               <line x1="50" y1="185" x2="600" y2="185" stroke="#cbd5e1" strokeWidth="1.5" />
 
               {/* Y-axis Labels */}
-              <text x="42" y="39" textAnchor="end" className="dt-axis-text">{formatShortVND(maxMonthlyVal)}</text>
-              <text x="42" y="89" textAnchor="end" className="dt-axis-text">{formatShortVND(maxMonthlyVal * 0.66)}</text>
-              <text x="42" y="139" textAnchor="end" className="dt-axis-text">{formatShortVND(maxMonthlyVal * 0.33)}</text>
+              <text x="42" y="39" textAnchor="end" className="dt-axis-text">
+                {isPrivacyMode ? "••• Tỷ" : formatShortVND(maxMonthlyVal)}
+              </text>
+              <text x="42" y="89" textAnchor="end" className="dt-axis-text">
+                {isPrivacyMode ? "••• Tỷ" : formatShortVND(maxMonthlyVal * 0.66)}
+              </text>
+              <text x="42" y="139" textAnchor="end" className="dt-axis-text">
+                {isPrivacyMode ? "••• Tỷ" : formatShortVND(maxMonthlyVal * 0.33)}
+              </text>
               <text x="42" y="189" textAnchor="end" className="dt-axis-text">0</text>
 
               {/* Month Bars */}
@@ -1161,7 +1225,7 @@ export default function DoanhThuAdmin({ onShowToast }) {
                   </td>
                 </tr>
               ) : (
-                filteredContracts.map((c) => {
+                filteredContracts.map((c, idx) => {
                   const payInfo = paymentStatusMap[c.paymentStatus] || { label: c.paymentStatus, color: "#64748b", bg: "#f1f5f9" };
                   const projInfo = projectStatusMap[c.projectStatus] || { label: c.projectStatus, color: "#64748b", bg: "#f1f5f9" };
                   const isPaidFull = c.remainingAmount <= 0 || c.totalPaid >= c.totalValue;
@@ -1169,12 +1233,17 @@ export default function DoanhThuAdmin({ onShowToast }) {
                   const isDepositFull = c.depositAmount >= reqDeposit && c.depositAmount > 0;
                   const collectionPct = c.totalValue > 0 ? Math.min(100, Math.round((c.totalPaid / c.totalValue) * 100)) : 0;
 
+                  const displayCode = maskContractCode(c.contractCode, idx);
+                  const displayProject = maskProjectName(c.projectName);
+                  const displayCustomer = maskCustomerName(c.customerName, idx);
+                  const displayPhone = maskPhone(c.phoneNumber);
+
                   return (
                     <tr key={c.id}>
                       {/* Code & Project */}
                       <td>
-                        <div className="dt-cell-strong text-primary">{c.contractCode}</div>
-                        <div className="dt-cell-subtext" title={c.projectName}>{c.projectName}</div>
+                        <div className="dt-cell-strong text-primary">{displayCode}</div>
+                        <div className="dt-cell-subtext" title={displayProject}>{displayProject}</div>
                         <small className="text-muted" style={{ fontSize: "0.75rem" }}>
                           Ký: {new Date(c.contractDate).toLocaleDateString("vi-VN")}
                         </small>
@@ -1182,9 +1251,9 @@ export default function DoanhThuAdmin({ onShowToast }) {
 
                       {/* Customer */}
                       <td>
-                        <div className="dt-cell-strong">{c.customerName}</div>
-                        <a href={`tel:${c.phoneNumber}`} className="dt-cell-phone">
-                          <i className="bi bi-telephone-fill"></i> {c.phoneNumber}
+                        <div className="dt-cell-strong">{displayCustomer}</div>
+                        <a href={isPrivacyMode ? "#" : `tel:${c.phoneNumber}`} className="dt-cell-phone">
+                          <i className="bi bi-telephone-fill"></i> {displayPhone}
                         </a>
                       </td>
 
