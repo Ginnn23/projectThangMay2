@@ -406,6 +406,18 @@ $@"💬 <b>TIN NHẮN TỪ KHÁCH TRÊN WEBSITE:</b>
         catch (Exception ex)
         {
             _logger.LogWarning("Telegram getUpdates exception: {Message}", ex.Message);
+            if (ex.Message.Contains("409") || ex.ToString().Contains("409"))
+            {
+                _logger.LogWarning("Telegram 409 Conflict (multiple bot instances running). Pausing 20s to allow previous instance to shutdown...");
+                try
+                {
+                    await Task.Delay(20000, cancellationToken);
+                }
+                catch (OperationCanceledException)
+                {
+                    // Ignore cancel
+                }
+            }
             return null;
         }
     }
