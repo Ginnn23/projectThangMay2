@@ -291,15 +291,11 @@
   content: ""; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: #0D9488;
 }
 
-/* 3. TWO COLUMN VISUALIZATION GRID */
+/* 3. VISUALIZATION GRID */
 .dt-charts-grid {
   display: grid;
-  grid-template-columns: 7fr 5fr;
+  grid-template-columns: 1fr;
   gap: 24px;
-}
-
-@media (max-width: 992px) {
-  .dt-charts-grid { grid-template-columns: 1fr; }
 }
 
 .dt-chart-card {

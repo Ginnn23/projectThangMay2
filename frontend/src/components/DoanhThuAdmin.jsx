@@ -510,16 +510,10 @@ export default function DoanhThuAdmin({ onShowToast }) {
       {/* 1. EXECUTIVE COMMAND HEADER & ADVANCED TIME FILTERS */}
       <div className="dt-hero-header">
         <div className="dt-hero-info">
-          <div className="dt-hero-badge">
-            <i className="bi bi-shield-check"></i> Ban Giám Đốc • Điều Hành Dòng Tiền & Hợp Đồng
-          </div>
           <h2 className="dt-hero-title">
             <i className="bi bi-bar-chart-fill" style={{ color: "#D9A441" }}></i>
             Quản Trị Doanh Thu & Tiến Độ Hợp Đồng
           </h2>
-          <p className="dt-hero-subtitle">
-            Hệ thống phân tách chuẩn hóa giữa <strong>Doanh số ký kết</strong>, <strong>Dòng tiền thực thu</strong>, <strong>Công nợ dự án</strong> và <strong>Chi phí triển khai</strong>.
-          </p>
         </div>
 
         {/* Global Filter Bar */}
@@ -681,9 +675,6 @@ export default function DoanhThuAdmin({ onShowToast }) {
             <strong className="dt-metric-value" style={{ color: "#1e40af" }}>
               {formatShortVND(stats?.totalContractValue)}
             </strong>
-            <p className="dt-metric-subtext">
-              <i className="bi bi-check-circle-fill text-primary"></i> Tổng giá trị các hợp đồng mua bán & lắp đặt ({stats?.totalContractsCount || 0} HĐ)
-            </p>
           </div>
         </div>
 
@@ -702,9 +693,6 @@ export default function DoanhThuAdmin({ onShowToast }) {
             <strong className="dt-metric-value" style={{ color: "#059669" }}>
               {formatShortVND(stats?.totalPaid)}
             </strong>
-            <p className="dt-metric-subtext">
-              <i className="bi bi-arrow-down-left-circle-fill text-success"></i> Số tiền thực tế khách hàng đã thanh toán qua cọc & các đợt
-            </p>
           </div>
         </div>
 
@@ -723,9 +711,6 @@ export default function DoanhThuAdmin({ onShowToast }) {
             <strong className="dt-metric-value" style={{ color: "#d97706" }}>
               {formatShortVND(stats?.remainingDebt)}
             </strong>
-            <p className="dt-metric-subtext">
-              <i className="bi bi-exclamation-circle-fill text-warning"></i> Tiền khách còn nợ, sẽ thu theo tiến độ nhập hàng & nghiệm thu
-            </p>
           </div>
         </div>
 
@@ -744,9 +729,6 @@ export default function DoanhThuAdmin({ onShowToast }) {
             <strong className="dt-metric-value" style={{ color: "#dc2626" }}>
               {formatShortVND(stats?.totalDeploymentCost)}
             </strong>
-            <p className="dt-metric-subtext">
-              <i className="bi bi-box-seam text-danger"></i> Chi phí nhập thiết bị, vận chuyển, cẩu kéo & nhân công lắp đặt
-            </p>
           </div>
         </div>
 
@@ -765,9 +747,6 @@ export default function DoanhThuAdmin({ onShowToast }) {
             <strong className="dt-metric-value" style={{ color: "#0d9488" }}>
               {formatShortVND(stats?.expectedProfit)}
             </strong>
-            <p className="dt-metric-subtext">
-              <i className="bi bi-stars text-teal"></i> Giá trị HĐ trừ tổng chi phí ({stats?.totalContractValue > 0 ? ((stats.expectedProfit / stats.totalContractValue) * 100).toFixed(1) : 0}% doanh thu)
-            </p>
           </div>
         </div>
       </div>
@@ -782,7 +761,6 @@ export default function DoanhThuAdmin({ onShowToast }) {
                 <i className="bi bi-bar-chart-line-fill" style={{ color: "#D9A441" }}></i>
                 Biểu Đồ Tài Chính & Dòng Tiền Theo Tháng
               </h3>
-              <p>Phân tích đa chiều: Giá trị HĐ đã ký, Tiền thực tế đã thu, Chi phí và Lợi nhuận</p>
             </div>
 
             {/* Metric Mode Toggle */}
@@ -1041,41 +1019,6 @@ export default function DoanhThuAdmin({ onShowToast }) {
                 );
               })}
             </svg>
-          </div>
-        </div>
-
-        {/* Right: Sales & Delivery Conversion Funnel (Phễu Chuyển Đổi 8 Bước) */}
-        <div className="dt-donut-card">
-          <div className="dt-donut-header">
-            <h3>
-              <i className="bi bi-funnel-fill" style={{ color: "#2563eb" }}></i>
-              Phễu Chuyển Đổi Kinh Doanh Thang Máy
-            </h3>
-            <p>Hành trình 8 bước từ liên hệ ban đầu đến tất toán & bảo hành 24 tháng</p>
-          </div>
-
-          <div className="dt-funnel-container">
-            {stats?.funnelSteps?.map((s) => (
-              <div key={s.step} className="dt-funnel-row">
-                <div className="dt-funnel-step-badge">{s.step}</div>
-                <div className="dt-funnel-info">
-                  <div className="dt-funnel-info-top">
-                    <span className="dt-funnel-name">{s.name}</span>
-                    <strong className="dt-funnel-count">{s.count}</strong>
-                  </div>
-                  <div className="dt-funnel-bar-bg">
-                    <div
-                      className="dt-funnel-bar-fill"
-                      style={{
-                        width: `${Math.max(s.percentage, 8)}%`,
-                        background: getFunnelGradient(s.step)
-                      }}
-                    ></div>
-                  </div>
-                  <span className="dt-funnel-desc">{s.description}</span>
-                </div>
-              </div>
-            ))}
           </div>
         </div>
       </div>
@@ -1984,28 +1927,4 @@ export default function DoanhThuAdmin({ onShowToast }) {
       )}
     </div>
   );
-}
-
-// Funnel Step Gradient Generator
-function getFunnelGradient(step) {
-  switch (step) {
-    case 1:
-      return "linear-gradient(90deg, #3b82f6, #60a5fa)";
-    case 2:
-      return "linear-gradient(90deg, #0284c7, #38bdf8)";
-    case 3:
-      return "linear-gradient(90deg, #6366f1, #818cf8)";
-    case 4:
-      return "linear-gradient(90deg, #d97706, #fbbf24)";
-    case 5:
-      return "linear-gradient(90deg, #2563eb, #60a5fa)";
-    case 6:
-      return "linear-gradient(90deg, #7c3aed, #a78bfa)";
-    case 7:
-      return "linear-gradient(90deg, #059669, #34d399)";
-    case 8:
-      return "linear-gradient(90deg, #15803d, #22c55e)";
-    default:
-      return "#3b82f6";
-  }
 }
