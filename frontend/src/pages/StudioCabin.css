@@ -109,9 +109,27 @@
 }
 
 .preset-card.active {
-  border-color: #d9a441;
-  background: #fffdf8;
-  box-shadow: 0 0 0 2px rgba(217, 164, 65, 0.4), 0 4px 14px rgba(0, 0, 0, 0.06);
+  border: 2px solid #d9a441 !important;
+  background: #fffdf2 !important;
+  box-shadow: 0 0 0 3px rgba(217, 164, 65, 0.4), 0 8px 24px rgba(217, 164, 65, 0.25) !important;
+  transform: translateY(-2px);
+}
+
+.preset-card.active::before {
+  content: "✓ ĐANG CHỌN";
+  position: absolute;
+  top: -9px;
+  right: 12px;
+  background: linear-gradient(135deg, #d9a441 0%, #b88528 100%);
+  color: #ffffff;
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  z-index: 10;
+  pointer-events: none;
 }
 
 .preset-card-top {

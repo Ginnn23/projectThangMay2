@@ -1150,10 +1150,11 @@
 }
 
 .cabin-tab-item.active {
-  color: #ffffff;
-  background: #1e3a8a;
-  border-color: #3b82f6;
-  box-shadow: 0 0 14px rgba(59, 130, 246, 0.4);
+  color: #ffd875;
+  background: linear-gradient(135deg, #1e3a8a 0%, #0d1b3e 100%);
+  border-color: #ffd875;
+  box-shadow: 0 0 14px rgba(255, 216, 117, 0.4);
+  font-weight: 700;
 }
 
 /* Lưới hiển thị các thẻ vật liệu */
@@ -1188,9 +1189,56 @@
 }
 
 .cabin-material-card.active {
-  background: linear-gradient(145deg, #1e3a8a 0%, #172554 100%);
-  border-color: #facc15;
-  box-shadow: 0 0 20px rgba(250, 204, 21, 0.35);
+  background: linear-gradient(145deg, #1a2a56 0%, #0d1836 100%) !important;
+  border: 2.5px solid #ffd875 !important;
+  box-shadow: 0 0 0 3px rgba(255, 216, 117, 0.4), 0 8px 24px rgba(217, 164, 65, 0.4) !important;
+  transform: translateY(-3px) scale(1.02);
+  z-index: 5;
+}
+
+.cabin-material-card.active::before {
+  content: "✓ ĐANG CHỌN";
+  position: absolute;
+  top: -10px;
+  right: 10px;
+  background: linear-gradient(135deg, #ffd875 0%, #eab308 100%);
+  color: #07192f;
+  font-size: 0.62rem;
+  font-weight: 900;
+  letter-spacing: 0.5px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5), 0 0 10px rgba(255, 216, 117, 0.7);
+  z-index: 10;
+  pointer-events: none;
+}
+
+.cabin-material-card.active .swatch-preview-box {
+  border: 2px solid #ffd875 !important;
+  box-shadow: 0 0 12px rgba(255, 216, 117, 0.5) !important;
+}
+
+.cabin-material-card.active .swatch-check-icon {
+  width: 22px;
+  height: 22px;
+  background: #ffd875;
+  color: #07192f;
+  font-size: 0.8rem;
+  font-weight: 900;
+  box-shadow: 0 0 10px rgba(255, 216, 117, 0.9);
+}
+
+.cabin-material-card.active .swatch-name {
+  color: #ffd875 !important;
+  font-weight: 800 !important;
+  text-shadow: 0 0 10px rgba(255, 216, 117, 0.35);
+}
+
+.cabin-material-card.active .swatch-badge {
+  background: #ffd875 !important;
+  color: #07192f !important;
+  font-weight: 800 !important;
+  border-radius: 4px;
 }
 
 /* Thumbnail preview hoa văn vật liệu lớn & đẹp */
