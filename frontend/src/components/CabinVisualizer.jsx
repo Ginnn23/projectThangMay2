@@ -1330,44 +1330,6 @@ const CabinVisualizer = forwardRef(function CabinVisualizer({
         )}
       </div>
 
-      {/* 5. Footer & Đồng bộ Dự toán */}
-      <div className="cabin-viz-footer">
-        <div className="cabin-selected-badges">
-          <span className="badge-item">
-            1. Vách: <strong>{curWallObj.name}</strong>
-          </span>
-          <span className="badge-item">
-            2. Sàn: <strong>{curFloorObj.name}</strong>
-          </span>
-          <span className="badge-item">
-            3. Trần: <strong>{curCeilObj.name}</strong>
-          </span>
-          <span className="badge-item">
-            4. Tay vịn: <strong>{curRailObj.name}</strong>
-          </span>
-        </div>
-
-        <div className="cabin-footer-actions">
-          <button
-            type="button"
-            className="btn-viz-reset"
-            onClick={handleReset}
-            title="Khôi phục cấu hình tiêu chuẩn"
-          >
-            <i className="bi bi-arrow-counterclockwise me-1"></i>
-            Đặt lại
-          </button>
-          <button
-            type="button"
-            className="btn-viz-apply"
-            onClick={handleConsultClick}
-            title="Chuyển cấu hình này vào bảng dự toán"
-          >
-            <span>Tư vấn cấu hình này</span>
-            <i className="bi bi-arrow-down-short fs-5"></i>
-          </button>
-        </div>
-      </div>
     </div>
   );
 });

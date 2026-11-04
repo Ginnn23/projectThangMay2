@@ -247,6 +247,16 @@ export default function StudioCabin() {
     navigate(`/du-toan?${params.toString()}`);
   };
 
+  const handleJumpToPhoto = () => {
+    setViewMode("photo");
+    setTimeout(() => {
+      const el = document.getElementById("studio-main-preview");
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }, 50);
+  };
+
   // Gửi thông tin đăng ký tư vấn mẫu này
   const handleQuickSubmit = async (e) => {
     e.preventDefault();
@@ -361,7 +371,7 @@ export default function StudioCabin() {
             
             {/* KHÔNG GIAN PHỐI CẢNH CABIN 2.5D & ẢNH THỰC TẾ (CỘT TRÁI) */}
             <div className="col-lg-7 col-xl-8">
-              <div className="studio-visualizer-wrapper">
+              <div className="studio-visualizer-wrapper" id="studio-main-preview">
                 <div className="studio-visualizer-header flex-wrap gap-2">
                   <div className="d-flex align-items-center gap-2">
                     <span className="live-dot"></span>
@@ -443,20 +453,6 @@ export default function StudioCabin() {
                 ) : (
                   /* GIAO DIỆN MÔ PHỎNG 2.5D TƯƠNG TÁC GỐC */
                   <div className="p-3">
-                    <div className="d-flex justify-content-end mb-2">
-                      <button
-                        type="button"
-                        className="btn btn-sm btn-outline-warning d-inline-flex align-items-center gap-1 fw-bold"
-                        style={{ fontSize: "12px", borderRadius: "16px", background: "rgba(11, 34, 70, 0.7)" }}
-                        onClick={() => setViewMode("photo")}
-                        title="Bấm để xem ảnh chụp thực tế sau khi phối xong"
-                      >
-                        <i className="bi bi-camera-fill text-warning"></i>
-                        Xem ảnh thực tế mẫu này
-                        <i className="bi bi-arrow-right ms-1"></i>
-                      </button>
-                    </div>
-
                     <CabinVisualizer
                       ref={cabinVisualizerRef}
                       elevatorType={elevatorType}
@@ -482,7 +478,7 @@ export default function StudioCabin() {
             <div className="col-lg-5 col-xl-4">
               <div className="studio-sidebar-specs">
                 
-                                {/* CARD ẢNH THỰC TẾ MẪU HOÀN THIỆN (PHÍA BÊN PHẢI CABIN) */}
+                {/* 1. CARD ẢNH THỰC TẾ MẪU HOÀN THIỆN (NGAY CẠNH CABIN) */}
                 <div className="studio-spec-card studio-real-photo-card mb-3">
                   <div className="studio-spec-header d-flex justify-content-between align-items-center">
                     <div className="d-flex align-items-center gap-2">
@@ -492,18 +488,12 @@ export default function StudioCabin() {
                         <small className="text-white-50">Đồng bộ tự động theo mẫu đã chọn</small>
                       </div>
                     </div>
-                    <span className="badge bg-warning text-dark fw-bold" style={{ fontSize: "10px" }}>
-                      THỰC TẾ 100%
-                    </span>
                   </div>
 
                   <div className="studio-real-photo-body">
                     <div
                       className="real-photo-thumbnail-wrap"
-                      onClick={() => {
-                        setViewMode("photo");
-                        window.scrollTo({ top: 380, behavior: "smooth" });
-                      }}
+                      onClick={handleJumpToPhoto}
                       role="button"
                       title="Bấm để xem ảnh chi tiết"
                     >
@@ -533,10 +523,7 @@ export default function StudioCabin() {
                         type="button"
                         className="btn btn-outline-primary btn-sm w-100 fw-bold d-flex align-items-center justify-content-center gap-1"
                         style={{ fontSize: "12px", borderRadius: "8px" }}
-                        onClick={() => {
-                          setViewMode("photo");
-                          window.scrollTo({ top: 380, behavior: "smooth" });
-                        }}
+                        onClick={handleJumpToPhoto}
                       >
                         <i className="bi bi-eye-fill"></i>
                         Bấm Xem Ảnh Phối Thực Tế
@@ -545,7 +532,34 @@ export default function StudioCabin() {
                   </div>
                 </div>
 
-                {/* 1. Tóm tắt vật liệu đã chọn */}
+                {/* 2. BẢNG ĐIỀU KHIỂN THANG MÁY ĐIỆN TỬ (SMART LCD COP - ĐẶT NGAY DƯỚI ẢNH THỰC TẾ CẠNH CABIN) */}
+                <div className="mb-3">
+                  <SmartElevatorCOP
+                    currentFloor={elevatorFlightState.currentFloor}
+                    targetFloor={elevatorFlightState.targetFloor}
+                    elevatorStatus={elevatorFlightState.elevatorStatus}
+                    moveDirection={elevatorFlightState.moveDirection}
+                    isDoorsOpen={elevatorFlightState.isDoorsOpen}
+                    isLightOn={elevatorFlightState.isLightOn}
+                    stops={Number(stops)}
+                    capacityKg={Number(capacityKg)}
+                    doorType={doorType}
+                    onCallFloor={(targetFloor) => {
+                      cabinVisualizerRef.current?.callFloor(targetFloor);
+                    }}
+                    onSetDoorOpen={(isOpen) => {
+                      cabinVisualizerRef.current?.setDoorOpen(isOpen);
+                    }}
+                    onToggleLight={() => {
+                      cabinVisualizerRef.current?.toggleLight();
+                    }}
+                    onTriggerBell={() => {
+                      cabinVisualizerRef.current?.triggerBell();
+                    }}
+                  />
+                </div>
+
+                {/* 3. TÓM TẮT CẤU HÌNH NỘI THẤT ĐANG CHỌN */}
                 <div className="studio-spec-card">
                   <div className="studio-spec-header">
                     <i className="bi bi-card-checklist text-warning fs-5"></i>
@@ -596,176 +610,6 @@ export default function StudioCabin() {
                       <small className="spec-item-sub">{materials.handrail?.spec}</small>
                     </div>
                   </div>
-                </div>
-
-                {/* 2. Bộ thông số vận hành (Tải trọng, Số tầng, Cửa) */}
-                <div className="studio-spec-card">
-                  <div className="studio-spec-header py-2 px-3" style={{ background: "#0b2246" }}>
-                    <i className="bi bi-sliders text-warning"></i>
-                    <h4 className="h6 fw-bold text-white mb-0">Thông Số Vận Hành Cơ Bản</h4>
-                  </div>
-                  <div className="p-3">
-                    <div className="row g-2 mb-2">
-                      <div className="col-6">
-                        <label className="form-label small fw-bold text-muted mb-1">Tải Trọng:</label>
-                        <select
-                          className="form-select form-select-sm"
-                          value={capacityKg}
-                          onChange={(e) => setCapacityKg(Number(e.target.value))}
-                        >
-                          <option value={300}>300 kg (3-4 người)</option>
-                          <option value={350}>350 kg (4-5 người)</option>
-                          <option value={450}>450 kg (6 người)</option>
-                          <option value={630}>630 kg (8-9 người)</option>
-                        </select>
-                      </div>
-                      <div className="col-6">
-                        <label className="form-label small fw-bold text-muted mb-1">Số Tầng:</label>
-                        <select
-                          className="form-select form-select-sm"
-                          value={stops}
-                          onChange={(e) => setStops(Number(e.target.value))}
-                        >
-                          {[2, 3, 4, 5, 6, 7, 8, 9, 10].map((s) => (
-                            <option key={s} value={s}>{s} Tầng</option>
-                          ))}
-                        </select>
-                      </div>
-                    </div>
-
-                    <div className="d-flex align-items-center justify-content-between pt-1">
-                      <span className="small text-muted fw-bold">Kiểu Mở Cửa:</span>
-                      <div className="btn-group btn-group-sm">
-                        <button
-                          type="button"
-                          className={`btn ${doorType === "CO" ? "btn-primary" : "btn-outline-secondary"}`}
-                          onClick={() => setDoorType("CO")}
-                        >
-                          Mở Trung Tâm (CO)
-                        </button>
-                        <button
-                          type="button"
-                          className={`btn ${doorType === "SO" ? "btn-primary" : "btn-outline-secondary"}`}
-                          onClick={() => setDoorType("SO")}
-                        >
-                          Mở Lùa (SO)
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* BẢNG ĐIỀU KHIỂN THANG MÁY ĐIỆN TỬ (SMART LCD COP - THAO TÁC ĐƯỢC) */}
-                <SmartElevatorCOP
-                  currentFloor={elevatorFlightState.currentFloor}
-                  targetFloor={elevatorFlightState.targetFloor}
-                  elevatorStatus={elevatorFlightState.elevatorStatus}
-                  moveDirection={elevatorFlightState.moveDirection}
-                  isDoorsOpen={elevatorFlightState.isDoorsOpen}
-                  isLightOn={elevatorFlightState.isLightOn}
-                  stops={Number(stops)}
-                  capacityKg={Number(capacityKg)}
-                  doorType={doorType}
-                  onCallFloor={(targetFloor) => {
-                    cabinVisualizerRef.current?.callFloor(targetFloor);
-                  }}
-                  onSetDoorOpen={(isOpen) => {
-                    cabinVisualizerRef.current?.setDoorOpen(isOpen);
-                  }}
-                  onToggleLight={() => {
-                    cabinVisualizerRef.current?.toggleLight();
-                  }}
-                  onTriggerBell={() => {
-                    cabinVisualizerRef.current?.triggerBell();
-                  }}
-                />
-
-                {/* 3. NÚT CHUYỂN DỰ TOÁN BÁO GIÁ (CTA CHÍNH) */}
-                <div className="studio-cta-box">
-                  <button
-                    type="button"
-                    className="btn-studio-estimator"
-                    onClick={handleGoToEstimator}
-                  >
-                    <div className="d-flex align-items-center gap-2">
-                      <i className="bi bi-calculator-fill fs-4"></i>
-                      <div className="text-start">
-                        <div className="fw-bold fs-6">Nhận Dự Toán Cho Mẫu Này</div>
-                        <small style={{ fontSize: "11px", opacity: 0.9 }}>
-                          Chuyển sang bảng giá &amp; kích thước hố thang
-                        </small>
-                      </div>
-                    </div>
-                    <i className="bi bi-arrow-right fs-4"></i>
-                  </button>
-
-                  <a
-                    href={`tel:${soDienThoaiLienKet}`}
-                    className="btn-studio-hotline"
-                  >
-                    <i className="bi bi-telephone-fill me-2 text-warning"></i>
-                    <span>Tư Vấn Kiến Trúc Trực Tiếp: {soDienThoaiCongTy}</span>
-                  </a>
-                </div>
-
-                {/* 4. FORM GỬI YÊU CẦU LẤY BẢN VẼ 3D RIÊNG */}
-                <div className="studio-quick-lead-card">
-                  <div className="quick-lead-title">
-                    <i className="bi bi-envelope-paper-heart-fill text-warning me-2"></i>
-                    Yêu Cầu Vẽ Phối Cảnh 3D Theo Hiện Trạng Nhà
-                  </div>
-                  <p className="quick-lead-desc">
-                    Kỹ sư kiến trúc Hà Hồng sẽ dựng mô hình 3D thực tế theo kích thước giếng thang nhà bạn và gửi qua Zalo trong 24h.
-                  </p>
-
-                  {submitSuccess ? (
-                    <div className="alert alert-success py-2 text-center small mb-0">
-                      <i className="bi bi-check-circle-fill me-1"></i>
-                      Đã ghi nhận yêu cầu! Kỹ sư sẽ gửi bản vẽ 3D cho bạn sớm nhất.
-                    </div>
-                  ) : (
-                    <form onSubmit={handleQuickSubmit}>
-                      {submitMsg && (
-                        <div className="alert alert-danger py-1 small mb-2">{submitMsg}</div>
-                      )}
-                      <div className="mb-2">
-                        <input
-                          type="text"
-                          className="form-control form-control-sm"
-                          placeholder="Họ và tên của bạn *"
-                          value={quickName}
-                          onChange={(e) => setQuickName(e.target.value)}
-                          required
-                        />
-                      </div>
-                      <div className="mb-2">
-                        <input
-                          type="tel"
-                          className="form-control form-control-sm"
-                          placeholder="Số điện thoại / Zalo *"
-                          value={quickPhone}
-                          onChange={(e) => setQuickPhone(e.target.value)}
-                          required
-                        />
-                      </div>
-                      <div className="mb-2">
-                        <input
-                          type="text"
-                          className="form-control form-control-sm"
-                          placeholder="Ghi chú về kích thước hoặc phong cách..."
-                          value={quickNote}
-                          onChange={(e) => setQuickNote(e.target.value)}
-                        />
-                      </div>
-                      <button
-                        type="submit"
-                        className="btn-quick-lead-submit"
-                        disabled={submitting}
-                      >
-                        {submitting ? "Đang gửi..." : "Gửi Yêu Cầu Dựng 3D Riêng (Miễn Phí)"}
-                      </button>
-                    </form>
-                  )}
                 </div>
 
               </div>
