@@ -97,7 +97,13 @@ function Header() {
             <ul className="navbar-nav align-items-lg-center mx-lg-auto">
               {menuItems.map((item) => (
                 <li className="nav-item" key={item.to}>
-                  <NavLink className={({ isActive }) => `nav-link${isActive ? " active" : ""}`} end={item.end} to={item.to} onClick={dongMenu}>
+                  <NavLink
+                    className={({ isActive }) => `nav-link notranslate${isActive ? " active" : ""}`}
+                    translate="no"
+                    end={item.end}
+                    to={item.to}
+                    onClick={dongMenu}
+                  >
                     {item.label}
                   </NavLink>
                 </li>
@@ -105,7 +111,7 @@ function Header() {
             </ul>
 
             <div className="d-flex align-items-center gap-2 ms-lg-3 mt-3 mt-lg-0 flex-wrap">
-              <NavLink className="btn navbar-quote-button" to="/lien-he" onClick={dongMenu}>
+              <NavLink className="btn navbar-quote-button notranslate" translate="no" to="/lien-he" onClick={dongMenu}>
                 {t.quoteButton}
                 <i className="bi bi-arrow-up-right ms-2"></i>
               </NavLink>

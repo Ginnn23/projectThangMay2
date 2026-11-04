@@ -22,7 +22,7 @@ export const translations = {
     about: "About Us",
     services: "Services",
     projects: "Projects",
-    cabinStudio: "Cabin Studio 2.5D",
+    cabinStudio: "Cabin 2D Design",
     estimator: "Cost Estimator",
     news: "News & Insights",
     contact: "Contact",
