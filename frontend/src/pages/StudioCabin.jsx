@@ -320,24 +320,21 @@ export default function StudioCabin() {
       {/* 2. BỘ SƯU TẬP PRESET GỢI Ý (CLICK 1 CHẠM ÁP DỤNG NGAY) */}
       <section className="studio-presets-section">
         <div className="site-container">
-          <div className="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+          <div className="d-flex align-items-center justify-content-between mb-2 flex-wrap gap-2">
             <div>
-              <h2 className="h5 fw-bold text-navy mb-1">
+              <h2 className="h6 fw-bold text-navy mb-0">
                 <i className="bi bi-collection-fill text-warning me-2"></i>
                 Bộ Sưu Tập Phong Cách Thiết Kế Tiêu Biểu
               </h2>
-              <p className="text-muted small mb-0">
-                Chọn nhanh các phong cách kiến trúc được các kiến trúc sư và gia chủ ưa chuộng nhất:
-              </p>
             </div>
-            <span className="badge bg-light text-dark border">4 Mẫu Tuyển Chọn</span>
+            <span className="badge bg-light text-dark border" style={{ fontSize: "11px" }}>4 Mẫu Tuyển Chọn</span>
           </div>
 
-          <div className="row g-3">
+          <div className="row g-2">
             {PRESET_COLLECTIONS.map((preset) => {
               const isSelected = activePreset === preset.id;
               return (
-                <div className="col-12 col-sm-6 col-lg-3" key={preset.id}>
+                <div className="col-6 col-lg-3" key={preset.id}>
                   <div
                     className={`preset-card ${isSelected ? "active" : ""}`}
                     onClick={() => handleSelectPreset(preset)}
@@ -352,9 +349,8 @@ export default function StudioCabin() {
                     </div>
                     <h3 className="preset-title">{preset.title}</h3>
                     <div className="preset-tagline">{preset.tagline}</div>
-                    <p className="preset-desc">{preset.desc}</p>
                     <button type="button" className="preset-btn-apply">
-                      {isSelected ? "Đang Trực Quan" : "Xem Phối Cảnh Mẫu Này"}
+                      {isSelected ? "Đang Trực Quan" : "Xem Phối Cảnh"}
                     </button>
                   </div>
                 </div>

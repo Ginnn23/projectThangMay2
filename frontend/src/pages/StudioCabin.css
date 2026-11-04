@@ -84,46 +84,47 @@
 
 /* 2. PRESETS GỢI Ý */
 .studio-presets-section {
-  padding: 2rem 0 1rem;
+  padding: 1rem 0 0.5rem;
 }
 
 .preset-card {
   background: #ffffff;
   border: 1.5px solid #e2e8f0;
-  border-radius: 14px;
-  padding: 1.15rem;
+  border-radius: 12px;
+  padding: 0.75rem 0.85rem;
   cursor: pointer;
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
   height: 100%;
   position: relative;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
 }
 
 .preset-card:hover {
   border-color: #d9a441;
-  transform: translateY(-3px);
-  box-shadow: 0 8px 24px rgba(217, 164, 65, 0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(217, 164, 65, 0.18);
 }
 
 .preset-card.active {
   border-color: #d9a441;
   background: #fffdf8;
-  box-shadow: 0 0 0 2px rgba(217, 164, 65, 0.4), 0 8px 20px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 0 0 2px rgba(217, 164, 65, 0.4), 0 4px 14px rgba(0, 0, 0, 0.06);
 }
 
 .preset-card-top {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.35rem;
 }
 
 .preset-badge {
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   font-weight: 700;
-  padding: 0.2rem 0.6rem;
+  padding: 0.15rem 0.5rem;
   border-radius: 999px;
   background: #f1f5f9;
   color: #475569;
@@ -135,38 +136,40 @@
 }
 
 .preset-active-check {
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   background: #d9a441;
   color: #07192f;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   font-weight: 800;
 }
 
 .preset-title {
-  font-size: 1.05rem;
+  font-size: 0.95rem;
   font-weight: 700;
   color: #0b2246;
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.15rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .preset-tagline {
-  font-size: 0.78rem;
+  font-size: 0.74rem;
   font-weight: 600;
   color: #d9a441;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.45rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .preset-desc {
-  font-size: 0.78rem;
-  color: #64748b;
-  line-height: 1.45;
-  margin-bottom: 1rem;
-  flex-grow: 1;
+  display: none;
 }
 
 .preset-btn-apply {
@@ -174,9 +177,9 @@
   border: 1px solid #cbd5e1;
   color: #334155;
   font-weight: 600;
-  font-size: 0.78rem;
-  padding: 0.4rem 0.75rem;
-  border-radius: 8px;
+  font-size: 0.72rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s ease;
   width: 100%;
